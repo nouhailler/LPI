@@ -249,12 +249,16 @@ export const practiceQuestions: PracticeQuestion[] = [
 
 import { topic101Flashcards } from './topic101Flashcards';
 import { topic102Flashcards } from './topic102Flashcards';
+import { topic103Flashcards } from './topic103Flashcards';
+import { topic104Flashcards } from './topic104Flashcards';
 
-export { topic101Flashcards, topic102Flashcards };
+export { topic101Flashcards, topic102Flashcards, topic103Flashcards, topic104Flashcards };
 
 export const flashcardsData: Flashcard[] = [
   ...topic101Flashcards,
   ...topic102Flashcards,
+  ...topic103Flashcards,
+  ...topic104Flashcards,
   {
     id: 1,
     deck: 'Linux Essentials',
