@@ -247,7 +247,12 @@ export const practiceQuestions: PracticeQuestion[] = [
   },
 ];
 
+import { topic101Flashcards } from './topic101Flashcards';
+
+export { topic101Flashcards };
+
 export const flashcardsData: Flashcard[] = [
+  ...topic101Flashcards,
   {
     id: 1,
     deck: 'Linux Essentials',

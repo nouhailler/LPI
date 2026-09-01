@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { BottomNav, DesktopSidebar } from './components/Navigation';
+import { HamburgerMenu } from './components/HamburgerMenu';
 import { DashboardView } from './components/DashboardView';
 import { CertificationPathView } from './components/CertificationPathView';
 import { LearningObjectivesView } from './components/LearningObjectivesView';
@@ -9,8 +10,16 @@ import { FlashcardsView } from './components/FlashcardsView';
 import { GlossaryView } from './components/GlossaryView';
 import { ExplanationModal } from './components/ExplanationModal';
 import { ProfileModal } from './components/ProfileModal';
+import { SettingsModal } from './components/SettingsModal';
+import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
 import { PracticeQuestion, TabType, UserStats } from './types';
+import {
+  initServiceWorker,
+  subscribeToUpdateEvents,
+  checkForUpdates,
+  VersionInfo,
+} from './utils/updateService';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('dashboard');
@@ -19,7 +28,45 @@ export default function App() {
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [activeExplanation, setActiveExplanation] = useState<PracticeQuestion | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsInitialTab, setSettingsInitialTab] = useState<'updates' | 'profile' | 'preferences'>('updates');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedLearningTopic, setSelectedLearningTopic] = useState<string | undefined>(undefined);
+
+  // Automatic Updates & Service Worker state
+  const [hasUpdateAvailable, setHasUpdateAvailable] = useState(false);
+  const [latestVersionInfo, setLatestVersionInfo] = useState<VersionInfo | null>(null);
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
+
+  // Initialize service worker and update listener
+  useEffect(() => {
+    initServiceWorker();
+
+    const unsubscribe = subscribeToUpdateEvents((available, info) => {
+      if (available) {
+        setHasUpdateAvailable(true);
+        if (info) {
+          setLatestVersionInfo(info);
+        }
+        setShowUpdateBanner(true);
+      }
+    });
+
+    // Check on startup
+    checkForUpdates(false).then((res) => {
+      if (res.hasUpdate) {
+        setHasUpdateAvailable(true);
+        if (res.latestInfo) {
+          setLatestVersionInfo(res.latestInfo);
+        }
+        setShowUpdateBanner(true);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Timer countdown for practice mode
   useEffect(() => {
@@ -44,11 +91,24 @@ export default function App() {
     setExamTimerSeconds(45 * 60 + 10);
     setIsTimerRunning(true);
     setCurrentTab('practice');
+    setIsMenuOpen(false);
   };
 
   const handleOpenLearningTopic = (topicId?: string) => {
     setSelectedLearningTopic(topicId);
     setCurrentTab('learning');
+    setIsMenuOpen(false);
+  };
+
+  const handleSelectTab = (tab: TabType) => {
+    setCurrentTab(tab);
+    setIsMenuOpen(false);
+  };
+
+  const handleOpenSettings = (tab: 'updates' | 'profile' | 'preferences' = 'updates') => {
+    setSettingsInitialTab(tab);
+    setIsSettingsOpen(true);
+    setIsMenuOpen(false);
   };
 
   const handleCompletePracticeSession = (correctCount: number, total: number) => {
@@ -70,21 +130,38 @@ export default function App() {
       {/* Top App Bar */}
       <Header
         currentTab={currentTab}
-        onTabChange={setCurrentTab}
+        onTabChange={handleSelectTab}
         examTimer={formatTimer(examTimerSeconds)}
         isExamTimerLow={examTimerSeconds < 300}
-        onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenProfile={() => handleOpenSettings('profile')}
+        onOpenSettings={() => handleOpenSettings('updates')}
+        hasUpdateAvailable={hasUpdateAvailable}
         onClosePractice={() => setCurrentTab('dashboard')}
         onOpenExamMenu={() => {
           if (confirm('Pause timer?')) {
             setIsTimerRunning(!isTimerRunning);
           }
         }}
+        onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
+        isMenuOpen={isMenuOpen}
+      />
+
+      {/* Hamburger Menu Drawer organized by categories */}
+      <HamburgerMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        currentTab={currentTab}
+        onSelectTab={handleSelectTab}
+        onSelectLearningTopic={handleOpenLearningTopic}
+        onStartExam={handleStartExam}
+        onOpenProfile={() => handleOpenSettings('profile')}
+        onOpenSettings={() => handleOpenSettings('updates')}
+        userStats={userStats}
       />
 
       <div className="flex flex-1 w-full pt-16 md:pt-20">
         {/* Desktop Sidebar */}
-        <DesktopSidebar currentTab={currentTab} onTabChange={setCurrentTab} />
+        <DesktopSidebar currentTab={currentTab} onTabChange={handleSelectTab} />
 
         {/* Main Content Area */}
         <main className="flex-1 px-4 md:px-8 py-6 md:pl-72 max-w-7xl mx-auto w-full transition-all duration-200">
@@ -92,8 +169,8 @@ export default function App() {
             <DashboardView
               userStats={userStats}
               tiers={certificationTiers}
-              onNavigate={setCurrentTab}
-              onSelectTier={() => setCurrentTab('path')}
+              onNavigate={handleSelectTab}
+              onSelectTier={() => handleSelectTab('path')}
               onStartExam={handleStartExam}
               onOpenLearning={handleOpenLearningTopic}
             />
@@ -101,7 +178,7 @@ export default function App() {
 
           {currentTab === 'learning' && (
             <LearningObjectivesView
-              onNavigate={setCurrentTab}
+              onNavigate={handleSelectTab}
               onStartExam={handleStartExam}
               initialTopicId={selectedLearningTopic}
             />
@@ -109,7 +186,7 @@ export default function App() {
 
           {currentTab === 'glossary' && (
             <GlossaryView
-              onNavigate={setCurrentTab}
+              onNavigate={handleSelectTab}
               onOpenLearningTopic={handleOpenLearningTopic}
             />
           )}
@@ -119,7 +196,7 @@ export default function App() {
               userStats={userStats}
               tiers={certificationTiers}
               onStartExam={handleStartExam}
-              onNavigate={setCurrentTab}
+              onNavigate={handleSelectTab}
               onOpenLearning={handleOpenLearningTopic}
             />
           )}
@@ -128,7 +205,7 @@ export default function App() {
             <PracticeExamView
               questions={practiceQuestions}
               onCompleteSession={handleCompletePracticeSession}
-              onExit={() => setCurrentTab('dashboard')}
+              onExit={() => handleSelectTab('dashboard')}
               onOpenExplanation={(q) => setActiveExplanation(q)}
             />
           )}
@@ -148,12 +225,21 @@ export default function App() {
       </div>
 
       {/* Bottom Nav Bar for Mobile */}
-      <BottomNav currentTab={currentTab} onTabChange={setCurrentTab} />
+      <BottomNav currentTab={currentTab} onTabChange={handleSelectTab} />
 
       {/* Explanation Modal */}
       <ExplanationModal
         question={activeExplanation}
         onClose={() => setActiveExplanation(null)}
+      />
+
+      {/* Settings & Updates Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        userStats={userStats}
+        onResetStats={handleResetStats}
+        initialTab={settingsInitialTab}
       />
 
       {/* Profile & Stats Modal */}
@@ -162,6 +248,17 @@ export default function App() {
         onClose={() => setIsProfileOpen(false)}
         userStats={userStats}
         onResetStats={handleResetStats}
+      />
+
+      {/* Floating Automatic Update Notification Banner */}
+      <UpdateNotificationBanner
+        show={showUpdateBanner}
+        versionInfo={latestVersionInfo}
+        onDismiss={() => setShowUpdateBanner(false)}
+        onOpenSettings={() => {
+          setShowUpdateBanner(false);
+          handleOpenSettings('updates');
+        }}
       />
     </div>
   );

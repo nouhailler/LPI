@@ -27,11 +27,13 @@
 - [🌟 Overview](#-overview)
 - [✨ Key Features](#-key-features)
   - [1. 📚 Learning Objectives & Study Modules](#1--learning-objectives--study-modules)
-  - [2. 📖 Linux Glossary & Command Index](#2--linux-glossary--command-index)
-  - [3. 📝 Timed Practice Exam Engine](#3--timed-practice-exam-engine)
-  - [4. 🗂️ Interactive Flashcards Deck](#4-️-interactive-flashcards-deck)
-  - [5. 🗺️ Career Roadmap & Certification Path](#5-️-career-roadmap--certification-path)
-  - [6. 📈 Progress Tracker & Analytics](#6--progress-tracker--analytics)
+  - [2. 🍔 Categorized Navigation Drawer & Feature Index](#2--categorized-navigation-drawer--feature-index)
+  - [3. ⚙️ Automatic Updates & Settings Menu](#3-️-automatic-updates--settings-menu)
+  - [4. 📖 Linux Glossary & Command Index](#4--linux-glossary--command-index)
+  - [5. 📝 Timed Practice Exam Engine](#5--timed-practice-exam-engine)
+  - [6. 🗂️ Interactive Flashcards Deck](#6-️-interactive-flashcards-deck)
+  - [7. 🗺️ Career Roadmap & Certification Path](#7-️-career-roadmap--certification-path)
+  - [8. 📈 Progress Tracker & Analytics](#8--progress-tracker--analytics)
 - [📱 Install on Desktop & Mobile (PWA)](#-install-on-desktop--mobile-pwa)
 - [🎯 Covered LPI Certification Exams](#-covered-lpi-certification-exams)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
@@ -57,7 +59,19 @@
 - Covers **System Architecture**, **Linux Installation & Package Management**, **GNU and Unix Commands**, **Devices & Filesystems**, **Shell Scripting & SQL**, **System Services & Networking**, and **Enterprise Infrastructure**.
 - Detailed explanations, key terms, configuration files, and common exam pitfalls (*"Exam Gotchas"*).
 
-### 2. 📖 Linux Glossary & Command Index
+### 2. 🍔 Categorized Navigation Drawer & Feature Index
+- Accessible anytime via the **Hamburger menu button** in the top navigation bar.
+- Features categorized cleanly into **Primary Navigation**, **LPIC-1 Curriculum**, **LPIC-2 Curriculum**, **LPIC-3 Enterprise Specialties**, **Specialized Testing Tools**, and **Profile & Progress**.
+- Integrated real-time search filter to jump straight to any topic or utility (e.g., `BIND`, `LVM`, `RAID`, `Bash`, `GRUB`).
+- Collapsible categories with item counts and quick-launch badge tags.
+
+### 3. ⚙️ Automatic Updates & Settings Menu
+- **Live Version Number & Release Date**: Displays current release (e.g., `v2.4.0`) and release date (`September 1, 2026`).
+- **Automatic Background Update Engine**: Service Worker and runtime version verification poll for newly deployed versions and show instant notification banners.
+- **Force Update & Cache Purge**: One-click **Force Update** button that unregisters stale workers, clears all `CacheStorage` caches, and performs a clean reload with fresh assets.
+- **Customizable Update Intervals**: Toggle background auto-update on/off and select check frequencies (every 5 mins, 15 mins, or 1 hour).
+
+### 4. 📖 Linux Glossary & Command Index
 - Complete dictionary of Linux utilities, configuration files, kernel parameters, and architectural terms.
 - Real-time search across command names, syntax, option flags, and objective numbers.
 - Filter by certification tier (**LPIC-1**, **LPIC-2**, **LPIC-3**), exam code, topic domain, and classification (Commands vs Config Files vs Concepts).
@@ -65,22 +79,33 @@
 - **Recall Mode**: Test your memory flashcard-style directly in the glossary.
 - Local bookmarking for quick review.
 
-### 3. 📝 Timed Practice Exam Engine
+### 5. 📝 Timed Practice Exam Engine
 - Realistic multiple-choice and single-choice exam simulation.
 - Configurable question banks for **Exam 101**, **Exam 102**, **Exam 201**, **Exam 202**, and **LPIC-3 Specialties**.
 - Flag questions for review, jump to unattempted items, and submit with real-time pass/fail score calculations.
 - Comprehensive answer reviews with in-depth technical explanations for every option.
 
-### 4. 🗂️ Interactive Flashcards Deck
-- Smooth 3D card flip animations powered by Tailwind & CSS.
-- Filter by certification tier and knowledge area.
-- Shuffle mode and recall tracking (Mark as *"Mastered"* vs *"Needs Review"*).
+### 6. 🗂️ 100 Interactive Flashcards for Topic 101 (System Architecture)
+- **100 Dedicated Cards for Topic 101**: Exhaustive recall deck spanning all three sub-objectives:
+  - **101.1 Hardware Settings (35 Cards)**: `lsmod`, `modprobe`, `insmod`, `rmmod`, `modinfo`, `depmod`, `/etc/modprobe.d/`, `lspci`, `lsusb`, `lscpu`, `lshw`, `dmidecode`, `udevadm` (info, monitor, trigger), `/etc/udev/rules.d/`, `/proc/cpuinfo`, `/proc/meminfo`, `/proc/interrupts`, `/proc/ioports`, `/proc/dma`, `/sys/`, `/dev/`, `sysctl`, `mknod`, D-Bus, and coldplug/hotplug.
+  - **101.2 Boot the System (35 Cards)**: BIOS vs UEFI, MBR vs GPT, ESP partition, `efibootmgr`, 7-stage boot process, `initramfs`/`initrd`, `vmlinuz`, `dracut`, `/boot/grub/grub.cfg`, `/etc/default/grub`, `/etc/grub.d/`, `grub-install`, GRUB interactive shell (`set root`, `linux`, `initrd`, `boot`), legacy partition numbering vs GRUB 2, `/proc/cmdline`, `init=/bin/bash`, `systemd.unit=`, `dmesg`, `journalctl -b`, `systemd-boot`, `update-grub`, and `systemd-analyze`.
+  - **101.3 Runlevels, Boot Targets & Shutdown (30 Cards)**: SysV runlevels (0-6), `/etc/inittab`, `telinit`, `init`, `runlevel`, `/etc/rc.d/` S/K scripts, systemd target units (`poweroff.target`, `rescue.target`, `multi-user.target`, `graphical.target`, `reboot.target`, `emergency.target`), `systemctl get-default`, `systemctl set-default`, `systemctl isolate`, `shutdown`, `wall`, `reboot`, `halt`, `poweroff`, `/etc/nologin`, `systemctl daemon-reload`, `systemctl mask/unmask`, Magic SysRq keys, and `ctrl-alt-del.target`.
+- **Interactive Controls & Features**:
+  - 3D perspective flip card animations with tactile feedback.
+  - Sub-objective filtering pills (**All 100**, **101.1 Hardware**, **101.2 Boot**, **101.3 Runlevels & Targets**).
+  - Search filter across all commands, definitions, examples, and exam tips.
+  - Card Index visual modal to quickly jump to any of the 100 cards.
+  - Keyboard shortcuts (`Space`/`Enter` to flip, `Left`/`Right` arrow or `R`/`L` keys for review/mastery, `S` for shuffle, `B` to star/bookmark).
+  - Speech synthesis (TTS) pronunciation audio for commands and definitions.
+  - One-click copy for command syntax examples.
+  - High-yield **Exam Tip** callouts highlighting key gotchas.
+  - Local persistence for Mastered, Needs Review, and Starred status across browser sessions.
 
-### 5. 🗺️ Career Roadmap & Certification Path
+### 7. 🗺️ Career Roadmap & Certification Path
 - Visual step-by-step career path from **Linux Essentials** $\rightarrow$ **LPIC-1** $\rightarrow$ **LPIC-2** $\rightarrow$ **LPIC-3 Specialties**.
 - Prerequisites, exam codes, question counts, passing scores, and recommended hands-on experience requirements.
 
-### 6. 📈 Progress Tracker & Analytics
+### 8. 📈 Progress Tracker & Analytics
 - Track study streaks, completed questions, practice exam attempts, and category proficiencies.
 - Persistent local storage: no account or sign-up needed, your study progress stays securely in your browser.
 

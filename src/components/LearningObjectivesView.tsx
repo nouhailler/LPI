@@ -368,8 +368,16 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
           </div>
 
           <button
+            onClick={() => onNavigate('flashcards')}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#f8ecdb] text-[#785a00] hover:bg-[#ebdcc8] text-xs font-bold transition-colors border border-[#d3c5ab] cursor-pointer"
+          >
+            <Layers className="w-4 h-4" />
+            <span>100 Topic 101 Flashcards</span>
+          </button>
+
+          <button
             onClick={() => onNavigate('practice')}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ffc20e] text-[#6d5100] hover:bg-[#f9bd00] font-bold text-xs md:text-sm shadow-xs transition-transform active:scale-[0.98]"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ffc20e] text-[#6d5100] hover:bg-[#f9bd00] font-bold text-xs md:text-sm shadow-xs transition-transform active:scale-[0.98] cursor-pointer"
           >
             <Play className="w-4 h-4 fill-current" />
             <span>Practice Exam Mode</span>

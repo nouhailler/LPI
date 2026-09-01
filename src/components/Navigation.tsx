@@ -51,7 +51,7 @@ export const DesktopSidebar: React.FC<NavigationProps> = ({ currentTab, onTabCha
     { id: 'glossary', label: 'Glossary & Index', icon: Library, badge: 'All Exams' },
     { id: 'path', label: 'Certification Path', icon: GraduationCap },
     { id: 'practice', label: 'Practice Exams', icon: HelpCircle },
-    { id: 'flashcards', label: 'Flashcards', icon: Layers },
+    { id: 'flashcards', label: 'Flashcards', icon: Layers, badge: '100 Topic 101' },
   ];
 
   return (

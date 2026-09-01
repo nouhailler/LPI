@@ -1,0 +1,12 @@
+{
+  "version": "2.4.0",
+  "releaseDate": "September 1, 2026",
+  "buildTime": "2026-09-01T06:25:00.000Z",
+  "changelog": [
+    "Added automatic background update engine with version check polling",
+    "Added Settings & System menu with live version number, release date, and force update trigger",
+    "Added categorized hamburger navigation drawer with real-time topic search",
+    "Expanded Linux glossary to 1,700+ terms with deterministic slug mapping",
+    "Optimized PWA installation and offline caching"
+  ]
+}

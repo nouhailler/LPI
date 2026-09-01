@@ -1089,18 +1089,78 @@ export const curatedGlossaryEntries: GlossaryEntry[] = [
 ];
 
 /**
+ * Helper to produce clean, unique, human-readable slugs for commands/files/symbols.
+ */
+function createSafeTermSlug(term: string): string {
+  const symbolMap: Record<string, string> = {
+    '<': 'stdin-redirect',
+    '>': 'stdout-redirect',
+    '>>': 'append-redirect',
+    '2>': 'stderr-redirect',
+    '2>&1': 'stderr-to-stdout',
+    '&>': 'all-redirect',
+    '|': 'pipe',
+    '||': 'or-operator',
+    '&&': 'and-operator',
+    ';': 'semicolon-sep',
+    '.': 'dot-source',
+    '..': 'parent-directory',
+    '[': 'bracket-test',
+    '[[': 'double-bracket-test',
+    ']': 'close-bracket-test',
+    ']]': 'close-double-bracket-test',
+    '$(...)': 'command-substitution',
+    '`...`': 'backtick-substitution',
+    '$?': 'exit-status-variable',
+    '$$': 'pid-variable',
+    '$#': 'param-count-variable',
+    '$@': 'all-params-array',
+    '$*': 'all-params-string',
+    '$0': 'script-name-variable',
+    '~': 'home-dir-tilde',
+    '/': 'root-directory',
+  };
+
+  const trimmed = term.trim();
+  if (symbolMap[trimmed]) {
+    return symbolMap[trimmed];
+  }
+
+  const slug = trimmed
+    .replace(/^[/_.-]+/, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+
+  return slug || 'symbol';
+}
+
+/**
  * Builds an aggregated, non-duplicate list of glossary terms by combining
  * the hand-crafted curated deep entries with all auto-indexed objective terms
  * across LPIC-1, LPIC-2, LPIC-3 (Exams 101, 102, 201, 202, 300, 303, 305, 306).
  */
 export function getAllGlossaryEntries(): GlossaryEntry[] {
   const map = new Map<string, GlossaryEntry>();
+  const seenIds = new Set<string>();
 
   // 1. Insert curated rich entries first
   for (const entry of curatedGlossaryEntries) {
     const key = entry.term.toLowerCase().trim();
     map.set(key, entry);
+    seenIds.add(entry.id);
   }
+
+  const getUniqueId = (baseId: string): string => {
+    let finalId = baseId;
+    let counter = 1;
+    while (seenIds.has(finalId)) {
+      finalId = `${baseId}-${++counter}`;
+    }
+    seenIds.add(finalId);
+    return finalId;
+  };
 
   // 2. Scan all LPIC topics and objectives for additional terms and files
   for (const topic of allLpicTopicsData) {
@@ -1119,9 +1179,11 @@ export function getAllGlossaryEntries(): GlossaryEntry[] {
           const isFile = cleanTerm.startsWith('/') || cleanTerm.endsWith('/') || cleanTerm.includes('.conf') || cleanTerm.includes('.d');
           const isCommand = !isFile && !cleanTerm.includes(' ') && !cleanTerm.includes('(');
           const type = isFile ? 'file' : isCommand ? 'command' : 'concept';
+          const safeSlug = createSafeTermSlug(cleanTerm);
+          const uniqueId = getUniqueId(`auto-${topic.topicNumber}-${safeSlug}`);
 
           map.set(key, {
-            id: `auto-${topic.topicNumber}-${cleanTerm.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`,
+            id: uniqueId,
             term: cleanTerm,
             type,
             certification: cert,
@@ -1146,8 +1208,11 @@ export function getAllGlossaryEntries(): GlossaryEntry[] {
         const key = cleanFile.toLowerCase();
 
         if (!map.has(key)) {
+          const safeSlug = createSafeTermSlug(cleanFile);
+          const uniqueId = getUniqueId(`auto-file-${topic.topicNumber}-${safeSlug}`);
+
           map.set(key, {
-            id: `auto-file-${topic.topicNumber}-${cleanFile.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`,
+            id: uniqueId,
             term: cleanFile,
             type: 'file',
             certification: cert,

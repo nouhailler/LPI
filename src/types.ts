@@ -101,11 +101,17 @@ export interface PracticeQuestion {
 
 export interface Flashcard {
   id: number;
-  deck: 'Linux Essentials' | 'LPIC-1 System' | 'LPIC-1 Networking' | 'LPIC-1 Storage';
+  deck: string;
   command: string;
   definition: string;
   example: string;
   exampleExplanation: string;
+  objectiveId?: string;
+  topicNumber?: number;
+  category?: string;
+  examTip?: string;
+  keyNotes?: string[];
+  difficulty?: 'Fundamental' | 'Intermediate' | 'Advanced';
   status?: 'unseen' | 'learning' | 'mastered';
 }
 

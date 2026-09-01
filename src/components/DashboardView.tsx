@@ -255,6 +255,38 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </button>
       </div>
 
+      {/* 100 Interactive Flashcards for Topic 101 Banner */}
+      <div className="bg-[#fdf3e4] border-2 border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-[#785a00] rounded-xl text-white shadow-xs shrink-0 mt-0.5 font-mono font-bold text-lg">
+            101
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#ffc20e] text-[#6d5100]">
+                100 Interactive Flashcards
+              </span>
+              <span className="text-xs font-bold text-[#785a00]">Topic 101: System Architecture</span>
+            </div>
+            <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
+              Master Kernel Modules, Boot Sequence & Systemd Targets
+            </h3>
+            <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
+              100 deep-recall 3D flashcards covering Objective 101.1 (Hardware & Kernel Modules), 101.2 (BIOS/UEFI, GRUB 2 & Boot Logs), and 101.3 (Runlevels, systemd Targets & Shutdown) with high-yield exam tips and code examples.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onNavigate('flashcards')}
+          className="px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+        >
+          <Layers className="w-4 h-4" />
+          <span>Launch 100 Flashcards</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* Featured Learning Section (Exam 101, 102, 201, 202, 300, 303, 305 & 306 Chapters) */}
       <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d3c5ab]/60 pb-4">
