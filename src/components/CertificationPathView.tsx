@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Lock, ArrowRight, ShieldCheck, Award } from 'lucide-react';
+import { CheckCircle2, Lock, ArrowRight, ShieldCheck, Award, BookOpen } from 'lucide-react';
 import { ExamTier, TabType, UserStats } from '../types';
 
 interface CertificationPathViewProps {
@@ -7,6 +7,7 @@ interface CertificationPathViewProps {
   tiers: ExamTier[];
   onStartExam: (examId: string) => void;
   onNavigate: (tab: TabType) => void;
+  onOpenLearning?: (topicId?: string) => void;
 }
 
 export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
@@ -14,6 +15,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
   tiers,
   onStartExam,
   onNavigate,
+  onOpenLearning,
 }) => {
   return (
     <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-16">
@@ -158,111 +160,232 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                 <div className="w-full h-2 bg-[#ece1d0] rounded-full mb-3 overflow-hidden">
                   <div className="h-full bg-[#0061a4] rounded-full" style={{ width: '70%' }} />
                 </div>
-                <button
-                  onClick={() => onStartExam('exam-101')}
-                  className="w-full py-2.5 bg-[#495e8a] hover:bg-[#314671] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  Continue Study
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => (onOpenLearning ? onOpenLearning('topic-101') : onNavigate('learning'))}
+                    className="flex-1 py-2.5 bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] border border-[#d3c5ab] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    Objectives
+                  </button>
+                  <button
+                    onClick={() => onStartExam('exam-101')}
+                    className="flex-1 py-2.5 bg-[#495e8a] hover:bg-[#314671] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    Practice
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Exam 102 */}
-            <div className="p-4 border border-[#d3c5ab] rounded-lg bg-[#fff8f2] flex flex-col justify-between opacity-80">
+            <div className="p-4 border border-[#d3c5ab] rounded-lg bg-[#fff8f2] flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold text-[#201b11] text-base opacity-80">Exam 102-500</h4>
-                  <Lock className="w-4 h-4 text-[#817660]" />
+                  <h4 className="font-bold text-[#201b11] text-base">Exam 102-500</h4>
+                  <span className="text-[11px] font-bold text-[#785a00] bg-[#ffc20e]/30 px-2 py-0.5 rounded">
+                    Topics 105-110
+                  </span>
                 </div>
-                <p className="text-xs text-[#4f4632] mb-3 opacity-80">
-                  Shells, Scripting, Data Management, Interfaces, Security
+                <p className="text-xs text-[#4f4632] mb-3">
+                  Shells, Scripting, Data Management, Interfaces, Security & Networking
                 </p>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs mb-1 opacity-60">
-                  <span className="font-bold text-[#817660]">Progress</span>
-                  <span className="font-bold text-[#817660]">0%</span>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="font-bold text-[#817660]">Objectives Status</span>
+                  <span className="font-bold text-[#785a00]">Available</span>
                 </div>
                 <div className="w-full h-2 bg-[#ece1d0] rounded-full mb-3 overflow-hidden">
-                  <div className="h-full bg-[#817660] rounded-full" style={{ width: '0%' }} />
+                  <div className="h-full bg-[#ffc20e]" style={{ width: '10%' }} />
                 </div>
-                <button
-                  disabled
-                  className="w-full py-2.5 border border-[#817660]/40 text-[#817660] rounded-lg font-bold text-xs uppercase tracking-wider opacity-60 cursor-not-allowed"
-                >
-                  Locked
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => (onOpenLearning ? onOpenLearning('topic-105') : onNavigate('learning'))}
+                    className="w-full py-2.5 bg-[#785a00] hover:bg-[#604700] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    Study Exam 102 Objectives
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* LPIC-2 Tier */}
-        <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-5 md:p-6 opacity-85 hover:opacity-100 transition-all shadow-xs">
-          <div className="flex gap-4 mb-4">
+        <div className="bg-[#ffffff] border-2 border-[#d3c5ab] hover:border-[#0061a4] rounded-xl p-5 md:p-6 transition-all shadow-xs">
+          <div className="flex flex-col md:flex-row gap-4 mb-5">
             <div className="w-16 h-16 bg-[#f8ecdb] rounded-lg border border-[#d3c5ab] flex items-center justify-center p-1 shrink-0">
               <img
                 alt="LPIC-2 Badge"
-                className="w-full h-full object-contain grayscale"
+                className="w-full h-full object-contain"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4"
                 referrerPolicy="no-referrer"
               />
             </div>
             <div>
-              <span className="inline-block px-2 py-0.5 bg-[#ece1d0] text-[#4f4632] rounded text-[10px] font-bold uppercase tracking-wider mb-1">
-                Advanced
+              <span className="inline-block px-2 py-0.5 bg-[#e7f0f8] text-[#0061a4] rounded text-[10px] font-bold uppercase tracking-wider mb-1">
+                Advanced Certification
               </span>
               <h3 className="font-bold text-lg text-[#201b11]">LPIC-2: Linux Engineer</h3>
               <p className="text-xs md:text-sm text-[#4f4632] mt-0.5">
-                Administer small to medium-sized mixed networks.
+                Administer small to medium-sized mixed networks, capacity planning, kernel compilation, web/mail servers, DNS, and network security.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-            <div className="flex items-center gap-3 p-3 bg-[#fef2e1] rounded-lg border border-[#d3c5ab]/50">
-              <Lock className="w-4 h-4 text-[#817660]" />
-              <span className="font-semibold text-xs text-[#4f4632]">Exam 201-450</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Exam 201 */}
+            <div className="p-4 border border-[#d3c5ab] rounded-lg bg-[#fff8f2] flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-[#201b11] text-base">Exam 201-450</h4>
+                  <span className="text-[11px] font-bold text-[#0061a4] bg-[#0061a4]/10 px-2 py-0.5 rounded">
+                    Topics 200-206
+                  </span>
+                </div>
+                <p className="text-xs text-[#4f4632] mb-3">
+                  Capacity Planning, Linux Kernel, System Startup & Recovery, Filesystems & Devices, Storage (RAID/LVM), Network Config.
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => (onOpenLearning ? onOpenLearning('topic-200') : onNavigate('learning'))}
+                  className="w-full py-2.5 bg-[#0061a4] hover:bg-[#004f87] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Study Exam 201 Objectives
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-[#fef2e1] rounded-lg border border-[#d3c5ab]/50">
-              <Lock className="w-4 h-4 text-[#817660]" />
-              <span className="font-semibold text-xs text-[#4f4632]">Exam 202-450</span>
+
+            {/* Exam 202 */}
+            <div className="p-4 border border-[#d3c5ab] rounded-lg bg-[#fff8f2] flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-[#201b11] text-base">Exam 202-450</h4>
+                  <span className="text-[11px] font-bold text-[#0061a4] bg-[#0061a4]/10 px-2 py-0.5 rounded">
+                    Topics 207-212
+                  </span>
+                </div>
+                <p className="text-xs text-[#4f4632] mb-3">
+                  DNS (BIND 9), Web Services (Apache, Nginx, Squid), File Sharing (Samba, NFS), Client Management, E-Mail (Postfix, Dovecot), System Security.
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => (onOpenLearning ? onOpenLearning('topic-207') : onNavigate('learning'))}
+                  className="w-full py-2.5 bg-[#0061a4] hover:bg-[#004f87] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Study Exam 202 Objectives
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* LPIC-3 Tier */}
-        <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-5 md:p-6 opacity-75 hover:opacity-100 transition-all shadow-xs">
-          <div className="flex gap-4 mb-4">
+        {/* LPIC-3 Tier (Enterprise) */}
+        <div className="bg-[#ffffff] border-2 border-[#d3c5ab] hover:border-[#5c3566] rounded-xl p-5 md:p-6 transition-all shadow-xs">
+          <div className="flex flex-col md:flex-row gap-4 mb-5">
             <div className="w-16 h-16 bg-[#f8ecdb] rounded-lg border border-[#d3c5ab] flex items-center justify-center p-1 shrink-0">
               <img
                 alt="LPIC-3 Badge"
-                className="w-full h-full object-contain grayscale"
+                className="w-full h-full object-contain"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB"
                 referrerPolicy="no-referrer"
               />
             </div>
             <div>
-              <span className="inline-block px-2 py-0.5 bg-[#ece1d0] text-[#4f4632] rounded text-[10px] font-bold uppercase tracking-wider mb-1">
-                Enterprise
+              <span className="inline-block px-2 py-0.5 bg-[#5c3566]/10 text-[#5c3566] rounded text-[10px] font-bold uppercase tracking-wider mb-1">
+                Enterprise Specialty (Tier 3)
               </span>
-              <h3 className="font-bold text-lg text-[#201b11]">LPIC-3: Enterprise Professional</h3>
+              <h3 className="font-bold text-lg text-[#201b11]">LPIC-3: Enterprise Professional (Mixed Environments, Security, HA & Storage)</h3>
               <p className="text-xs md:text-sm text-[#4f4632] mt-0.5">
-                Highest level certification for enterprise-level professionals.
+                Highest level Linux certification for enterprise specialists: Choose between Mixed Environments (300), Enterprise Security (303), or High Availability and Storage Clusters (306).
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-            <div className="flex items-center gap-3 p-3 bg-[#fef2e1] rounded-lg border border-[#d3c5ab]/50">
-              <Lock className="w-4 h-4 text-[#817660]" />
-              <span className="font-semibold text-xs text-[#4f4632]">Exam 300 (Mixed Environment)</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Exam 300 */}
+            <div className="p-4 border border-[#d3c5ab] rounded-lg bg-[#fff8f2] flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-[#201b11] text-base">Exam 300-300</h4>
+                  <span className="text-[11px] font-bold text-[#5c3566] bg-[#5c3566]/15 px-2 py-0.5 rounded">
+                    Mixed Environments
+                  </span>
+                </div>
+                <p className="text-xs text-[#4f4632] mb-3">
+                  Topics 301–305: Samba Basics, Samba as AD DC & Member Server, Share Security, Client Auth (SSSD/Winbind/CIFS), Linux Identity Management (FreeIPA & NFSv4).
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => (onOpenLearning ? onOpenLearning('topic-301') : onNavigate('learning'))}
+                  className="w-full py-2.5 bg-[#5c3566] hover:bg-[#472750] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Study Exam 300 Objectives
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-[#fef2e1] rounded-lg border border-[#d3c5ab]/50">
-              <Lock className="w-4 h-4 text-[#817660]" />
-              <span className="font-semibold text-xs text-[#4f4632]">Exam 303 (Security)</span>
+
+            {/* Exam 303 */}
+            <div className="p-4 border border-[#d3c5ab] rounded-lg bg-[#fff8f2] flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-[#201b11] text-base">Exam 303-300</h4>
+                  <span className="text-[11px] font-bold text-[#991b1b] bg-[#991b1b]/15 px-2 py-0.5 rounded">
+                    Enterprise Security
+                  </span>
+                </div>
+                <p className="text-xs text-[#4f4632] mb-3">
+                  Topics 325–328: Cryptography (PKI, X.509, LUKS, DNSSEC), Host Security (Hardening, Audit, AIDE, PAM, FreeIPA), Access Control (ACLs, SELinux, NFSv4), and Network Security (FreeRADIUS, NIDS, Netfilter, VPNs).
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => (onOpenLearning ? onOpenLearning('topic-325') : onNavigate('learning'))}
+                  className="w-full py-2.5 bg-[#991b1b] hover:bg-[#7f1d1d] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Study Exam 303 Objectives
+                </button>
+              </div>
+            </div>
+
+            {/* Exam 306 */}
+            <div className="p-4 border border-[#d3c5ab] rounded-lg bg-[#fff8f2] flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-[#201b11] text-base">Exam 306-300</h4>
+                  <span className="text-[11px] font-bold text-[#047857] bg-[#047857]/15 px-2 py-0.5 rounded">
+                    HA & Storage
+                  </span>
+                </div>
+                <p className="text-xs text-[#4f4632] mb-3">
+                  Topics 361–364: HA Cluster Management (LVS, Keepalived, Pacemaker, Corosync, STONITH), Cluster Storage (DRBD, SAN/iSCSI, GFS2/OCFS2), Distributed Storage (GlusterFS, Ceph), and Single Node HA (Watchdog, RAID, LVM, Teaming).
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => (onOpenLearning ? onOpenLearning('topic-361') : onNavigate('learning'))}
+                  className="w-full py-2.5 bg-[#047857] hover:bg-[#065f46] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Study Exam 306 Objectives
+                </button>
+              </div>
             </div>
           </div>
         </div>

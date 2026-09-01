@@ -1,4 +1,68 @@
-export type TabType = 'dashboard' | 'path' | 'practice' | 'flashcards';
+export type TabType = 'dashboard' | 'learning' | 'path' | 'practice' | 'flashcards' | 'glossary';
+
+export type GlossaryItemType = 'command' | 'concept' | 'file' | 'function_or_directive';
+
+export interface GlossaryFlagOrParam {
+  flag: string;
+  description: string;
+}
+
+export interface GlossaryEntry {
+  id: string;
+  term: string;
+  type: GlossaryItemType;
+  certification: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  examId: 'exam-101' | 'exam-102' | 'exam-201' | 'exam-202' | 'exam-300' | 'exam-303' | 'exam-305' | 'exam-306';
+  objectiveId: string;
+  topicNumber: number;
+  topicTitle: string;
+  category: string;
+  definition: string;
+  syntaxOrLocation?: string;
+  flagsOrParameters?: GlossaryFlagOrParam[];
+  exampleSnippet?: string;
+  exampleExplanation?: string;
+  examTips?: string;
+  relatedTerms?: string[];
+}
+
+export interface LPICCommandSnippet {
+  command: string;
+  description: string;
+  example: string;
+  explanation?: string;
+}
+
+export interface ObjectiveQuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface LPICObjective {
+  id: string; // e.g. "101.1"
+  title: string;
+  weight: number;
+  description: string;
+  keyKnowledgeAreas: string[];
+  termsAndUtilities: string[];
+  filesAndPaths: string[];
+  keyCommands: LPICCommandSnippet[];
+  studyNotes: string[];
+  quickQuestions: ObjectiveQuizQuestion[];
+}
+
+export interface LPICTopic {
+  id: string; // e.g. "topic-101", "topic-201", or "topic-301"
+  topicNumber: number; // 101, 201, 301
+  title: string; // "System Architecture", "Capacity Planning", "Samba Basics"
+  totalWeight: number;
+  examId: 'exam-101' | 'exam-102' | 'exam-201' | 'exam-202' | 'exam-300' | 'exam-303' | 'exam-305' | 'exam-306';
+  certification?: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  description: string;
+  objectives: LPICObjective[];
+}
 
 export interface ExamTier {
   id: string;

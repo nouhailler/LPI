@@ -3,8 +3,10 @@ import { Header } from './components/Header';
 import { BottomNav, DesktopSidebar } from './components/Navigation';
 import { DashboardView } from './components/DashboardView';
 import { CertificationPathView } from './components/CertificationPathView';
+import { LearningObjectivesView } from './components/LearningObjectivesView';
 import { PracticeExamView } from './components/PracticeExamView';
 import { FlashcardsView } from './components/FlashcardsView';
+import { GlossaryView } from './components/GlossaryView';
 import { ExplanationModal } from './components/ExplanationModal';
 import { ProfileModal } from './components/ProfileModal';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
@@ -17,6 +19,7 @@ export default function App() {
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [activeExplanation, setActiveExplanation] = useState<PracticeQuestion | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [selectedLearningTopic, setSelectedLearningTopic] = useState<string | undefined>(undefined);
 
   // Timer countdown for practice mode
   useEffect(() => {
@@ -41,6 +44,11 @@ export default function App() {
     setExamTimerSeconds(45 * 60 + 10);
     setIsTimerRunning(true);
     setCurrentTab('practice');
+  };
+
+  const handleOpenLearningTopic = (topicId?: string) => {
+    setSelectedLearningTopic(topicId);
+    setCurrentTab('learning');
   };
 
   const handleCompletePracticeSession = (correctCount: number, total: number) => {
@@ -87,6 +95,22 @@ export default function App() {
               onNavigate={setCurrentTab}
               onSelectTier={() => setCurrentTab('path')}
               onStartExam={handleStartExam}
+              onOpenLearning={handleOpenLearningTopic}
+            />
+          )}
+
+          {currentTab === 'learning' && (
+            <LearningObjectivesView
+              onNavigate={setCurrentTab}
+              onStartExam={handleStartExam}
+              initialTopicId={selectedLearningTopic}
+            />
+          )}
+
+          {currentTab === 'glossary' && (
+            <GlossaryView
+              onNavigate={setCurrentTab}
+              onOpenLearningTopic={handleOpenLearningTopic}
             />
           )}
 
@@ -96,6 +120,7 @@ export default function App() {
               tiers={certificationTiers}
               onStartExam={handleStartExam}
               onNavigate={setCurrentTab}
+              onOpenLearning={handleOpenLearningTopic}
             />
           )}
 
