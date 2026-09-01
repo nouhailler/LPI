@@ -67,9 +67,12 @@ export const Header: React.FC<HeaderProps> = ({
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => onTabChange('dashboard')}
       >
-        <div className="w-8 h-8 rounded-full bg-[#ffc20e] flex items-center justify-center text-[#6d5100] font-bold text-xs shadow-xs tracking-wider">
-          LPI
-        </div>
+        <img
+          src="/app-logo.jpg"
+          alt="LPI Prep Logo"
+          referrerPolicy="no-referrer"
+          className="w-8 h-8 rounded-lg object-cover shadow-xs border border-[#d3c5ab]"
+        />
         <h1 className="font-sans font-bold text-lg md:text-xl text-[#785a00]">
           LPI Certification Prep
         </h1>
