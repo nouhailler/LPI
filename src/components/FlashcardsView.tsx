@@ -19,18 +19,42 @@ import {
   Filter,
   Layers,
   HelpCircle,
+  HardDrive,
+  Cpu,
+  Package,
+  Terminal,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
+  initialTopic?: 101 | 102 | 'all';
 }
 
-type FilterObjective = 'all-101' | '101.1' | '101.2' | '101.3' | 'all' | 'starred' | 'review';
+type SelectedTopic = 101 | 102 | 'all';
 
-export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLearned }) => {
-  const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-101');
+type FilterObjective =
+  | 'all-topic'
+  | '101.1'
+  | '101.2'
+  | '101.3'
+  | '102.1'
+  | '102.2'
+  | '102.3'
+  | '102.4'
+  | '102.5'
+  | '102.6'
+  | 'starred'
+  | 'review';
+
+export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
+  cards,
+  onCardLearned,
+  initialTopic = 102,
+}) => {
+  const [selectedTopic, setSelectedTopic] = useState<SelectedTopic>(initialTopic);
+  const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-topic');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -91,21 +115,48 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
     }
   }, [starredCardIds]);
 
+  // Reset filter when topic changes
+  const handleTopicSelect = (topic: SelectedTopic) => {
+    setSelectedTopic(topic);
+    setActiveDeckFilter('all-topic');
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
   // Compute filtered card list
   const filteredCards = useMemo(() => {
     let result = cards;
 
-    // Filter by deck/objective
-    if (activeDeckFilter === 'all-101') {
+    // Filter by Topic level first
+    if (selectedTopic === 101) {
       result = result.filter(
         (c) => c.topicNumber === 101 || c.deck.includes('Topic 101') || c.objectiveId?.startsWith('101.')
       );
-    } else if (activeDeckFilter === '101.1') {
+    } else if (selectedTopic === 102) {
+      result = result.filter(
+        (c) => c.topicNumber === 102 || c.deck.includes('Topic 102') || c.objectiveId?.startsWith('102.')
+      );
+    }
+
+    // Filter by sub-objective / state
+    if (activeDeckFilter === '101.1') {
       result = result.filter((c) => c.objectiveId === '101.1');
     } else if (activeDeckFilter === '101.2') {
       result = result.filter((c) => c.objectiveId === '101.2');
     } else if (activeDeckFilter === '101.3') {
       result = result.filter((c) => c.objectiveId === '101.3');
+    } else if (activeDeckFilter === '102.1') {
+      result = result.filter((c) => c.objectiveId === '102.1');
+    } else if (activeDeckFilter === '102.2') {
+      result = result.filter((c) => c.objectiveId === '102.2');
+    } else if (activeDeckFilter === '102.3') {
+      result = result.filter((c) => c.objectiveId === '102.3');
+    } else if (activeDeckFilter === '102.4') {
+      result = result.filter((c) => c.objectiveId === '102.4');
+    } else if (activeDeckFilter === '102.5') {
+      result = result.filter((c) => c.objectiveId === '102.5');
+    } else if (activeDeckFilter === '102.6') {
+      result = result.filter((c) => c.objectiveId === '102.6');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -126,7 +177,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
     }
 
     return result;
-  }, [cards, activeDeckFilter, searchQuery, starredCardIds, reviewCardIds]);
+  }, [cards, selectedTopic, activeDeckFilter, searchQuery, starredCardIds, reviewCardIds]);
 
   // Display deck
   const [deckOrder, setDeckOrder] = useState<Flashcard[]>([]);
@@ -264,49 +315,136 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleFlip, handleGotIt, handleStudyAgain, toggleStarred]);
 
-  // Count metrics for Topic 101
+  // Compute metrics for Topic 101 and Topic 102
   const topic101Cards = useMemo(
     () => cards.filter((c) => c.topicNumber === 101 || c.deck.includes('Topic 101') || c.objectiveId?.startsWith('101.')),
     [cards]
   );
   const topic101Mastered = topic101Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic102Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 102 || c.deck.includes('Topic 102') || c.objectiveId?.startsWith('102.')),
+    [cards]
+  );
+  const topic102Mastered = topic102Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const activeTopicTitle =
+    selectedTopic === 102
+      ? 'Topic 102: Linux Installation and Package Management'
+      : selectedTopic === 101
+      ? 'Topic 101: System Architecture'
+      : 'All LPIC-1 Exam 101 Flashcards';
+
+  const activeTopicBadge =
+    selectedTopic === 102
+      ? '100 Cards • 6 Sub-Objectives'
+      : selectedTopic === 101
+      ? '100 Cards • 3 Sub-Objectives'
+      : `${cards.length} Total Cards`;
+
+  const activeTopicMastered =
+    selectedTopic === 102
+      ? topic102Mastered
+      : selectedTopic === 101
+      ? topic101Mastered
+      : masteredCardIds.length;
+
+  const activeTopicTotal =
+    selectedTopic === 102
+      ? topic102Cards.length || 100
+      : selectedTopic === 101
+      ? topic101Cards.length || 100
+      : cards.length;
+
+  const activeTopicPct = activeTopicTotal > 0 ? Math.round((activeTopicMastered / activeTopicTotal) * 100) : 0;
+
   return (
     <div className="max-w-4xl mx-auto w-full flex flex-col items-center justify-center pb-24 px-2">
-      {/* Header Topic 101 Banner */}
-      <div className="w-full bg-[#fef2e1] border border-[#d3c5ab] rounded-2xl p-4 md:p-5 mb-6 shadow-2xs">
+      {/* Top Topic Switcher Tabs */}
+      <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
+          <button
+            onClick={() => handleTopicSelect(102)}
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+              selectedTopic === 102
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Topic 102 Deck (100)</span>
+            <span className="hidden md:inline text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              New
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(101)}
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+              selectedTopic === 101
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Cpu className="w-4 h-4" />
+            <span>Topic 101 Deck (100)</span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect('all')}
+            className={`hidden sm:flex px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer items-center justify-center gap-1.5 ${
+              selectedTopic === 'all'
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>All LPIC-1 ({cards.length})</span>
+          </button>
+        </div>
+
+        <div className="hidden lg:flex items-center gap-2 pr-2 text-xs text-[#817660]">
+          <span>Total Mastered:</span>
+          <strong className="text-[#28A745] font-bold">{masteredCardIds.length}</strong>
+        </div>
+      </div>
+
+      {/* Header Topic Banner */}
+      <div className="w-full bg-[#fef2e1] border border-[#d3c5ab] rounded-2xl p-4 md:p-5 mb-5 shadow-2xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#785a00] text-white flex items-center justify-center font-mono font-bold text-lg shadow-sm">
-              101
+            <div className="w-12 h-12 rounded-xl bg-[#785a00] text-white flex items-center justify-center font-mono font-bold text-lg shadow-sm shrink-0">
+              {selectedTopic === 'all' ? '101' : selectedTopic}
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  LPIC-1 Exam 101 Deck
+                  LPIC-1 Exam 101-500
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  100 Interactive Cards
+                  {activeTopicBadge}
                 </span>
               </div>
               <h1 className="text-xl md:text-2xl font-bold text-[#201b11] mt-0.5">
-                Topic 101: System Architecture
+                {activeTopicTitle}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto">
+          <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
-              <span className="text-[10px] uppercase font-bold text-[#817660] block">Topic 101 Mastery</span>
+              <span className="text-[10px] uppercase font-bold text-[#817660] block">
+                {selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+              </span>
               <span className="text-base font-bold text-[#785a00]">
-                {topic101Mastered} / {topic101Cards.length || 100}{' '}
+                {activeTopicMastered} / {activeTopicTotal}{' '}
                 <span className="text-xs text-[#817660] font-normal">
-                  ({Math.round(((topic101Mastered) / (topic101Cards.length || 100)) * 100)}%)
+                  ({activeTopicPct}%)
                 </span>
               </span>
             </div>
             <div className="w-10 h-10 rounded-full border-2 border-[#785a00] flex items-center justify-center font-bold text-xs text-[#785a00] bg-[#fef2e1]">
-              {Math.round(((topic101Mastered) / (topic101Cards.length || 100)) * 100)}%
+              {activeTopicPct}%
             </div>
           </div>
         </div>
@@ -314,51 +452,135 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
         {/* Filter Pills */}
         <div className="mt-4 pt-3 border-t border-[#d3c5ab]/60 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap gap-1.5 items-center">
+            {/* All Topic Pill */}
             <button
-              onClick={() => setActiveDeckFilter('all-101')}
+              onClick={() => setActiveDeckFilter('all-topic')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeDeckFilter === 'all-101'
+                activeDeckFilter === 'all-topic'
                   ? 'bg-[#785a00] text-white shadow-xs'
                   : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All Topic 101 (100)
+              All In Deck ({selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
 
-            <button
-              onClick={() => setActiveDeckFilter('101.1')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeDeckFilter === '101.1'
-                  ? 'bg-[#785a00] text-white shadow-xs'
-                  : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
-              }`}
-            >
-              101.1 Hardware (35)
-            </button>
+            {/* Topic 102 Sub-Objectives */}
+            {selectedTopic === 102 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('102.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '102.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Design hard disk layout (LVM, Partitions, fstab)"
+                >
+                  102.1 Disks & LVM (18)
+                </button>
 
-            <button
-              onClick={() => setActiveDeckFilter('101.2')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeDeckFilter === '101.2'
-                  ? 'bg-[#785a00] text-white shadow-xs'
-                  : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
-              }`}
-            >
-              101.2 Boot & GRUB (35)
-            </button>
+                <button
+                  onClick={() => setActiveDeckFilter('102.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '102.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Install a boot manager (GRUB 2, UEFI)"
+                >
+                  102.2 GRUB & Boot (18)
+                </button>
 
-            <button
-              onClick={() => setActiveDeckFilter('101.3')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeDeckFilter === '101.3'
-                  ? 'bg-[#785a00] text-white shadow-xs'
-                  : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
-              }`}
-            >
-              101.3 Runlevels & Targets (30)
-            </button>
+                <button
+                  onClick={() => setActiveDeckFilter('102.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '102.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Manage shared libraries (ldd, ldconfig)"
+                >
+                  102.3 Libraries (14)
+                </button>
 
+                <button
+                  onClick={() => setActiveDeckFilter('102.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '102.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Use Debian package management (dpkg, apt)"
+                >
+                  102.4 Debian/APT (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('102.5')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '102.5'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Use RPM and YUM/DNF package management"
+                >
+                  102.5 RPM/YUM (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('102.6')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '102.6'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Linux as a virtualization guest (cloud-init, VM tools)"
+                >
+                  102.6 Cloud & Virt (10)
+                </button>
+              </>
+            )}
+
+            {/* Topic 101 Sub-Objectives */}
+            {selectedTopic === 101 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('101.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '101.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                >
+                  101.1 Hardware (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('101.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '101.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                >
+                  101.2 Boot & GRUB (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('101.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '101.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                >
+                  101.3 Runlevels (30)
+                </button>
+              </>
+            )}
+
+            {/* Global Starred & Needs Review Filters */}
             <button
               onClick={() => setActiveDeckFilter('starred')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
@@ -380,7 +602,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
               }`}
             >
               <RotateCw className="w-3.5 h-3.5" />
-              Needs Review ({reviewCardIds.length})
+              Review ({reviewCardIds.length})
             </button>
           </div>
 
@@ -388,7 +610,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
           <button
             onClick={() => setShowGridModal(true)}
             className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-[#495e8a] hover:bg-[#ece1d0] border border-[#d3c5ab] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
-            title="Browse all 100 cards in a visual index"
+            title="Browse all cards in a visual index"
           >
             <Grid className="w-3.5 h-3.5" />
             Card Index ({filteredCards.length})
@@ -402,7 +624,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
           <Search className="w-4 h-4 text-[#817660] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search Topic 101 commands, files, or concepts..."
+            placeholder={
+              selectedTopic === 102
+                ? 'Search dpkg, rpm, ldd, fstab, LVM, cloud-init...'
+                : selectedTopic === 101
+                ? 'Search lsmod, GRUB, systemd, udev, dmesg...'
+                : 'Search all LPIC-1 commands, files, or concepts...'
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-white border border-[#d3c5ab] text-[#201b11] focus:outline-none focus:ring-2 focus:ring-[#785a00] transition-all shadow-2xs placeholder-[#817660]"
@@ -452,12 +680,12 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
           </p>
           <button
             onClick={() => {
-              setActiveDeckFilter('all-101');
+              setActiveDeckFilter('all-topic');
               setSearchQuery('');
             }}
             className="mt-4 px-4 py-2 bg-[#785a00] text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer hover:bg-[#6d5100]"
           >
-            Show All 100 Topic 101 Cards
+            Show All Cards
           </button>
         </div>
       ) : (
@@ -467,7 +695,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
             <div className="flex justify-between items-center text-xs font-bold text-[#495e8a]">
               <div className="flex items-center gap-2">
                 <span className="uppercase tracking-wider">
-                  {currentCard?.objectiveId ? `OBJ ${currentCard.objectiveId}` : 'TOPIC 101'}
+                  {currentCard?.objectiveId ? `OBJ ${currentCard.objectiveId}` : `TOPIC ${currentCard?.topicNumber || 101}`}
                 </span>
                 {currentCard?.category && (
                   <span className="text-[10px] font-semibold bg-[#f8ecdb] text-[#785a00] px-2 py-0.5 rounded border border-[#d3c5ab]">
@@ -508,7 +736,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
                 <div className="flex justify-between items-center text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-mono uppercase font-bold text-[11px] bg-[#785a00] text-white px-2.5 py-0.5 rounded-md shadow-2xs">
-                      {currentCard?.objectiveId ? `LPIC-1: ${currentCard.objectiveId}` : 'Topic 101'}
+                      {currentCard?.objectiveId ? `LPIC-1: ${currentCard.objectiveId}` : 'LPIC-1'}
                     </span>
                     {currentCard?.difficulty && (
                       <span className="text-[10px] font-bold text-[#817660] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
@@ -630,7 +858,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
                           )}
                         </button>
                       </div>
-                      <code className="font-mono text-xs md:text-sm text-[#1A1A1A] font-bold block bg-[#ffffff] p-2 rounded-lg border border-[#d3c5ab]/60 overflow-x-auto">
+                      <code className="font-mono text-xs md:text-sm text-[#1A1A1A] font-bold block bg-[#ffffff] p-2 rounded-lg border border-[#d3c5ab]/60 overflow-x-auto whitespace-pre-wrap">
                         {currentCard.example}
                       </code>
                       <p className="text-xs text-[#4f4632] mt-1.5 leading-relaxed">
@@ -728,7 +956,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
           <div className="bg-white border border-[#d3c5ab] rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-xl animate-in fade-in zoom-in-95 duration-150">
             <div className="p-4 border-b border-[#d3c5ab] flex justify-between items-center bg-[#fff8f2] rounded-t-2xl">
               <div>
-                <h3 className="font-bold text-base text-[#201b11]">Topic 101 Flashcard Index</h3>
+                <h3 className="font-bold text-base text-[#201b11]">
+                  {selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
+                </h3>
                 <p className="text-xs text-[#817660]">
                   Click on any card to jump directly to it ({filteredCards.length} cards available)
                 </p>
@@ -780,7 +1010,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ cards, onCardLea
                       {card.command}
                     </span>
                     <span className="text-[10px] text-[#817660] truncate block mt-0.5">
-                      {card.objectiveId ? `Obj ${card.objectiveId}` : card.category || 'Topic 101'}
+                      {card.objectiveId ? `Obj ${card.objectiveId}` : card.category || `Topic ${card.topicNumber || 101}`}
                     </span>
                   </button>
                 );

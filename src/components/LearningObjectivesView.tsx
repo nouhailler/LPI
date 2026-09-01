@@ -372,7 +372,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#f8ecdb] text-[#785a00] hover:bg-[#ebdcc8] text-xs font-bold transition-colors border border-[#d3c5ab] cursor-pointer"
           >
             <Layers className="w-4 h-4" />
-            <span>100 Topic 101 Flashcards</span>
+            <span>200 Flashcards (Topics 101 & 102)</span>
           </button>
 
           <button

@@ -173,14 +173,14 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         },
         {
           id: 'nav-flashcards',
-          title: 'Interactive Flashcards (Topic 101)',
-          subtitle: '100 3D interactive cards for LPIC-1 System Architecture',
+          title: 'Interactive Flashcards Decks',
+          subtitle: '200 interactive cards for Topic 101 & Topic 102',
           icon: Layers,
-          badge: '100 Topic 101 Cards',
+          badge: '200 LPIC-1 Cards',
           badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
           tabTarget: 'flashcards',
           action: () => onSelectTab('flashcards'),
-          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', 'topic 101'],
+          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', 'topic 101', 'topic 102', 'dpkg', 'rpm', 'grub', 'lvm'],
         },
         {
           id: 'nav-path',
