@@ -255,24 +255,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </button>
       </div>
 
-      {/* 300 Interactive Flashcards for Topics 101, 102 & 103 Banner */}
+      {/* 800 Interactive Flashcards for Topics 101, 102, 103, 104, 105, 106, 108 & 109 Banner */}
       <div className="bg-[#fdf3e4] border-2 border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
           <div className="p-3 bg-[#785a00] rounded-xl text-white shadow-xs shrink-0 mt-0.5 font-mono font-bold text-lg flex items-center justify-center">
-            300
+            800
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#ffc20e] text-[#6d5100]">
-                300 Interactive Flashcards
+                800 Interactive Flashcards
               </span>
-              <span className="text-xs font-bold text-[#785a00]">Topic 101, Topic 102 & Topic 103 Decks</span>
+              <span className="text-xs font-bold text-[#785a00]">Topics 101, 102, 103, 104, 105, 106, 108 & 109</span>
             </div>
             <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
-              Master System Architecture, Package Management & GNU/Unix Commands
+              Master System Architecture, Commands, Filesystems, Shell, Desktops, Services & Networking
             </h3>
             <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
-              100 cards for Topic 101 (Hardware, Boot, systemd), 100 cards for Topic 102 (LVM, GRUB 2, Debian/RPM packages), and 100 cards for Topic 103 (CLI, text filters, pipes, processes, regex & vi) with 3D flip, audio pronunciation, and exam gotchas.
+              100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands/regex (103), filesystems/FHS (104), shells/scripting (105), X11/desktops/accessibility (106), services/time/logs/MTA/CUPS (108), and IPv4/IPv6/routing/troubleshooting/DNS (109) with 3D flip and exam gotchas.
             </p>
           </div>
         </div>
@@ -282,7 +282,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           className="px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer"
         >
           <Layers className="w-4 h-4" />
-          <span>Launch 300 Flashcards</span>
+          <span>Launch 800 Flashcards</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

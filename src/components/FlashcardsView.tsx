@@ -24,16 +24,19 @@ import {
   Package,
   Terminal,
   Code2,
+  Monitor,
+  Server,
+  Network,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -63,13 +66,24 @@ type FilterObjective =
   | '104.7'
   | '105.1'
   | '105.2'
+  | '106.1'
+  | '106.2'
+  | '106.3'
+  | '108.1'
+  | '108.2'
+  | '108.3'
+  | '108.4'
+  | '109.1'
+  | '109.2'
+  | '109.3'
+  | '109.4'
   | 'starred'
   | 'review';
 
 export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   cards,
   onCardLearned,
-  initialTopic = 105,
+  initialTopic = 109,
 }) => {
   const [selectedTopic, setSelectedTopic] = useState<SelectedTopic>(initialTopic);
   const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-topic');
@@ -166,6 +180,18 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 105 || c.deck.includes('Topic 105') || c.objectiveId?.startsWith('105.')
       );
+    } else if (selectedTopic === 106) {
+      result = result.filter(
+        (c) => c.topicNumber === 106 || c.deck.includes('Topic 106') || c.objectiveId?.startsWith('106.')
+      );
+    } else if (selectedTopic === 108) {
+      result = result.filter(
+        (c) => c.topicNumber === 108 || c.deck.includes('Topic 108') || c.objectiveId?.startsWith('108.')
+      );
+    } else if (selectedTopic === 109) {
+      result = result.filter(
+        (c) => c.topicNumber === 109 || c.deck.includes('Topic 109') || c.objectiveId?.startsWith('109.')
+      );
     }
 
     // Filter by sub-objective / state
@@ -221,6 +247,28 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '105.1');
     } else if (activeDeckFilter === '105.2') {
       result = result.filter((c) => c.objectiveId === '105.2');
+    } else if (activeDeckFilter === '106.1') {
+      result = result.filter((c) => c.objectiveId === '106.1');
+    } else if (activeDeckFilter === '106.2') {
+      result = result.filter((c) => c.objectiveId === '106.2');
+    } else if (activeDeckFilter === '106.3') {
+      result = result.filter((c) => c.objectiveId === '106.3');
+    } else if (activeDeckFilter === '108.1') {
+      result = result.filter((c) => c.objectiveId === '108.1');
+    } else if (activeDeckFilter === '108.2') {
+      result = result.filter((c) => c.objectiveId === '108.2');
+    } else if (activeDeckFilter === '108.3') {
+      result = result.filter((c) => c.objectiveId === '108.3');
+    } else if (activeDeckFilter === '108.4') {
+      result = result.filter((c) => c.objectiveId === '108.4');
+    } else if (activeDeckFilter === '109.1') {
+      result = result.filter((c) => c.objectiveId === '109.1');
+    } else if (activeDeckFilter === '109.2') {
+      result = result.filter((c) => c.objectiveId === '109.2');
+    } else if (activeDeckFilter === '109.3') {
+      result = result.filter((c) => c.objectiveId === '109.3');
+    } else if (activeDeckFilter === '109.4') {
+      result = result.filter((c) => c.objectiveId === '109.4');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -410,8 +458,32 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic105Mastered = topic105Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic106Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 106 || c.deck.includes('Topic 106') || c.objectiveId?.startsWith('106.')),
+    [cards]
+  );
+  const topic106Mastered = topic106Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic108Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 108 || c.deck.includes('Topic 108') || c.objectiveId?.startsWith('108.')),
+    [cards]
+  );
+  const topic108Mastered = topic108Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic109Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 109 || c.deck.includes('Topic 109') || c.objectiveId?.startsWith('109.')),
+    [cards]
+  );
+  const topic109Mastered = topic109Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 105
+    selectedTopic === 109
+      ? 'Topic 109: Networking Fundamentals'
+      : selectedTopic === 108
+      ? 'Topic 108: Essential System Services'
+      : selectedTopic === 106
+      ? 'Topic 106: User Interfaces and Desktops'
+      : selectedTopic === 105
       ? 'Topic 105: Shells and Shell Scripting'
       : selectedTopic === 104
       ? 'Topic 104: Devices, Linux Filesystems, Filesystem Hierarchy Standard'
@@ -424,7 +496,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC-1 Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 105
+    selectedTopic === 109
+      ? '100 Cards • 4 Sub-Objectives (Weight 14)'
+      : selectedTopic === 108
+      ? '100 Cards • 4 Sub-Objectives (Weight 12)'
+      : selectedTopic === 106
+      ? '100 Cards • 3 Sub-Objectives (Weight 4)'
+      : selectedTopic === 105
       ? '100 Cards • 2 Sub-Objectives (Weight 8)'
       : selectedTopic === 104
       ? '100 Cards • 7 Sub-Objectives'
@@ -437,7 +515,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 105
+    selectedTopic === 109
+      ? topic109Mastered
+      : selectedTopic === 108
+      ? topic108Mastered
+      : selectedTopic === 106
+      ? topic106Mastered
+      : selectedTopic === 105
       ? topic105Mastered
       : selectedTopic === 104
       ? topic104Mastered
@@ -450,7 +534,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 105
+    selectedTopic === 109
+      ? topic109Cards.length || 100
+      : selectedTopic === 108
+      ? topic108Cards.length || 100
+      : selectedTopic === 106
+      ? topic106Cards.length || 100
+      : selectedTopic === 105
       ? topic105Cards.length || 100
       : selectedTopic === 104
       ? topic104Cards.length || 100
@@ -470,6 +560,45 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
           <button
+            onClick={() => handleTopicSelect(109)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 109
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Network className="w-4 h-4" />
+            <span>Topic 109 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              New
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(108)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 108
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Server className="w-4 h-4" />
+            <span>Topic 108 (100)</span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(106)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 106
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Monitor className="w-4 h-4" />
+            <span>Topic 106 (100)</span>
+          </button>
+
+          <button
             onClick={() => handleTopicSelect(105)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedTopic === 105
@@ -478,10 +607,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <Code2 className="w-4 h-4" />
-            <span>Topic 105 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              New
-            </span>
+            <span>Topic 105 (100)</span>
           </button>
 
           <button
@@ -561,7 +687,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  {selectedTopic === 105 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
+                  {selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
                   {activeTopicBadge}
@@ -576,7 +702,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -604,9 +730,155 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
 
+            {/* Topic 109 Sub-Objectives */}
+            {selectedTopic === 109 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('109.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '109.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Fundamentals of internet protocols (109.1)"
+                >
+                  109.1 Internet Protocols (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('109.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '109.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Persistent network configuration (109.2)"
+                >
+                  109.2 Network Config (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('109.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '109.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Basic network troubleshooting (109.3)"
+                >
+                  109.3 Troubleshooting (30)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('109.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '109.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Configure client side DNS (109.4)"
+                >
+                  109.4 Client DNS (20)
+                </button>
+              </>
+            )}
+
+            {/* Topic 108 Sub-Objectives */}
+            {selectedTopic === 108 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('108.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '108.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Maintain system time (108.1)"
+                >
+                  108.1 System Time (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('108.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '108.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="System logging (108.2)"
+                >
+                  108.2 System Logging (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('108.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '108.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Mail Transfer Agent (MTA) basics (108.3)"
+                >
+                  108.3 MTA Basics (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('108.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '108.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Manage printers and printing (108.4)"
+                >
+                  108.4 Printing & CUPS (15)
+                </button>
+              </>
+            )}
+
+            {/* Topic 106 Sub-Objectives */}
+            {selectedTopic === 106 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('106.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '106.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Install and configure X11 (106.1)"
+                >
+                  106.1 Install & Config X11 (45)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('106.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '106.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Graphical Desktops (106.2)"
+                >
+                  106.2 Graphical Desktops (30)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('106.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '106.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Accessibility (106.3)"
+                >
+                  106.3 Accessibility (25)
+                </button>
+              </>
+            )}
             {/* Topic 105 Sub-Objectives */}
             {selectedTopic === 105 && (
               <>
@@ -1318,7 +1590,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div className="p-4 border-b border-[#d3c5ab] flex justify-between items-center bg-[#fff8f2] rounded-t-2xl">
               <div>
                 <h3 className="font-bold text-base text-[#201b11]">
-                  {selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
+                  {selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
                 </h3>
                 <p className="text-xs text-[#817660]">
                   Click on any card to jump directly to it ({filteredCards.length} cards available)
