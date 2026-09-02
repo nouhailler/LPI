@@ -27,16 +27,18 @@ import {
   Monitor,
   Server,
   Network,
+  Shield,
+  Activity,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -77,13 +79,18 @@ type FilterObjective =
   | '109.2'
   | '109.3'
   | '109.4'
+  | '110.1'
+  | '110.2'
+  | '110.3'
+  | '200.1'
+  | '200.2'
   | 'starred'
   | 'review';
 
 export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   cards,
   onCardLearned,
-  initialTopic = 109,
+  initialTopic = 200,
 }) => {
   const [selectedTopic, setSelectedTopic] = useState<SelectedTopic>(initialTopic);
   const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-topic');
@@ -192,6 +199,14 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 109 || c.deck.includes('Topic 109') || c.objectiveId?.startsWith('109.')
       );
+    } else if (selectedTopic === 110) {
+      result = result.filter(
+        (c) => c.topicNumber === 110 || c.deck.includes('Topic 110') || c.objectiveId?.startsWith('110.')
+      );
+    } else if (selectedTopic === 200) {
+      result = result.filter(
+        (c) => c.topicNumber === 200 || c.deck.includes('Topic 200') || c.objectiveId?.startsWith('200.')
+      );
     }
 
     // Filter by sub-objective / state
@@ -269,6 +284,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '109.3');
     } else if (activeDeckFilter === '109.4') {
       result = result.filter((c) => c.objectiveId === '109.4');
+    } else if (activeDeckFilter === '110.1') {
+      result = result.filter((c) => c.objectiveId === '110.1');
+    } else if (activeDeckFilter === '110.2') {
+      result = result.filter((c) => c.objectiveId === '110.2');
+    } else if (activeDeckFilter === '110.3') {
+      result = result.filter((c) => c.objectiveId === '110.3');
+    } else if (activeDeckFilter === '200.1') {
+      result = result.filter((c) => c.objectiveId === '200.1');
+    } else if (activeDeckFilter === '200.2') {
+      result = result.filter((c) => c.objectiveId === '200.2');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -476,8 +501,24 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic109Mastered = topic109Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic110Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 110 || c.deck.includes('Topic 110') || c.objectiveId?.startsWith('110.')),
+    [cards]
+  );
+  const topic110Mastered = topic110Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic200Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 200 || c.deck.includes('Topic 200') || c.objectiveId?.startsWith('200.')),
+    [cards]
+  );
+  const topic200Mastered = topic200Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 109
+    selectedTopic === 200
+      ? 'Topic 200: Capacity Planning'
+      : selectedTopic === 110
+      ? 'Topic 110: Security'
+      : selectedTopic === 109
       ? 'Topic 109: Networking Fundamentals'
       : selectedTopic === 108
       ? 'Topic 108: Essential System Services'
@@ -493,10 +534,14 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       ? 'Topic 102: Linux Installation and Package Management'
       : selectedTopic === 101
       ? 'Topic 101: System Architecture'
-      : 'All LPIC-1 Flashcards';
+      : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 109
+    selectedTopic === 200
+      ? '100 Cards • 2 Sub-Objectives (Weight 8)'
+      : selectedTopic === 110
+      ? '100 Cards • 3 Sub-Objectives (Weight 9)'
+      : selectedTopic === 109
       ? '100 Cards • 4 Sub-Objectives (Weight 14)'
       : selectedTopic === 108
       ? '100 Cards • 4 Sub-Objectives (Weight 12)'
@@ -515,7 +560,11 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 109
+    selectedTopic === 200
+      ? topic200Mastered
+      : selectedTopic === 110
+      ? topic110Mastered
+      : selectedTopic === 109
       ? topic109Mastered
       : selectedTopic === 108
       ? topic108Mastered
@@ -534,7 +583,11 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 109
+    selectedTopic === 200
+      ? topic200Cards.length || 100
+      : selectedTopic === 110
+      ? topic110Cards.length || 100
+      : selectedTopic === 109
       ? topic109Cards.length || 100
       : selectedTopic === 108
       ? topic108Cards.length || 100
@@ -560,6 +613,33 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
           <button
+            onClick={() => handleTopicSelect(200)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 200
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+            <span>Topic 200 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(110)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 110
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span>Topic 110 (100)</span>
+          </button>
+
+          <button
             onClick={() => handleTopicSelect(109)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedTopic === 109
@@ -568,10 +648,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <Network className="w-4 h-4" />
-            <span>Topic 109 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              New
-            </span>
+            <span>Topic 109 (100)</span>
           </button>
 
           <button
@@ -667,7 +744,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>All LPIC-1 ({cards.length})</span>
+            <span>All ({cards.length})</span>
           </button>
         </div>
 
@@ -687,7 +764,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  {selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
+                  {selectedTopic === 200 ? 'LPIC-2 Exam 201-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
                   {activeTopicBadge}
@@ -702,7 +779,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -730,8 +807,78 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
+
+            {/* Topic 200 Sub-Objectives */}
+            {selectedTopic === 200 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('200.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '200.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Measure and Troubleshoot Resource Usage (200.1)"
+                >
+                  200.1 Resource Usage (65)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('200.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '200.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Predict Future Resource Needs (200.2)"
+                >
+                  200.2 Forecasting & RRD (35)
+                </button>
+              </>
+            )}
+
+            {/* Topic 110 Sub-Objectives */}
+            {selectedTopic === 110 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('110.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '110.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Perform security administration tasks (110.1)"
+                >
+                  110.1 Security Admin (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('110.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '110.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Setup host security (110.2)"
+                >
+                  110.2 Host Security (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('110.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '110.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Securing data with encryption (110.3)"
+                >
+                  110.3 Encryption (30)
+                </button>
+              </>
+            )}
 
             {/* Topic 109 Sub-Objectives */}
             {selectedTopic === 109 && (
@@ -1590,7 +1737,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div className="p-4 border-b border-[#d3c5ab] flex justify-between items-center bg-[#fff8f2] rounded-t-2xl">
               <div>
                 <h3 className="font-bold text-base text-[#201b11]">
-                  {selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
+                  {selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
                 </h3>
                 <p className="text-xs text-[#817660]">
                   Click on any card to jump directly to it ({filteredCards.length} cards available)

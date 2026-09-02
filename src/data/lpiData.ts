@@ -255,8 +255,10 @@ import { topic105Flashcards } from './topic105Flashcards';
 import { topic106Flashcards } from './topic106Flashcards';
 import { topic108Flashcards } from './topic108Flashcards';
 import { topic109Flashcards } from './topic109Flashcards';
+import { topic110Flashcards } from './topic110Flashcards';
+import { topic200Flashcards } from './topic200Flashcards';
 
-export { topic101Flashcards, topic102Flashcards, topic103Flashcards, topic104Flashcards, topic105Flashcards, topic106Flashcards, topic108Flashcards, topic109Flashcards };
+export { topic101Flashcards, topic102Flashcards, topic103Flashcards, topic104Flashcards, topic105Flashcards, topic106Flashcards, topic108Flashcards, topic109Flashcards, topic110Flashcards, topic200Flashcards };
 
 export const flashcardsData: Flashcard[] = [
   ...topic101Flashcards,
@@ -267,6 +269,8 @@ export const flashcardsData: Flashcard[] = [
   ...topic106Flashcards,
   ...topic108Flashcards,
   ...topic109Flashcards,
+  ...topic110Flashcards,
+  ...topic200Flashcards,
   {
     id: 1,
     deck: 'Linux Essentials',
