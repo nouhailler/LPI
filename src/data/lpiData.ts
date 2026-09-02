@@ -251,14 +251,16 @@ import { topic101Flashcards } from './topic101Flashcards';
 import { topic102Flashcards } from './topic102Flashcards';
 import { topic103Flashcards } from './topic103Flashcards';
 import { topic104Flashcards } from './topic104Flashcards';
+import { topic105Flashcards } from './topic105Flashcards';
 
-export { topic101Flashcards, topic102Flashcards, topic103Flashcards, topic104Flashcards };
+export { topic101Flashcards, topic102Flashcards, topic103Flashcards, topic104Flashcards, topic105Flashcards };
 
 export const flashcardsData: Flashcard[] = [
   ...topic101Flashcards,
   ...topic102Flashcards,
   ...topic103Flashcards,
   ...topic104Flashcards,
+  ...topic105Flashcards,
   {
     id: 1,
     deck: 'Linux Essentials',

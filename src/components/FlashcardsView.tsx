@@ -23,16 +23,17 @@ import {
   Cpu,
   Package,
   Terminal,
+  Code2,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -60,13 +61,15 @@ type FilterObjective =
   | '104.5'
   | '104.6'
   | '104.7'
+  | '105.1'
+  | '105.2'
   | 'starred'
   | 'review';
 
 export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   cards,
   onCardLearned,
-  initialTopic = 104,
+  initialTopic = 105,
 }) => {
   const [selectedTopic, setSelectedTopic] = useState<SelectedTopic>(initialTopic);
   const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-topic');
@@ -159,6 +162,10 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 104 || c.deck.includes('Topic 104') || c.objectiveId?.startsWith('104.')
       );
+    } else if (selectedTopic === 105) {
+      result = result.filter(
+        (c) => c.topicNumber === 105 || c.deck.includes('Topic 105') || c.objectiveId?.startsWith('105.')
+      );
     }
 
     // Filter by sub-objective / state
@@ -210,6 +217,10 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '104.6');
     } else if (activeDeckFilter === '104.7') {
       result = result.filter((c) => c.objectiveId === '104.7');
+    } else if (activeDeckFilter === '105.1') {
+      result = result.filter((c) => c.objectiveId === '105.1');
+    } else if (activeDeckFilter === '105.2') {
+      result = result.filter((c) => c.objectiveId === '105.2');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -368,7 +379,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleFlip, handleGotIt, handleStudyAgain, toggleStarred]);
 
-  // Compute metrics for Topic 101, Topic 102, Topic 103, and Topic 104
+  // Compute metrics for Topic 101, Topic 102, Topic 103, Topic 104, and Topic 105
   const topic101Cards = useMemo(
     () => cards.filter((c) => c.topicNumber === 101 || c.deck.includes('Topic 101') || c.objectiveId?.startsWith('101.')),
     [cards]
@@ -393,8 +404,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic104Mastered = topic104Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic105Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 105 || c.deck.includes('Topic 105') || c.objectiveId?.startsWith('105.')),
+    [cards]
+  );
+  const topic105Mastered = topic105Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 104
+    selectedTopic === 105
+      ? 'Topic 105: Shells and Shell Scripting'
+      : selectedTopic === 104
       ? 'Topic 104: Devices, Linux Filesystems, Filesystem Hierarchy Standard'
       : selectedTopic === 103
       ? 'Topic 103: GNU and Unix Commands'
@@ -402,10 +421,12 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       ? 'Topic 102: Linux Installation and Package Management'
       : selectedTopic === 101
       ? 'Topic 101: System Architecture'
-      : 'All LPIC-1 Exam 101 Flashcards';
+      : 'All LPIC-1 Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 104
+    selectedTopic === 105
+      ? '100 Cards • 2 Sub-Objectives (Weight 8)'
+      : selectedTopic === 104
       ? '100 Cards • 7 Sub-Objectives'
       : selectedTopic === 103
       ? '100 Cards • 8 Sub-Objectives'
@@ -416,7 +437,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 104
+    selectedTopic === 105
+      ? topic105Mastered
+      : selectedTopic === 104
       ? topic104Mastered
       : selectedTopic === 103
       ? topic103Mastered
@@ -427,7 +450,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 104
+    selectedTopic === 105
+      ? topic105Cards.length || 100
+      : selectedTopic === 104
       ? topic104Cards.length || 100
       : selectedTopic === 103
       ? topic103Cards.length || 100
@@ -445,6 +470,21 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
           <button
+            onClick={() => handleTopicSelect(105)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 105
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Code2 className="w-4 h-4" />
+            <span>Topic 105 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              New
+            </span>
+          </button>
+
+          <button
             onClick={() => handleTopicSelect(104)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedTopic === 104
@@ -453,10 +493,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <HardDrive className="w-4 h-4" />
-            <span>Topic 104 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              New
-            </span>
+            <span>Topic 104 (100)</span>
           </button>
 
           <button
@@ -468,7 +505,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <Terminal className="w-4 h-4" />
-            <span>Topic 103 Deck (100)</span>
+            <span>Topic 103 (100)</span>
           </button>
 
           <button
@@ -480,7 +517,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <Package className="w-4 h-4" />
-            <span>Topic 102 Deck (100)</span>
+            <span>Topic 102 (100)</span>
           </button>
 
           <button
@@ -492,7 +529,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <Cpu className="w-4 h-4" />
-            <span>Topic 101 Deck (100)</span>
+            <span>Topic 101 (100)</span>
           </button>
 
           <button
@@ -524,7 +561,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  LPIC-1 Exam 101-500
+                  {selectedTopic === 105 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
                   {activeTopicBadge}
@@ -539,7 +576,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -567,8 +604,37 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
+
+            {/* Topic 105 Sub-Objectives */}
+            {selectedTopic === 105 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('105.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '105.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Customize and use the shell environment (105.1)"
+                >
+                  105.1 Shell Env & Startup (50)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('105.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '105.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Customize or write simple scripts (105.2)"
+                >
+                  105.2 Shell Scripting (50)
+                </button>
+              </>
+            )}
 
             {/* Topic 104 Sub-Objectives */}
             {selectedTopic === 104 && (
@@ -1252,7 +1318,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div className="p-4 border-b border-[#d3c5ab] flex justify-between items-center bg-[#fff8f2] rounded-t-2xl">
               <div>
                 <h3 className="font-bold text-base text-[#201b11]">
-                  {selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
+                  {selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
                 </h3>
                 <p className="text-xs text-[#817660]">
                   Click on any card to jump directly to it ({filteredCards.length} cards available)
