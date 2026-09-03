@@ -29,16 +29,19 @@ import {
   Network,
   Shield,
   Activity,
+  Power,
+  FolderTree,
+  CheckCircle2,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 204 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 204 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -84,13 +87,22 @@ type FilterObjective =
   | '110.3'
   | '200.1'
   | '200.2'
+  | '201.1'
+  | '201.2'
+  | '201.3'
+  | '202.1'
+  | '202.2'
+  | '202.3'
+  | '204.1'
+  | '204.2'
+  | '204.3'
   | 'starred'
   | 'review';
 
 export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   cards,
   onCardLearned,
-  initialTopic = 200,
+  initialTopic = 204,
 }) => {
   const [selectedTopic, setSelectedTopic] = useState<SelectedTopic>(initialTopic);
   const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-topic');
@@ -100,6 +112,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   const [isShuffled, setIsShuffled] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [showGridModal, setShowGridModal] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   // Local persistence for mastered cards and starred cards
   const [masteredCardIds, setMasteredCardIds] = useState<number[]>(() => {
@@ -207,6 +220,18 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 200 || c.deck.includes('Topic 200') || c.objectiveId?.startsWith('200.')
       );
+    } else if (selectedTopic === 201) {
+      result = result.filter(
+        (c) => c.topicNumber === 201 || c.deck.includes('Topic 201') || c.objectiveId?.startsWith('201.')
+      );
+    } else if (selectedTopic === 202) {
+      result = result.filter(
+        (c) => c.topicNumber === 202 || c.deck.includes('Topic 202') || c.objectiveId?.startsWith('202.')
+      );
+    } else if (selectedTopic === 204) {
+      result = result.filter(
+        (c) => c.topicNumber === 204 || c.deck.includes('Topic 204') || c.objectiveId?.startsWith('204.')
+      );
     }
 
     // Filter by sub-objective / state
@@ -294,6 +319,24 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '200.1');
     } else if (activeDeckFilter === '200.2') {
       result = result.filter((c) => c.objectiveId === '200.2');
+    } else if (activeDeckFilter === '201.1') {
+      result = result.filter((c) => c.objectiveId === '201.1');
+    } else if (activeDeckFilter === '201.2') {
+      result = result.filter((c) => c.objectiveId === '201.2');
+    } else if (activeDeckFilter === '201.3') {
+      result = result.filter((c) => c.objectiveId === '201.3');
+    } else if (activeDeckFilter === '202.1') {
+      result = result.filter((c) => c.objectiveId === '202.1');
+    } else if (activeDeckFilter === '202.2') {
+      result = result.filter((c) => c.objectiveId === '202.2');
+    } else if (activeDeckFilter === '202.3') {
+      result = result.filter((c) => c.objectiveId === '202.3');
+    } else if (activeDeckFilter === '204.1') {
+      result = result.filter((c) => c.objectiveId === '204.1');
+    } else if (activeDeckFilter === '204.2') {
+      result = result.filter((c) => c.objectiveId === '204.2');
+    } else if (activeDeckFilter === '204.3') {
+      result = result.filter((c) => c.objectiveId === '204.3');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -307,6 +350,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
         (c) =>
           c.command.toLowerCase().includes(q) ||
           c.definition.toLowerCase().includes(q) ||
+          c.question?.toLowerCase().includes(q) ||
+          c.answer?.toLowerCase().includes(q) ||
           c.category?.toLowerCase().includes(q) ||
           c.example?.toLowerCase().includes(q) ||
           c.examTip?.toLowerCase().includes(q)
@@ -345,6 +390,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   // Card Navigation
   const nextCard = useCallback(() => {
     setIsFlipped(false);
+    setShowHint(false);
     if (totalInDeck === 0) return;
     if (currentIndex < totalInDeck - 1) {
       setCurrentIndex((prev) => prev + 1);
@@ -355,6 +401,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
 
   const prevCard = useCallback(() => {
     setIsFlipped(false);
+    setShowHint(false);
     if (totalInDeck === 0) return;
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
@@ -513,8 +560,32 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic200Mastered = topic200Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic201Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 201 || c.deck.includes('Topic 201') || c.objectiveId?.startsWith('201.')),
+    [cards]
+  );
+  const topic201Mastered = topic201Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic202Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 202 || c.deck.includes('Topic 202') || c.objectiveId?.startsWith('202.')),
+    [cards]
+  );
+  const topic202Mastered = topic202Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic204Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 204 || c.deck.includes('Topic 204') || c.objectiveId?.startsWith('204.')),
+    [cards]
+  );
+  const topic204Mastered = topic204Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 200
+    selectedTopic === 204
+      ? 'Topic 204: Filesystems and Devices'
+      : selectedTopic === 202
+      ? 'Topic 202: System Startup'
+      : selectedTopic === 201
+      ? 'Topic 201: Linux Kernel'
+      : selectedTopic === 200
       ? 'Topic 200: Capacity Planning'
       : selectedTopic === 110
       ? 'Topic 110: Security'
@@ -537,7 +608,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 200
+    selectedTopic === 204
+      ? '100 Cards • 3 Sub-Objectives (Weight 10)'
+      : selectedTopic === 202
+      ? '100 Cards • 3 Sub-Objectives (Weight 11)'
+      : selectedTopic === 201
+      ? '100 Cards • 3 Sub-Objectives (Weight 9)'
+      : selectedTopic === 200
       ? '100 Cards • 2 Sub-Objectives (Weight 8)'
       : selectedTopic === 110
       ? '100 Cards • 3 Sub-Objectives (Weight 9)'
@@ -560,7 +637,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 200
+    selectedTopic === 204
+      ? topic204Mastered
+      : selectedTopic === 202
+      ? topic202Mastered
+      : selectedTopic === 201
+      ? topic201Mastered
+      : selectedTopic === 200
       ? topic200Mastered
       : selectedTopic === 110
       ? topic110Mastered
@@ -583,7 +666,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 200
+    selectedTopic === 204
+      ? topic204Cards.length || 100
+      : selectedTopic === 202
+      ? topic202Cards.length || 100
+      : selectedTopic === 201
+      ? topic201Cards.length || 100
+      : selectedTopic === 200
       ? topic200Cards.length || 100
       : selectedTopic === 110
       ? topic110Cards.length || 100
@@ -613,6 +702,51 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
           <button
+            onClick={() => handleTopicSelect(204)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 204
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <FolderTree className="w-4 h-4" />
+            <span>Topic 204 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(202)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 202
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Power className="w-4 h-4" />
+            <span>Topic 202 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(201)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 201
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Cpu className="w-4 h-4" />
+            <span>Topic 201 (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2
+            </span>
+          </button>
+
+          <button
             onClick={() => handleTopicSelect(200)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedTopic === 200
@@ -621,7 +755,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             }`}
           >
             <Activity className="w-4 h-4" />
-            <span>Topic 200 Deck (100)</span>
+            <span>Topic 200 (100)</span>
             <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
               LPIC-2
             </span>
@@ -764,7 +898,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  {selectedTopic === 200 ? 'LPIC-2 Exam 201-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
+                  {selectedTopic === 200 || selectedTopic === 201 || selectedTopic === 202 ? 'LPIC-2 Exam 201-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
                   {activeTopicBadge}
@@ -779,7 +913,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 204 ? 'Topic 204' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -807,8 +941,131 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 204 ? topic204Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
+
+            {/* Topic 204 Sub-Objectives */}
+            {selectedTopic === 204 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('204.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '204.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Operating the Linux filesystem (204.1) - 35 cards (Weight 3)"
+                >
+                  204.1 Operating FS (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('204.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '204.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Maintaining a Linux filesystem (204.2) - 35 cards (Weight 3)"
+                >
+                  204.2 Maintaining FS (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('204.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '204.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Creating and configuring filesystem options (204.3) - 30 cards (Weight 4)"
+                >
+                  204.3 FS Options & LVM/RAID (30)
+                </button>
+              </>
+            )}
+
+            {/* Topic 202 Sub-Objectives */}
+            {selectedTopic === 202 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('202.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '202.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Customizing SysV-init System Startup (202.1) - 30 cards (Weight 3)"
+                >
+                  202.1 SysV-init (30)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('202.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '202.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Systemd System Startup (202.2) - 38 cards (Weight 4)"
+                >
+                  202.2 Systemd (38)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('202.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '202.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="System Recovery (202.3) - 32 cards (Weight 4)"
+                >
+                  202.3 System Recovery (32)
+                </button>
+              </>
+            )}
+
+            {/* Topic 201 Sub-Objectives */}
+            {selectedTopic === 201 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('201.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '201.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Kernel Components (201.1) - 25 cards (Weight 2)"
+                >
+                  201.1 Components (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('201.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '201.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Compiling a Kernel (201.2) - 35 cards (Weight 3)"
+                >
+                  201.2 Compiling (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('201.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '201.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Kernel Runtime Management & Troubleshooting (201.3) - 40 cards (Weight 4)"
+                >
+                  201.3 Runtime & Troubleshooting (40)
+                </button>
+              </>
+            )}
 
             {/* Topic 200 Sub-Objectives */}
             {selectedTopic === 200 && (
@@ -1405,11 +1662,21 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <input
             type="text"
             placeholder={
-              selectedTopic === 102
+              selectedTopic === 202
+                ? 'Search systemctl, journalctl, inittab, grub-install, chroot, efibootmgr...'
+                : selectedTopic === 201
+                ? 'Search vmlinuz, make menuconfig, modprobe, sysctl, udev, DKMS...'
+                : selectedTopic === 200
+                ? 'Search iostat, sar, vmstat, collectd, rrdtool, Cacti, nc...'
+                : selectedTopic === 110
+                ? 'Search sudo, iptables, ufw, gpg, ssh-keygen, fail2ban...'
+                : selectedTopic === 109
+                ? 'Search ip, nmcli, ss, dig, traceroute, /etc/resolv.conf...'
+                : selectedTopic === 102
                 ? 'Search dpkg, rpm, ldd, fstab, LVM, cloud-init...'
                 : selectedTopic === 101
                 ? 'Search lsmod, GRUB, systemd, udev, dmesg...'
-                : 'Search all LPIC-1 commands, files, or concepts...'
+                : 'Search all LPIC commands, parameters, files, or concepts...'
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -1469,7 +1736,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           </button>
         </div>
       ) : (
-        <div className="w-full max-w-xl flex flex-col items-center">
+        <div className="w-full max-w-2xl flex flex-col items-center">
           {/* Deck Progress Bar & Counter */}
           <div className="w-full flex flex-col gap-1.5 mb-3">
             <div className="flex justify-between items-center text-xs font-bold text-[#495e8a]">
@@ -1495,180 +1762,255 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             </div>
           </div>
 
-          {/* Interactive Flashcard with 3D Flip */}
-          <div
-            className="w-full min-h-[380px] md:min-h-[420px] perspective-1000 cursor-pointer select-none relative group"
-            onClick={handleFlip}
-          >
-            {/* Layered stack visual effect */}
-            <div className="absolute -bottom-2 inset-x-2 h-full bg-[#f2e7d6] rounded-2xl border border-[#d3c5ab] -z-10 shadow-xs" />
-            <div className="absolute -bottom-4 inset-x-4 h-full bg-[#ece1d0] rounded-2xl border border-[#d3c5ab] -z-20 shadow-xs" />
+          {/* Interactive Flashcard with 3D Flip (Auto-sizing, no scrollbar needed) */}
+          <div className="w-full relative select-none">
+            {/* Layered stack visual effect behind */}
+            <div className="absolute -bottom-2 inset-x-2 h-full bg-[#f2e7d6] rounded-2xl border border-[#d3c5ab] -z-10 shadow-xs pointer-events-none" />
+            <div className="absolute -bottom-4 inset-x-4 h-full bg-[#ece1d0] rounded-2xl border border-[#d3c5ab] -z-20 shadow-xs pointer-events-none" />
 
-            {/* Flipping card container */}
             <div
-              className={`w-full h-full relative transition-transform duration-500 transform-style-3d ${
-                isFlipped ? 'rotate-y-180' : ''
-              }`}
+              className="w-full perspective-1000 cursor-pointer group"
+              onClick={handleFlip}
             >
-              {/* FRONT FACE */}
-              <div className="absolute inset-0 w-full h-full backface-hidden rounded-2xl border border-[#d3c5ab] bg-[#fff8f2] shadow-sm flex flex-col justify-between p-6 md:p-8">
-                {/* Front Top Bar */}
-                <div className="flex justify-between items-center text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono uppercase font-bold text-[11px] bg-[#785a00] text-white px-2.5 py-0.5 rounded-md shadow-2xs">
-                      {currentCard?.objectiveId ? `LPIC-1: ${currentCard.objectiveId}` : 'LPIC-1'}
-                    </span>
-                    {currentCard?.difficulty && (
-                      <span className="text-[10px] font-bold text-[#817660] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                        {currentCard.difficulty}
+              {!isFlipped ? (
+                /* FRONT FACE */
+                <div
+                  key={`front-${currentCard?.id}`}
+                  className="w-full min-h-[380px] rounded-2xl border border-[#d3c5ab] bg-[#fff8f2] shadow-sm flex flex-col justify-between p-5 sm:p-7 md:p-8 animate-card-flip"
+                >
+                  {/* Front Top Bar */}
+                  <div className="flex justify-between items-center text-xs mb-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono uppercase font-bold text-[11px] bg-[#785a00] text-white px-2.5 py-0.5 rounded-md shadow-2xs">
+                        {currentCard?.topicNumber && currentCard.topicNumber >= 200
+                          ? `LPIC-2: ${currentCard.objectiveId || currentCard.topicNumber}`
+                          : currentCard?.objectiveId
+                          ? `LPIC-1: ${currentCard.objectiveId}`
+                          : 'LPIC-1'}
                       </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={toggleStarred}
-                      className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                        isCurrentStarred
-                          ? 'bg-[#ffc20e] text-[#6d5100] border-[#ffc20e]'
-                          : 'bg-white text-[#817660] border-[#d3c5ab] hover:text-[#201b11]'
-                      }`}
-                      title={isCurrentStarred ? 'Bookmarked' : 'Bookmark Card'}
-                    >
-                      {isCurrentStarred ? (
-                        <BookmarkCheck className="w-4 h-4 fill-current" />
-                      ) : (
-                        <Bookmark className="w-4 h-4" />
-                      )}
-                    </button>
-
-                    <button
-                      onClick={(e) => handleSpeak(currentCard?.command || '', e)}
-                      className="p-1.5 rounded-lg bg-white border border-[#d3c5ab] text-[#817660] hover:text-[#201b11] transition-colors cursor-pointer"
-                      title="Pronounce aloud"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Front Center: The Concept / Command Name */}
-                <div className="flex-grow flex flex-col items-center justify-center my-6 text-center">
-                  <span className="font-mono font-bold text-2xl md:text-3xl text-[#1A1A1A] bg-[#ece1d0] px-6 py-3.5 rounded-xl border border-[#d3c5ab] shadow-2xs group-hover:border-[#785a00] transition-colors max-w-full break-words">
-                    {currentCard?.command}
-                  </span>
-
-                  {currentCard?.category && (
-                    <span className="text-xs text-[#817660] font-semibold mt-3">
-                      Category: {currentCard.category}
-                    </span>
-                  )}
-                </div>
-
-                {/* Front Footer */}
-                <div className="flex justify-between items-center text-xs text-[#817660]">
-                  <div className="flex items-center gap-1.5">
-                    {isCurrentMastered ? (
-                      <span className="text-[#28A745] font-bold flex items-center gap-1 text-[11px] bg-[#28A745]/10 px-2 py-0.5 rounded">
-                        <Check className="w-3.5 h-3.5" /> Mastered
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-[#817660]">Tap card to view answer</span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1 text-[#785a00] font-bold">
-                    <Hand className="w-4 h-4 animate-bounce" />
-                    <span>Flip card</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* BACK FACE */}
-              <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl border border-[#d3c5ab] bg-[#ffffff] shadow-sm flex flex-col justify-between p-6 md:p-8 overflow-y-auto">
-                {/* Back Top Bar */}
-                <div className="flex justify-between items-center text-xs text-[#817660]">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-[10px] uppercase text-[#28A745] bg-[#28A745]/10 px-2 py-0.5 rounded border border-[#28A745]/20">
-                      Definition & Syntax
-                    </span>
-                    <span className="font-mono text-[10px] text-[#785a00] font-bold">
-                      {currentCard?.command}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={(e) => handleSpeak(currentCard?.definition || '', e)}
-                      className="p-1 rounded-md bg-[#f8ecdb] text-[#785a00] hover:bg-[#ece1d0] cursor-pointer"
-                      title="Read explanation aloud"
-                    >
-                      <Volume2 className="w-3.5 h-3.5" />
-                    </button>
-                    <Sparkles className="w-4 h-4 text-[#ffc20e]" />
-                  </div>
-                </div>
-
-                {/* Back Content Body */}
-                <div className="flex-grow flex flex-col gap-3 my-3 text-left">
-                  {/* Definition */}
-                  <h3 className="font-bold text-sm md:text-base text-[#201b11] leading-snug">
-                    {currentCard?.definition}
-                  </h3>
-
-                  {/* Code Example Box */}
-                  {currentCard?.example && (
-                    <div className="bg-[#fef2e1] p-3 rounded-xl border border-[#d3c5ab] w-full">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#495e8a]">
-                          Live Command Example
+                      {currentCard?.difficulty && (
+                        <span className="text-[10px] font-bold text-[#817660] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
+                          {currentCard.difficulty}
                         </span>
-                        <button
-                          onClick={(e) => handleCopyCode(currentCard.example, e)}
-                          className="text-[10px] font-bold text-[#785a00] hover:underline flex items-center gap-1 cursor-pointer bg-white px-2 py-0.5 rounded border border-[#d3c5ab]"
-                        >
-                          {copiedCode ? (
-                            <>
-                              <CheckCheck className="w-3 h-3 text-[#28A745]" /> Copied!
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3 h-3" /> Copy
-                            </>
-                          )}
-                        </button>
-                      </div>
-                      <code className="font-mono text-xs md:text-sm text-[#1A1A1A] font-bold block bg-[#ffffff] p-2 rounded-lg border border-[#d3c5ab]/60 overflow-x-auto whitespace-pre-wrap">
-                        {currentCard.example}
-                      </code>
-                      <p className="text-xs text-[#4f4632] mt-1.5 leading-relaxed">
-                        {currentCard.exampleExplanation}
-                      </p>
+                      )}
+                      <span className="text-[10px] font-bold text-[#785a00] bg-[#fff4db] px-2 py-0.5 rounded border border-[#ffc20e]/60 flex items-center gap-1">
+                        <HelpCircle className="w-3 h-3 text-[#785a00]" />
+                        Challenge
+                      </span>
                     </div>
-                  )}
 
-                  {/* High-Yield Exam Tip */}
-                  {currentCard?.examTip && (
-                    <div className="bg-[#fff9e6] border border-[#ffc20e] p-2.5 rounded-xl flex items-start gap-2 text-xs">
-                      <Lightbulb className="w-4 h-4 text-[#785a00] flex-shrink-0 mt-0.5" />
-                      <p className="text-[#6d5100] leading-snug">
-                        <strong>Exam Tip:</strong> {currentCard.examTip}
-                      </p>
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={toggleStarred}
+                        className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                          isCurrentStarred
+                            ? 'bg-[#ffc20e] text-[#6d5100] border-[#ffc20e]'
+                            : 'bg-white text-[#817660] border-[#d3c5ab] hover:text-[#201b11]'
+                        }`}
+                        title={isCurrentStarred ? 'Bookmarked' : 'Bookmark Card'}
+                      >
+                        {isCurrentStarred ? (
+                          <BookmarkCheck className="w-4 h-4 fill-current" />
+                        ) : (
+                          <Bookmark className="w-4 h-4" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={(e) => handleSpeak(currentCard?.question || currentCard?.command || '', e)}
+                        className="p-1.5 rounded-lg bg-white border border-[#d3c5ab] text-[#817660] hover:text-[#201b11] transition-colors cursor-pointer"
+                        title="Pronounce question aloud"
+                      >
+                        <Volume2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  )}
-                </div>
-
-                {/* Back Footer */}
-                <div className="flex justify-between items-center text-xs text-[#817660] pt-2 border-t border-[#d3c5ab]/40">
-                  <div className="flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-[#f8ecdb] border border-[#d3c5ab] rounded text-[10px] font-mono">
-                      Space
-                    </kbd>
-                    <span className="text-[10px]">to flip</span>
                   </div>
-                  <span className="text-[11px] font-semibold text-[#785a00]">Tap to flip back</span>
+
+                  {/* Front Center: The Exam Question / Challenge */}
+                  <div className="flex-grow flex flex-col items-center justify-center my-6 text-center px-2">
+                    <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fef2e1] border border-[#d3c5ab] text-[11px] font-bold text-[#785a00]">
+                      <HelpCircle className="w-3.5 h-3.5 text-[#785a00]" />
+                      <span>LPI Exam Question / Challenge</span>
+                    </div>
+
+                    {/* The specific question */}
+                    <h2 className="font-bold text-base sm:text-lg md:text-xl text-[#1A1A1A] leading-relaxed max-w-xl mb-3">
+                      {currentCard?.question
+                        ? currentCard.question
+                        : `What is the syntax, key options, and purpose of the "${currentCard?.command}" command in Linux?`}
+                    </h2>
+
+                    {currentCard?.category && (
+                      <span className="text-xs text-[#817660] font-semibold bg-white/80 px-2.5 py-1 rounded-md border border-[#d3c5ab]/60">
+                        Objective Area: {currentCard.category}
+                      </span>
+                    )}
+
+                    {/* Hint peek toggle */}
+                    <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+                      {showHint ? (
+                        <div className="inline-flex items-center gap-2 text-xs bg-[#ece1d0] text-[#785a00] font-mono font-bold px-3 py-1.5 rounded-lg border border-[#d3c5ab] shadow-2xs">
+                          <Lightbulb className="w-3.5 h-3.5 text-[#ffc20e] flex-shrink-0" />
+                          <span>Command Clue: <strong className="text-[#1A1A1A]">{currentCard?.command}</strong></span>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowHint(true)}
+                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#817660] hover:text-[#785a00] px-2.5 py-1 rounded-lg bg-white/80 hover:bg-white border border-[#d3c5ab] transition-colors cursor-pointer"
+                        >
+                          <Lightbulb className="w-3.5 h-3.5 text-[#ffc20e]" />
+                          <span>Show Command Clue</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Front Footer */}
+                  <div className="flex justify-between items-center text-xs text-[#817660] pt-2 border-t border-[#d3c5ab]/40">
+                    <div className="flex items-center gap-1.5">
+                      {isCurrentMastered ? (
+                        <span className="text-[#28A745] font-bold flex items-center gap-1 text-[11px] bg-[#28A745]/10 px-2 py-0.5 rounded">
+                          <Check className="w-3.5 h-3.5" /> Mastered
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-[#817660]">Tap card to reveal answer</span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 text-[#785a00] font-bold">
+                      <Hand className="w-4 h-4 animate-bounce" />
+                      <span>Tap to view answer</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* BACK FACE (Completely displayed answer, zero scrollbar needed) */
+                <div
+                  key={`back-${currentCard?.id}`}
+                  className="w-full min-h-[380px] rounded-2xl border border-[#d3c5ab] bg-white shadow-sm flex flex-col justify-between p-5 sm:p-7 md:p-8 animate-card-flip"
+                >
+                  {/* Back Top Bar */}
+                  <div className="flex justify-between items-center text-xs text-[#817660] mb-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-[10px] uppercase text-[#28A745] bg-[#28A745]/10 px-2.5 py-1 rounded-md border border-[#28A745]/20 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#28A745]" />
+                        Correct Answer & Solution
+                      </span>
+                      <span className="font-mono text-xs text-[#785a00] font-bold bg-[#f8ecdb] px-2.5 py-0.5 rounded border border-[#d3c5ab]">
+                        {currentCard?.command}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={(e) => handleSpeak(currentCard?.answer || currentCard?.definition || '', e)}
+                        className="p-1.5 rounded-lg bg-white border border-[#d3c5ab] text-[#785a00] hover:bg-[#f8ecdb] transition-colors cursor-pointer"
+                        title="Read answer aloud"
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                      </button>
+                      <Sparkles className="w-4 h-4 text-[#ffc20e]" />
+                    </div>
+                  </div>
+
+                  {/* Back Content Body - Completely visible, structured naturally */}
+                  <div className="flex-grow flex flex-col gap-3 my-2 text-left">
+                    {/* Primary Answer & Explanation */}
+                    {currentCard?.answer ? (
+                      <>
+                        <div className="bg-[#f0f9f1] border border-[#28A745]/30 p-3 rounded-xl shadow-2xs">
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1e7e34] mb-1">
+                            <Check className="w-3.5 h-3.5 text-[#28A745]" />
+                            <span>Direct Answer:</span>
+                          </div>
+                          <p className="font-mono text-xs sm:text-sm font-bold text-[#1A1A1A] bg-white p-2.5 rounded-lg border border-[#28A745]/20 leading-relaxed break-words">
+                            {currentCard.answer}
+                          </p>
+                        </div>
+
+                        {currentCard?.definition && currentCard.definition !== currentCard.answer && (
+                          <div className="flex flex-col gap-1 bg-[#fff8f2] p-2.5 rounded-xl border border-[#d3c5ab]/60">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#785a00]">
+                              Detailed Explanation
+                            </span>
+                            <p className="font-medium text-xs sm:text-sm text-[#201b11] leading-relaxed">
+                              {currentCard.definition}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="bg-[#f0f9f1] border border-[#28A745]/30 p-3.5 rounded-xl shadow-2xs">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1e7e34] mb-1.5">
+                          <Check className="w-3.5 h-3.5 text-[#28A745]" />
+                          <span>Core Answer & Concept:</span>
+                        </div>
+                        <p className="text-xs sm:text-sm font-semibold text-[#1A1A1A] leading-relaxed">
+                          {currentCard?.definition}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Code Example Box */}
+                    {currentCard?.example && (
+                      <div className="bg-[#fef2e1] p-3 rounded-xl border border-[#d3c5ab] w-full">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#495e8a]">
+                            Live Command Example
+                          </span>
+                          <button
+                            onClick={(e) => handleCopyCode(currentCard.example, e)}
+                            className="text-[10px] font-bold text-[#785a00] hover:underline flex items-center gap-1 cursor-pointer bg-white px-2 py-0.5 rounded border border-[#d3c5ab]"
+                          >
+                            {copiedCode ? (
+                              <>
+                                <CheckCheck className="w-3 h-3 text-[#28A745]" /> Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" /> Copy
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <code className="font-mono text-xs text-[#1A1A1A] font-bold block bg-white p-2 rounded-lg border border-[#d3c5ab]/60 overflow-x-auto whitespace-pre-wrap break-all">
+                          {currentCard.example}
+                        </code>
+                        {currentCard.exampleExplanation && (
+                          <p className="text-xs text-[#4f4632] mt-1.5 leading-relaxed">
+                            {currentCard.exampleExplanation}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* High-Yield Exam Tip */}
+                    {currentCard?.examTip && (
+                      <div className="bg-[#fff9e6] border border-[#ffc20e] p-2.5 rounded-xl flex items-start gap-2 text-xs">
+                        <Lightbulb className="w-4 h-4 text-[#785a00] flex-shrink-0 mt-0.5" />
+                        <p className="text-[#6d5100] leading-snug">
+                          <strong>Exam Tip:</strong> {currentCard.examTip}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Back Footer */}
+                  <div className="flex justify-between items-center text-xs text-[#817660] pt-2 border-t border-[#d3c5ab]/40 mt-1">
+                    <div className="flex items-center gap-1">
+                      <kbd className="px-1.5 py-0.5 bg-[#f8ecdb] border border-[#d3c5ab] rounded text-[10px] font-mono">
+                        Space
+                      </kbd>
+                      <span className="text-[10px]">to flip</span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-[#785a00] flex items-center gap-1">
+                      <RotateCw className="w-3 h-3" />
+                      Tap card to flip back
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -106,6 +106,8 @@ export interface Flashcard {
   definition: string;
   example: string;
   exampleExplanation: string;
+  question?: string;
+  answer?: string;
   objectiveId?: string;
   topicNumber?: number;
   category?: string;
