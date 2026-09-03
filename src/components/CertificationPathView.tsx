@@ -100,7 +100,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
               <img
                 alt="LPIC-1 Badge"
                 className="w-full h-full object-contain"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbOhdrjtM5GESOO_G3NptEHGSY9JxAvXjpHZ67Z9T1_EFVVeMa2S7VVikLqRsW0HmGlO12TrKVAJ4-A91bsR0wNKxAoHTH8SFtFK-OP2X4iunJIUfIkdrmGedPmMl-qg5pB3VNp0vd5ChGR8-bS-bKZQ4F8cX-konp-PHlepO4F5GxWU139c8kBlPq4sLfrFaFz7Hu_UvP71eiOJwN1wjS-03sXoMH5Gkry-YacArysYMHEZkF4iRX"
+                src="/lpic-1.jpg"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbOhdrjtM5GESOO_G3NptEHGSY9JxAvXjpHZ67Z9T1_EFVVeMa2S7VVikLqRsW0HmGlO12TrKVAJ4-A91bsR0wNKxAoHTH8SFtFK-OP2X4iunJIUfIkdrmGedPmMl-qg5pB3VNp0vd5ChGR8-bS-bKZQ4F8cX-konp-PHlepO4F5GxWU139c8kBlPq4sLfrFaFz7Hu_UvP71eiOJwN1wjS-03sXoMH5Gkry-YacArysYMHEZkF4iRX') {
+                    target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbOhdrjtM5GESOO_G3NptEHGSY9JxAvXjpHZ67Z9T1_EFVVeMa2S7VVikLqRsW0HmGlO12TrKVAJ4-A91bsR0wNKxAoHTH8SFtFK-OP2X4iunJIUfIkdrmGedPmMl-qg5pB3VNp0vd5ChGR8-bS-bKZQ4F8cX-konp-PHlepO4F5GxWU139c8kBlPq4sLfrFaFz7Hu_UvP71eiOJwN1wjS-03sXoMH5Gkry-YacArysYMHEZkF4iRX';
+                  }
+                }}
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -222,7 +228,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
               <img
                 alt="LPIC-2 Badge"
                 className="w-full h-full object-contain"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4"
+                src="/lpic-2.jpg"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4') {
+                    target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4';
+                  }
+                }}
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -297,7 +309,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
               <img
                 alt="LPIC-3 Badge"
                 className="w-full h-full object-contain"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB"
+                src="/lpic-3.jpg"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB') {
+                    target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB';
+                  }
+                }}
                 referrerPolicy="no-referrer"
               />
             </div>

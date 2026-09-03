@@ -18,7 +18,7 @@ export const certificationTiers: ExamTier[] = [
     name: 'Linux Essentials',
     subtitle: 'Fundamentals of Linux systems and open source.',
     levelTag: 'ENTRY LEVEL',
-    badgeUrl: 'https://lh3.googleusercontent.com/aida/AEtjO1U5DBNKJUzD2Ha0gk41iL2nvO5rW0yi6Sy7UK6ytIDKhlbXzvG8V1mcVapLclzooC1go_PYSvv5ecdREVEtfkLC9at0iiftyiovOhoY-gw0T275yDtbuK8mFkmcfJa7qU8resm2z1meK2fXvPDCFxP9inY1L_8k3tevnC7Ar1mRTQRNnPvJMc0DgqvDxFOdDeyNKRaJozO2lDF5rgE8pH7HERVsd5H-s3khKx3yI7ral3ieAzJKFhv_-oY',
+    badgeUrl: '/app-logo.jpg',
     status: 'passed',
     description: 'Validates fundamental understanding of the Linux operating system, command line navigation, and open source philosophy.',
     validity: 'Lifetime',
@@ -40,7 +40,7 @@ export const certificationTiers: ExamTier[] = [
     name: 'LPIC-1: Linux Administrator',
     subtitle: 'System Administrator',
     levelTag: 'ACTIVE PREPARATION',
-    badgeUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbOhdrjtM5GESOO_G3NptEHGSY9JxAvXjpHZ67Z9T1_EFVVeMa2S7VVikLqRsW0HmGlO12TrKVAJ4-A91bsR0wNKxAoHTH8SFtFK-OP2X4iunJIUfIkdrmGedPmMl-qg5pB3VNp0vd5ChGR8-bS-bKZQ4F8cX-konp-PHlepO4F5GxWU139c8kBlPq4sLfrFaFz7Hu_UvP71eiOJwN1wjS-03sXoMH5Gkry-YacArysYMHEZkF4iRX',
+    badgeUrl: '/lpic-1.jpg',
     status: 'in_progress',
     description: 'Validate your ability to perform maintenance tasks on the command line, install and configure a computer running Linux and configure basic networking.',
     validity: '5 Years',
@@ -71,7 +71,7 @@ export const certificationTiers: ExamTier[] = [
     name: 'LPIC-2: Linux Engineer',
     subtitle: 'Linux Engineer',
     levelTag: 'ADVANCED',
-    badgeUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4',
+    badgeUrl: '/lpic-2.jpg',
     status: 'locked',
     description: 'Administer small to medium-sized mixed networks, implement network services (HTTP, DNS, DHCP, SSH), security, and storage.',
     validity: '5 Years',
@@ -102,7 +102,7 @@ export const certificationTiers: ExamTier[] = [
     name: 'LPIC-3: Enterprise Professional',
     subtitle: 'Mixed Environments',
     levelTag: 'ENTERPRISE',
-    badgeUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB',
+    badgeUrl: '/lpic-3.jpg',
     status: 'locked',
     description: 'Highest level certification for enterprise-level professionals covering Mixed Environments, Security, Virtualization and High Availability.',
     validity: '5 Years',
@@ -259,7 +259,11 @@ import { topic110Flashcards } from './topic110Flashcards';
 import { topic200Flashcards } from './topic200Flashcards';
 import { topic201Flashcards } from './topic201Flashcards';
 import { topic202Flashcards } from './topic202Flashcards';
+import { topic203Flashcards } from './topic203Flashcards';
 import { topic204Flashcards } from './topic204Flashcards';
+import { topic205Flashcards } from './topic205Flashcards';
+import { topic206Flashcards } from './topic206Flashcards';
+import { topic207Flashcards } from './topic207Flashcards';
 
 export {
   topic101Flashcards,
@@ -274,7 +278,11 @@ export {
   topic200Flashcards,
   topic201Flashcards,
   topic202Flashcards,
+  topic203Flashcards,
   topic204Flashcards,
+  topic205Flashcards,
+  topic206Flashcards,
+  topic207Flashcards,
 };
 
 export const flashcardsData: Flashcard[] = [
@@ -290,7 +298,11 @@ export const flashcardsData: Flashcard[] = [
   ...topic200Flashcards,
   ...topic201Flashcards,
   ...topic202Flashcards,
+  ...topic203Flashcards,
   ...topic204Flashcards,
+  ...topic205Flashcards,
+  ...topic206Flashcards,
+  ...topic207Flashcards,
   {
     id: 1,
     deck: 'Linux Essentials',

@@ -953,10 +953,10 @@ export const lpic2TopicsData: LPICTopic[] = [
     id: 'topic-206',
     topicNumber: 206,
     title: 'System Maintenance',
-    totalWeight: 5,
+    totalWeight: 6,
     examId: 'exam-201',
     certification: 'lpic-2',
-    description: 'Compiling software from source, patch management, and backup operations.',
+    description: 'Compiling software from source, patch management, backup operations, and user notifications.',
     objectives: [
       {
         id: '206.1',
@@ -1052,6 +1052,56 @@ export const lpic2TopicsData: LPICTopic[] = [
             ],
             correctIndex: 0,
             explanation: 'Incremental archives only data modified since the previous backup; differential captures all modifications since the initial full archive.'
+          }
+        ]
+      },
+      {
+        id: '206.3',
+        title: 'Notify Users on System-Related Issues',
+        weight: 1,
+        description: 'Candidates should be able to automate and manage user notifications, broadcast emergency maintenance messages, and restrict unauthorized logins during maintenance windows.',
+        keyKnowledgeAreas: [
+          'Broadcast messages to active terminals with wall and write',
+          'Configure login banners with /etc/issue (pre-login) and /etc/issue.net (remote pre-login)',
+          'Configure message of the day with /etc/motd and /etc/update-motd.d/ dynamic scripts',
+          'Prevent non-root logins during maintenance with /etc/nologin and systemd-inhibit'
+        ],
+        termsAndUtilities: [
+          'wall', 'write', 'mesg', 'shutdown', 'systemd-inhibit', 'mail', 'mailx'
+        ],
+        filesAndPaths: [
+          '/etc/issue',
+          '/etc/issue.net',
+          '/etc/motd',
+          '/etc/update-motd.d/',
+          '/etc/nologin',
+          '/var/run/nologin'
+        ],
+        keyCommands: [
+          {
+            command: 'wall "System going down for kernel upgrade in 15 minutes. Save work."',
+            description: 'Broadcast urgent message to all logged-in terminals via terminal write permissions',
+            example: 'Broadcast message from root@server (pts/0) (Thu Sep 3 10:00:00 2026):\nSystem going down for kernel upgrade in 15 minutes. Save work.',
+            explanation: 'Sends text directly to all open pts and tty devices that have mesg y enabled.'
+          },
+          {
+            command: 'echo "Scheduled maintenance in progress until 04:00 UTC." > /etc/nologin',
+            description: 'Block all non-root logins displaying the custom notification text',
+            example: 'Connection closed by 192.168.1.100 port 22\nScheduled maintenance in progress until 04:00 UTC.',
+            explanation: 'pam_nologin intercepts auth and rejects non-root logins, printing the file contents.'
+          }
+        ],
+        studyNotes: [
+          '/etc/issue is shown BEFORE local login; /etc/issue.net before remote SSH login (requires Banner in sshd_config).',
+          '/etc/motd is displayed AFTER successful user authentication.',
+          'systemd-inhibit locks suspend/shutdown while critical jobs or backups run.'
+        ],
+        quickQuestions: [
+          {
+            question: 'Which file is read by pam_nologin to display a message to non-root users and prevent them from logging in during maintenance?',
+            options: ['/etc/issue', '/etc/motd', '/etc/nologin', '/etc/shutdown.msg'],
+            correctIndex: 2,
+            explanation: '/etc/nologin blocks non-root users from authenticating and displays its contents upon rejection.'
           }
         ]
       }

@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Cpu,
   Database,
+  Network,
   Terminal,
   FileCode,
   Flame,
@@ -26,7 +27,8 @@ import {
   Award,
   ChevronDown,
   Settings,
-  RefreshCw
+  RefreshCw,
+  Wrench,
 } from 'lucide-react';
 import { TabType, UserStats } from '../types';
 import { CURRENT_APP_VERSION, CURRENT_RELEASE_DATE } from '../utils/updateService';
@@ -328,6 +330,15 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           keywords: ['systemd', 'targets', 'units', 'recovery', 'grub2', 'dracut'],
         },
         {
+          id: 'topic-203',
+          title: 'Topic 203: Filesystem and Devices',
+          subtitle: 'ext4/XFS/Btrfs maintenance, autofs automounting, swap tuning, FUSE/ZFS',
+          icon: Database,
+          badge: 'Weight 8',
+          action: () => onSelectLearningTopic('topic-203'),
+          keywords: ['fstab', 'autofs', 'ext4', 'xfs', 'btrfs', 'swap', 'fuse', 'zfs', 'smartctl'],
+        },
+        {
           id: 'topic-204',
           title: 'Topic 204: Advanced Storage & LVM',
           subtitle: 'LVM (PV/VG/LV), Software RAID (mdadm), SMART disk diagnostics',
@@ -335,6 +346,24 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           badge: 'Weight 11',
           action: () => onSelectLearningTopic('topic-204'),
           keywords: ['lvm', 'pvcreate', 'vgcreate', 'lvcreate', 'raid', 'mdadm', 'smartctl'],
+        },
+        {
+          id: 'topic-205',
+          title: 'Topic 205: Network Configuration',
+          subtitle: 'Basic & advanced IP configuration, bonding, wireless, routing & troubleshooting',
+          icon: Network,
+          badge: 'Weight 11',
+          action: () => onSelectLearningTopic('topic-205'),
+          keywords: ['network', 'ip', 'route', 'bonding', 'bridge', 'vlan', 'wpa_supplicant', 'tcpdump', 'wireshark', 'nc'],
+        },
+        {
+          id: 'topic-206',
+          title: 'Topic 206: System Maintenance',
+          subtitle: 'Source compilation, patch management, backup strategies & user notifications',
+          icon: Wrench,
+          badge: 'Weight 6',
+          action: () => onSelectLearningTopic('topic-206'),
+          keywords: ['make', 'cmake', 'patch', 'ldconfig', 'tar', 'rsync', 'dd', 'cpio', 'wall', 'shutdown', 'issue', 'motd', 'nologin'],
         },
         {
           id: 'topic-207',

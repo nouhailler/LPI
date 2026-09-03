@@ -160,7 +160,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <img
                   alt="LPIC-1 Logo"
                   className="h-full object-contain mix-blend-multiply transition-transform group-hover:scale-105"
-                  src="https://lh3.googleusercontent.com/aida/AEtjO1U5DBNKJUzD2Ha0gk41iL2nvO5rW0yi6Sy7UK6ytIDKhlbXzvG8V1mcVapLclzooC1go_PYSvv5ecdREVEtfkLC9at0iiftyiovOhoY-gw0T275yDtbuK8mFkmcfJa7qU8resm2z1meK2fXvPDCFxP9inY1L_8k3tevnC7Ar1mRTQRNnPvJMc0DgqvDxFOdDeyNKRaJozO2lDF5rgE8pH7HERVsd5H-s3khKx3yI7ral3ieAzJKFhv_-oY"
+                  src="/lpic-1.jpg"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbOhdrjtM5GESOO_G3NptEHGSY9JxAvXjpHZ67Z9T1_EFVVeMa2S7VVikLqRsW0HmGlO12TrKVAJ4-A91bsR0wNKxAoHTH8SFtFK-OP2X4iunJIUfIkdrmGedPmMl-qg5pB3VNp0vd5ChGR8-bS-bKZQ4F8cX-konp-PHlepO4F5GxWU139c8kBlPq4sLfrFaFz7Hu_UvP71eiOJwN1wjS-03sXoMH5Gkry-YacArysYMHEZkF4iRX') {
+                      target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbOhdrjtM5GESOO_G3NptEHGSY9JxAvXjpHZ67Z9T1_EFVVeMa2S7VVikLqRsW0HmGlO12TrKVAJ4-A91bsR0wNKxAoHTH8SFtFK-OP2X4iunJIUfIkdrmGedPmMl-qg5pB3VNp0vd5ChGR8-bS-bKZQ4F8cX-konp-PHlepO4F5GxWU139c8kBlPq4sLfrFaFz7Hu_UvP71eiOJwN1wjS-03sXoMH5Gkry-YacArysYMHEZkF4iRX';
+                    }
+                  }}
                   referrerPolicy="no-referrer"
                 />
               </div>
@@ -184,7 +190,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <img
                   alt="LPIC-2 Logo"
                   className="h-full object-contain mix-blend-multiply grayscale group-hover:grayscale-0 transition-all"
-                  src="https://lh3.googleusercontent.com/aida/AEtjO1Uy6-7GEuXY8N4MXEUdIqW9cD2B0VoEwZpxqFxZ8x-11grFHBR64vd54YQ5G54vT-5tdV2PgtWz_nwj6aWvykisgTh5ExAeExviwwRs1PmS7xV60OjtUMTz0v9t7u-DoyKYnwtowUOk4dF312wtVp5m4Q2UJBH0mZ7iqXyKgN_0wT9ifLYrDdRP83PthX_eqDEBQToDYsdTwPWFYgVxFZIo9j5g56odvwNl9dgErLExI9pUhn3ULquWpww"
+                  src="/lpic-2.jpg"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4') {
+                      target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4';
+                    }
+                  }}
                   referrerPolicy="no-referrer"
                 />
               </div>
@@ -206,7 +218,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <img
                   alt="LPIC-3 Logo"
                   className="h-full object-contain mix-blend-multiply transition-all"
-                  src="https://lh3.googleusercontent.com/aida/AEtjO1XFptj6KM6nRHCkxi6kPUODrl0KCMrBW0DYV-ac0whxYnpa1b3FAEJZqR2FT6XDvJdiAhaVoXcMBazLja4VzQtbrz6fNtumCNrvhSrdUXqVPC3zWiBHYPDIsu_LNNWGkK0FK4kOsz8GFfzJhAkWcyaQqomQdKFFqGLOxtVSYcxr-Z_aj3VHZZm1__4L91YLw4NLeIFrDXVwZzOaULk2qwduc-LKyg3N_m8JbYmDUYSWdQqZKzJeirMQGQ"
+                  src="/lpic-3.jpg"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB') {
+                      target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB';
+                    }
+                  }}
                   referrerPolicy="no-referrer"
                 />
               </div>

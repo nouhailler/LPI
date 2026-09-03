@@ -32,16 +32,18 @@ import {
   Power,
   FolderTree,
   CheckCircle2,
+  Globe,
+  Wrench,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 204 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 204 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -93,16 +95,28 @@ type FilterObjective =
   | '202.1'
   | '202.2'
   | '202.3'
+  | '203.1'
+  | '203.2'
+  | '203.3'
   | '204.1'
   | '204.2'
   | '204.3'
+  | '205.1'
+  | '205.2'
+  | '205.3'
+  | '206.1'
+  | '206.2'
+  | '206.3'
+  | '207.1'
+  | '207.2'
+  | '207.3'
   | 'starred'
   | 'review';
 
 export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   cards,
   onCardLearned,
-  initialTopic = 204,
+  initialTopic = 203,
 }) => {
   const [selectedTopic, setSelectedTopic] = useState<SelectedTopic>(initialTopic);
   const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-topic');
@@ -228,9 +242,25 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 202 || c.deck.includes('Topic 202') || c.objectiveId?.startsWith('202.')
       );
+    } else if (selectedTopic === 203) {
+      result = result.filter(
+        (c) => c.topicNumber === 203 || c.deck.includes('Topic 203') || c.objectiveId?.startsWith('203.')
+      );
     } else if (selectedTopic === 204) {
       result = result.filter(
         (c) => c.topicNumber === 204 || c.deck.includes('Topic 204') || c.objectiveId?.startsWith('204.')
+      );
+    } else if (selectedTopic === 205) {
+      result = result.filter(
+        (c) => c.topicNumber === 205 || c.deck.includes('Topic 205') || c.objectiveId?.startsWith('205.')
+      );
+    } else if (selectedTopic === 206) {
+      result = result.filter(
+        (c) => c.topicNumber === 206 || c.deck.includes('Topic 206') || c.objectiveId?.startsWith('206.')
+      );
+    } else if (selectedTopic === 207) {
+      result = result.filter(
+        (c) => c.topicNumber === 207 || c.deck.includes('Topic 207') || c.objectiveId?.startsWith('207.')
       );
     }
 
@@ -331,12 +361,36 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '202.2');
     } else if (activeDeckFilter === '202.3') {
       result = result.filter((c) => c.objectiveId === '202.3');
+    } else if (activeDeckFilter === '203.1') {
+      result = result.filter((c) => c.objectiveId === '203.1');
+    } else if (activeDeckFilter === '203.2') {
+      result = result.filter((c) => c.objectiveId === '203.2');
+    } else if (activeDeckFilter === '203.3') {
+      result = result.filter((c) => c.objectiveId === '203.3');
     } else if (activeDeckFilter === '204.1') {
       result = result.filter((c) => c.objectiveId === '204.1');
     } else if (activeDeckFilter === '204.2') {
       result = result.filter((c) => c.objectiveId === '204.2');
     } else if (activeDeckFilter === '204.3') {
       result = result.filter((c) => c.objectiveId === '204.3');
+    } else if (activeDeckFilter === '205.1') {
+      result = result.filter((c) => c.objectiveId === '205.1');
+    } else if (activeDeckFilter === '205.2') {
+      result = result.filter((c) => c.objectiveId === '205.2');
+    } else if (activeDeckFilter === '205.3') {
+      result = result.filter((c) => c.objectiveId === '205.3');
+    } else if (activeDeckFilter === '206.1') {
+      result = result.filter((c) => c.objectiveId === '206.1');
+    } else if (activeDeckFilter === '206.2') {
+      result = result.filter((c) => c.objectiveId === '206.2');
+    } else if (activeDeckFilter === '206.3') {
+      result = result.filter((c) => c.objectiveId === '206.3');
+    } else if (activeDeckFilter === '207.1') {
+      result = result.filter((c) => c.objectiveId === '207.1');
+    } else if (activeDeckFilter === '207.2') {
+      result = result.filter((c) => c.objectiveId === '207.2');
+    } else if (activeDeckFilter === '207.3') {
+      result = result.filter((c) => c.objectiveId === '207.3');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -572,15 +626,47 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic202Mastered = topic202Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic203Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 203 || c.deck.includes('Topic 203') || c.objectiveId?.startsWith('203.')),
+    [cards]
+  );
+  const topic203Mastered = topic203Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const topic204Cards = useMemo(
     () => cards.filter((c) => c.topicNumber === 204 || c.deck.includes('Topic 204') || c.objectiveId?.startsWith('204.')),
     [cards]
   );
   const topic204Mastered = topic204Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic205Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 205 || c.deck.includes('Topic 205') || c.objectiveId?.startsWith('205.')),
+    [cards]
+  );
+  const topic205Mastered = topic205Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic206Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 206 || c.deck.includes('Topic 206') || c.objectiveId?.startsWith('206.')),
+    [cards]
+  );
+  const topic206Mastered = topic206Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic207Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 207 || c.deck.includes('Topic 207') || c.objectiveId?.startsWith('207.')),
+    [cards]
+  );
+  const topic207Mastered = topic207Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 204
-      ? 'Topic 204: Filesystems and Devices'
+    selectedTopic === 207
+      ? 'Topic 207: Domain Name Server (DNS)'
+      : selectedTopic === 206
+      ? 'Topic 206: System Maintenance'
+      : selectedTopic === 205
+      ? 'Topic 205: Network Configuration'
+      : selectedTopic === 204
+      ? 'Topic 204: Advanced Storage Device Administration'
+      : selectedTopic === 203
+      ? 'Topic 203: Filesystem and Devices'
       : selectedTopic === 202
       ? 'Topic 202: System Startup'
       : selectedTopic === 201
@@ -608,8 +694,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 204
+    selectedTopic === 207
+      ? '100 Cards • 3 Sub-Objectives (Weight 12)'
+      : selectedTopic === 206
+      ? '100 Cards • 3 Sub-Objectives (Weight 6)'
+      : selectedTopic === 205
+      ? '100 Cards • 3 Sub-Objectives (Weight 11)'
+      : selectedTopic === 204
       ? '100 Cards • 3 Sub-Objectives (Weight 10)'
+      : selectedTopic === 203
+      ? '100 Cards • 3 Sub-Objectives (Weight 8)'
       : selectedTopic === 202
       ? '100 Cards • 3 Sub-Objectives (Weight 11)'
       : selectedTopic === 201
@@ -637,8 +731,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 204
+    selectedTopic === 207
+      ? topic207Mastered
+      : selectedTopic === 206
+      ? topic206Mastered
+      : selectedTopic === 205
+      ? topic205Mastered
+      : selectedTopic === 204
       ? topic204Mastered
+      : selectedTopic === 203
+      ? topic203Mastered
       : selectedTopic === 202
       ? topic202Mastered
       : selectedTopic === 201
@@ -666,8 +768,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 204
+    selectedTopic === 207
+      ? topic207Cards.length || 100
+      : selectedTopic === 206
+      ? topic206Cards.length || 100
+      : selectedTopic === 205
+      ? topic205Cards.length || 100
+      : selectedTopic === 204
       ? topic204Cards.length || 100
+      : selectedTopic === 203
+      ? topic203Cards.length || 100
       : selectedTopic === 202
       ? topic202Cards.length || 100
       : selectedTopic === 201
@@ -702,6 +812,51 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
           <button
+            onClick={() => handleTopicSelect(207)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 207
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Globe className="w-4 h-4" />
+            <span>Topic 207 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (202)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(206)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 206
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Wrench className="w-4 h-4" />
+            <span>Topic 206 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (201)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(205)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 205
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Network className="w-4 h-4" />
+            <span>Topic 205 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (201)
+            </span>
+          </button>
+
+          <button
             onClick={() => handleTopicSelect(204)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedTopic === 204
@@ -713,6 +868,21 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <span>Topic 204 Deck (100)</span>
             <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
               LPIC-2
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(203)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 203
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <HardDrive className="w-4 h-4" />
+            <span>Topic 203 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (201)
             </span>
           </button>
 
@@ -913,7 +1083,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 204 ? 'Topic 204' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 207 ? 'Topic 207' : selectedTopic === 206 ? 'Topic 206' : selectedTopic === 205 ? 'Topic 205' : selectedTopic === 204 ? 'Topic 204' : selectedTopic === 203 ? 'Topic 203' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -941,8 +1111,131 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 204 ? topic204Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
+
+            {/* Topic 207 Sub-Objectives */}
+            {selectedTopic === 207 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('207.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '207.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Basic DNS Server Configuration (207.1) - 35 cards (Weight 4)"
+                >
+                  207.1 DNS Config & BIND (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('207.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '207.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Create and Maintain DNS Zones (207.2) - 35 cards (Weight 4)"
+                >
+                  207.2 DNS Zones & RRs (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('207.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '207.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Securing a DNS Server (207.3) - 30 cards (Weight 4)"
+                >
+                  207.3 Securing DNS & DNSSEC (30)
+                </button>
+              </>
+            )}
+
+            {/* Topic 206 Sub-Objectives */}
+            {selectedTopic === 206 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('206.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '206.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Make and install programs from source (206.1) - 35 cards (Weight 2)"
+                >
+                  206.1 Source Compilation (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('206.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '206.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Backup Operations (206.2) - 40 cards (Weight 3)"
+                >
+                  206.2 Backup Operations (40)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('206.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '206.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Notify users on system-related issues (206.3) - 25 cards (Weight 1)"
+                >
+                  206.3 User Notifications (25)
+                </button>
+              </>
+            )}
+
+            {/* Topic 205 Sub-Objectives */}
+            {selectedTopic === 205 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('205.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '205.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Basic Networking Configuration (205.1) - 35 cards (Weight 3)"
+                >
+                  205.1 Basic Networking (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('205.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '205.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Advanced Network Configuration & Troubleshooting (205.2) - 35 cards (Weight 4)"
+                >
+                  205.2 Bonding, VLAN & Wireless (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('205.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '205.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Troubleshooting Network Issues (205.3) - 30 cards (Weight 4)"
+                >
+                  205.3 Network Diagnostics & Capture (30)
+                </button>
+              </>
+            )}
 
             {/* Topic 204 Sub-Objectives */}
             {selectedTopic === 204 && (
@@ -981,6 +1274,47 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                   title="Creating and configuring filesystem options (204.3) - 30 cards (Weight 4)"
                 >
                   204.3 FS Options & LVM/RAID (30)
+                </button>
+              </>
+            )}
+
+            {/* Topic 203 Sub-Objectives */}
+            {selectedTopic === 203 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('203.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '203.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Operating the Linux Filesystem (203.1) - 40 cards (Weight 3)"
+                >
+                  203.1 Operating FS & autofs (40)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('203.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '203.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Maintaining a Linux Filesystem (203.2) - 35 cards (Weight 3)"
+                >
+                  203.2 Maintaining FS & SMART (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('203.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '203.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Creating and Configuring Filesystem Options (203.3) - 25 cards (Weight 2)"
+                >
+                  203.3 ISO, FUSE & ZFS (25)
                 </button>
               </>
             )}
