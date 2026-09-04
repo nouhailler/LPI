@@ -1,6 +1,7 @@
 import React from 'react';
-import { Play, CheckCircle2, Flame, Lock, BookOpen, ChevronRight, Sparkles, Layers, Library } from 'lucide-react';
+import { Play, CheckCircle2, Flame, BookOpen, ChevronRight, Layers, Library } from 'lucide-react';
 import { ExamTier, TabType, UserStats } from '../types';
+import { flashcardsData } from '../data/lpiData';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -19,13 +20,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onStartExam,
   onOpenLearning,
 }) => {
+  const totalCardsCount = flashcardsData.length;
+  const lpic1CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 101 && c.topicNumber <= 110).length;
+  const lpic2CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 208).length;
+
   const quickTopics = [
     { id: 'topic-101', number: 101, title: 'System Architecture', exam: 'LPIC-1 (101)', weight: 8 },
     { id: 'topic-103', number: 103, title: 'GNU & Unix Commands', exam: 'LPIC-1 (101)', weight: 26 },
     { id: 'topic-109', number: 109, title: 'Networking Fundamentals', exam: 'LPIC-1 (102)', weight: 14 },
     { id: 'topic-200', number: 200, title: 'Capacity Planning', exam: 'LPIC-2 (201)', weight: 8 },
     { id: 'topic-207', number: 207, title: 'Domain Name Server (BIND 9)', exam: 'LPIC-2 (202)', weight: 12 },
-    { id: 'topic-301', number: 301, title: 'Samba Basics & Architecture', exam: 'LPIC-3 (300)', weight: 11 },
+    { id: 'topic-208', number: 208, title: 'Web Services (Apache, Squid, Nginx)', exam: 'LPIC-2 (202)', weight: 12 },
   ];
 
   return (
@@ -184,12 +189,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {/* LPIC-2 Card */}
             <div
               onClick={() => onNavigate('path')}
-              className="bg-[#ffffff] rounded-xl border border-[#d3c5ab] shadow-xs overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all opacity-85 hover:opacity-100"
+              className="bg-[#ffffff] rounded-xl border border-[#d3c5ab] shadow-xs overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all hover:border-[#ffc20e]"
             >
               <div className="h-32 bg-[#ece1d0] flex items-center justify-center p-4">
                 <img
                   alt="LPIC-2 Logo"
-                  className="h-full object-contain mix-blend-multiply grayscale group-hover:grayscale-0 transition-all"
+                  className="h-full object-contain mix-blend-multiply transition-transform group-hover:scale-105"
                   src="/lpic-2.jpg"
                   onError={(e) => {
                     const target = e.currentTarget;
@@ -203,9 +208,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div className="p-4 flex flex-col gap-1.5 flex-grow">
                 <div className="flex justify-between items-center">
                   <h4 className="font-bold text-lg text-[#201b11]">LPIC-2</h4>
-                  <Lock className="w-4 h-4 text-[#817660]" />
+                  <span className="bg-[#ffc20e]/25 text-[#6d5100] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                    {lpic2CardsCount} Cards Ready
+                  </span>
                 </div>
-                <p className="text-sm text-[#4f4632]">Linux Engineer</p>
+                <p className="text-sm text-[#4f4632]">Linux Engineer (Exams 201 & 202)</p>
               </div>
             </div>
 
@@ -273,34 +280,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </button>
       </div>
 
-      {/* 900 Interactive Flashcards for Topics 101, 102, 103, 104, 105, 106, 108, 109 & 110 Banner */}
+      {/* 1,800+ Interactive Flashcards Banner */}
       <div className="bg-[#fdf3e4] border-2 border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
           <div className="p-3 bg-[#785a00] rounded-xl text-white shadow-xs shrink-0 mt-0.5 font-mono font-bold text-lg flex items-center justify-center">
-            900
+            {totalCardsCount}+
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#ffc20e] text-[#6d5100]">
-                900 Interactive Flashcards
+                {totalCardsCount} Interactive Flashcards
               </span>
-              <span className="text-xs font-bold text-[#785a00]">Topics 101, 102, 103, 104, 105, 106, 108, 109 & 110</span>
+              <span className="text-xs font-bold text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
+                LPIC-1: {lpic1CardsCount} Cards (Topics 101–110)
+              </span>
+              <span className="text-xs font-bold text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
+                LPIC-2: {lpic2CardsCount} Cards (Topics 200–208)
+              </span>
             </div>
             <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
-              Master System Architecture, Commands, Filesystems, Shell, Desktops, Services, Networking & Security
+              Master System Admin & Linux Engineering Concepts Across 18 Comprehensive Topics
             </h3>
             <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
-              100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands/regex (103), filesystems/FHS (104), shells/scripting (105), X11/desktops/accessibility (106), services/time/logs/MTA/CUPS (108), networking/DNS (109), and security/visudo/SUID/ulimit/firewalls/SSH/GPG (110) with 3D flip and exam gotchas.
+              100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands (103), filesystems/FHS (104), shells/scripting (105), desktops (106), services/logs (108), networking (109), security (110), capacity planning (200), kernel (201), system startup (202), filesystems & devices (203), advanced storage (204), network configuration (205), system maintenance (206), BIND 9 DNS (207), and web services with Apache, Squid & Nginx (208).
             </p>
           </div>
         </div>
 
         <button
           onClick={() => onNavigate('flashcards')}
-          className="px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+          className="px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer whitespace-nowrap"
         >
           <Layers className="w-4 h-4" />
-          <span>Launch 900 Flashcards</span>
+          <span>Launch Flashcards ({totalCardsCount})</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

@@ -40,10 +40,10 @@ import { Flashcard } from '../types';
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -110,6 +110,10 @@ type FilterObjective =
   | '207.1'
   | '207.2'
   | '207.3'
+  | '208.1'
+  | '208.2'
+  | '208.3'
+  | '208.4'
   | 'starred'
   | 'review';
 
@@ -262,6 +266,10 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 207 || c.deck.includes('Topic 207') || c.objectiveId?.startsWith('207.')
       );
+    } else if (selectedTopic === 208) {
+      result = result.filter(
+        (c) => c.topicNumber === 208 || c.deck.includes('Topic 208') || c.objectiveId?.startsWith('208.')
+      );
     }
 
     // Filter by sub-objective / state
@@ -391,6 +399,14 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '207.2');
     } else if (activeDeckFilter === '207.3') {
       result = result.filter((c) => c.objectiveId === '207.3');
+    } else if (activeDeckFilter === '208.1') {
+      result = result.filter((c) => c.objectiveId === '208.1');
+    } else if (activeDeckFilter === '208.2') {
+      result = result.filter((c) => c.objectiveId === '208.2');
+    } else if (activeDeckFilter === '208.3') {
+      result = result.filter((c) => c.objectiveId === '208.3');
+    } else if (activeDeckFilter === '208.4') {
+      result = result.filter((c) => c.objectiveId === '208.4');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -656,8 +672,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic207Mastered = topic207Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic208Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 208 || c.deck.includes('Topic 208') || c.objectiveId?.startsWith('208.')),
+    [cards]
+  );
+  const topic208Mastered = topic208Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 207
+    selectedTopic === 208
+      ? 'Topic 208: Web Services'
+      : selectedTopic === 207
       ? 'Topic 207: Domain Name Server (DNS)'
       : selectedTopic === 206
       ? 'Topic 206: System Maintenance'
@@ -694,7 +718,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 207
+    selectedTopic === 208
+      ? '100 Cards • 4 Sub-Objectives (Weight 12)'
+      : selectedTopic === 207
       ? '100 Cards • 3 Sub-Objectives (Weight 12)'
       : selectedTopic === 206
       ? '100 Cards • 3 Sub-Objectives (Weight 6)'
@@ -731,7 +757,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 207
+    selectedTopic === 208
+      ? topic208Mastered
+      : selectedTopic === 207
       ? topic207Mastered
       : selectedTopic === 206
       ? topic206Mastered
@@ -768,7 +796,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 207
+    selectedTopic === 208
+      ? topic208Cards.length || 100
+      : selectedTopic === 207
       ? topic207Cards.length || 100
       : selectedTopic === 206
       ? topic206Cards.length || 100
@@ -811,6 +841,21 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       {/* Top Topic Switcher Tabs */}
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
+          <button
+            onClick={() => handleTopicSelect(208)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 208
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Server className="w-4 h-4" />
+            <span>Topic 208 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (202)
+            </span>
+          </button>
+
           <button
             onClick={() => handleTopicSelect(207)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -1111,8 +1156,61 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 208 ? topic208Cards.length : selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
+
+            {/* Topic 208 Sub-Objectives */}
+            {selectedTopic === 208 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('208.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '208.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Basic Apache Configuration (208.1) - 30 cards (Weight 4)"
+                >
+                  208.1 Apache Configuration (30)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('208.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '208.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Apache Configuration for HTTPS (208.2) - 25 cards (Weight 3)"
+                >
+                  208.2 Apache HTTPS & SSL (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('208.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '208.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Implementing Squid as a Caching Proxy (208.3) - 20 cards (Weight 2)"
+                >
+                  208.3 Squid Caching Proxy (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('208.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '208.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Implementing Nginx as a Web Server and Reverse Proxy (208.4) - 25 cards (Weight 3)"
+                >
+                  208.4 Nginx Web & Proxy (25)
+                </button>
+              </>
+            )}
 
             {/* Topic 207 Sub-Objectives */}
             {selectedTopic === 207 && (

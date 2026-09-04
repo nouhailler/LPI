@@ -176,13 +176,13 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         {
           id: 'nav-flashcards',
           title: 'Interactive Flashcards Decks',
-          subtitle: '200 interactive cards for Topic 101 & Topic 102',
+          subtitle: '1,800+ interactive cards across LPIC-1 & LPIC-2 (18 Topics)',
           icon: Layers,
-          badge: '200 LPIC-1 Cards',
+          badge: '1,800+ Cards',
           badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
           tabTarget: 'flashcards',
           action: () => onSelectTab('flashcards'),
-          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', 'topic 101', 'topic 102', 'dpkg', 'rpm', 'grub', 'lvm'],
+          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', '201', '202', 'topic 101', 'topic 208', 'apache', 'bind', 'nginx'],
         },
         {
           id: 'nav-path',
@@ -376,12 +376,12 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         },
         {
           id: 'topic-208',
-          title: 'Topic 208: Web Services (Apache & Nginx)',
-          subtitle: 'VirtualHosts, Reverse proxying, TLS/SSL certificates, mod_rewrite',
+          title: 'Topic 208: Web Services',
+          subtitle: 'Apache2, HTTPS/TLS, Squid caching proxy & Nginx reverse proxy',
           icon: Server,
-          badge: 'Weight 10',
+          badge: 'Weight 12',
           action: () => onSelectLearningTopic('topic-208'),
-          keywords: ['apache', 'httpd', 'nginx', 'ssl', 'tls', 'virtualhost', 'proxy'],
+          keywords: ['apache', 'httpd', 'nginx', 'ssl', 'tls', 'virtualhost', 'squid', 'proxy', 'reverse proxy', 'certbot', 'openssl'],
         },
         {
           id: 'topic-209',

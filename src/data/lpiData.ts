@@ -264,6 +264,7 @@ import { topic204Flashcards } from './topic204Flashcards';
 import { topic205Flashcards } from './topic205Flashcards';
 import { topic206Flashcards } from './topic206Flashcards';
 import { topic207Flashcards } from './topic207Flashcards';
+import { topic208Flashcards } from './topic208Flashcards';
 
 export {
   topic101Flashcards,
@@ -283,6 +284,7 @@ export {
   topic205Flashcards,
   topic206Flashcards,
   topic207Flashcards,
+  topic208Flashcards,
 };
 
 export const flashcardsData: Flashcard[] = [
@@ -303,6 +305,7 @@ export const flashcardsData: Flashcard[] = [
   ...topic205Flashcards,
   ...topic206Flashcards,
   ...topic207Flashcards,
+  ...topic208Flashcards,
   {
     id: 1,
     deck: 'Linux Essentials',
