@@ -176,13 +176,13 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         {
           id: 'nav-flashcards',
           title: 'Interactive Flashcards Decks',
-          subtitle: '1,800+ interactive cards across LPIC-1 & LPIC-2 (18 Topics)',
+          subtitle: '2,000+ interactive cards across LPIC-1 & LPIC-2 (20 Topics)',
           icon: Layers,
-          badge: '1,800+ Cards',
+          badge: '2,000+ Cards',
           badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
           tabTarget: 'flashcards',
           action: () => onSelectTab('flashcards'),
-          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', '201', '202', 'topic 101', 'topic 208', 'apache', 'bind', 'nginx'],
+          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', '201', '202', '210', 'topic 101', 'topic 208', 'topic 209', 'topic 210', 'apache', 'bind', 'nginx', 'samba', 'nfs', 'dhcp', 'pam', 'ldap'],
         },
         {
           id: 'nav-path',
@@ -391,6 +391,15 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           badge: 'Weight 9',
           action: () => onSelectLearningTopic('topic-209'),
           keywords: ['samba', 'smb', 'nfs', 'exports', 'nfs4', 'cifs', 'shares'],
+        },
+        {
+          id: 'topic-210',
+          title: 'Topic 210: Network Client Management',
+          subtitle: 'DHCP server & client config, PAM authentication, LDAP client & SSSD',
+          icon: ShieldCheck,
+          badge: 'Weight 7',
+          action: () => onSelectLearningTopic('topic-210'),
+          keywords: ['dhcp', 'dhcpd', 'dhclient', 'pam', 'pam.d', 'ldap', 'ldapsearch', 'sssd', 'nsswitch'],
         },
         {
           id: 'topic-212',

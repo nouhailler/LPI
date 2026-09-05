@@ -22,15 +22,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 }) => {
   const totalCardsCount = flashcardsData.length;
   const lpic1CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 101 && c.topicNumber <= 110).length;
-  const lpic2CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 208).length;
+  const lpic2CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 212).length;
+  const lpic3CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 300 && c.topicNumber <= 399).length;
 
   const quickTopics = [
     { id: 'topic-101', number: 101, title: 'System Architecture', exam: 'LPIC-1 (101)', weight: 8 },
     { id: 'topic-103', number: 103, title: 'GNU & Unix Commands', exam: 'LPIC-1 (101)', weight: 26 },
     { id: 'topic-109', number: 109, title: 'Networking Fundamentals', exam: 'LPIC-1 (102)', weight: 14 },
     { id: 'topic-200', number: 200, title: 'Capacity Planning', exam: 'LPIC-2 (201)', weight: 8 },
-    { id: 'topic-207', number: 207, title: 'Domain Name Server (BIND 9)', exam: 'LPIC-2 (202)', weight: 12 },
     { id: 'topic-208', number: 208, title: 'Web Services (Apache, Squid, Nginx)', exam: 'LPIC-2 (202)', weight: 12 },
+    { id: 'topic-209', number: 209, title: 'File Sharing (Samba, NFS)', exam: 'LPIC-2 (202)', weight: 8 },
+    { id: 'topic-210', number: 210, title: 'Network Client Management (DHCP, PAM, LDAP)', exam: 'LPIC-2 (202)', weight: 7 },
+    { id: 'topic-211', number: 211, title: 'E-Mail Services (Postfix, Dovecot, Delivery)', exam: 'LPIC-2 (202)', weight: 8 },
+    { id: 'topic-212', number: 212, title: 'System Security (Router, IDS, OpenVPN, IPsec)', exam: 'LPIC-2 (202)', weight: 10 },
+    { id: 'topic-301', number: 301, title: 'Samba Basics (smb.conf, TDB/LDB, RPC)', exam: 'LPIC-3 (300)', weight: 11 },
   ];
 
   return (
@@ -239,7 +244,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div className="flex justify-between items-center">
                   <h4 className="font-bold text-lg text-[#201b11]">LPIC-3</h4>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#5c3566] bg-[#5c3566]/10 px-2 py-0.5 rounded">
-                    Enterprise
+                    {lpic3CardsCount > 0 ? `${lpic3CardsCount} Cards Ready` : 'Enterprise'}
                   </span>
                 </div>
                 <p className="text-sm text-[#4f4632]">300, 303, 305 & 306 Specialties</p>
@@ -295,14 +300,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 LPIC-1: {lpic1CardsCount} Cards (Topics 101–110)
               </span>
               <span className="text-xs font-bold text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                LPIC-2: {lpic2CardsCount} Cards (Topics 200–208)
+                LPIC-2: {lpic2CardsCount} Cards (Topics 200–210)
               </span>
             </div>
             <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
-              Master System Admin & Linux Engineering Concepts Across 18 Comprehensive Topics
+              Master System Admin & Linux Engineering Concepts Across 20 Comprehensive Topics
             </h3>
             <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
-              100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands (103), filesystems/FHS (104), shells/scripting (105), desktops (106), services/logs (108), networking (109), security (110), capacity planning (200), kernel (201), system startup (202), filesystems & devices (203), advanced storage (204), network configuration (205), system maintenance (206), BIND 9 DNS (207), and web services with Apache, Squid & Nginx (208).
+              100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands (103), filesystems/FHS (104), shells/scripting (105), desktops (106), services/logs (108), networking (109), security (110), capacity planning (200), kernel (201), system startup (202), filesystems & devices (203), advanced storage (204), network configuration (205), system maintenance (206), BIND 9 DNS (207), web services (208), file sharing with Samba & NFS (209), and network client management with DHCP, PAM & LDAP (210).
             </p>
           </div>
         </div>

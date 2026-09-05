@@ -34,16 +34,20 @@ import {
   CheckCircle2,
   Globe,
   Wrench,
+  Share2,
+  Mail,
+  Lock,
+  Users,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -114,6 +118,58 @@ type FilterObjective =
   | '208.2'
   | '208.3'
   | '208.4'
+  | '209.1'
+  | '209.2'
+  | '210.1'
+  | '210.2'
+  | '210.3'
+  | '211.1'
+  | '211.2'
+  | '211.3'
+  | '212.1'
+  | '212.2'
+  | '212.3'
+  | '301.1'
+  | '301.2'
+  | '301.3'
+  | '301.4'
+  | '302.1'
+  | '302.2'
+  | '302.3'
+  | '302.4'
+  | '302.5'
+  | '303.1'
+  | '303.2'
+  | '303.3'
+  | '303.4'
+  | '304.1'
+  | '304.2'
+  | '304.3'
+  | '351.1'
+  | '351.2'
+  | '351.3'
+  | '351.4'
+  | '351.5'
+  | '352.1'
+  | '352.2'
+  | '352.3'
+  | '352.4'
+  | '353.1'
+  | '353.2'
+  | '353.3'
+  | '353.4'
+  | '361.1'
+  | '361.2'
+  | '361.3'
+  | '361.4'
+  | '362.1'
+  | '362.2'
+  | '362.3'
+  | '362.4'
+  | '325.1'
+  | '325.2'
+  | '325.3'
+  | '325.4'
   | 'starred'
   | 'review';
 
@@ -270,6 +326,62 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 208 || c.deck.includes('Topic 208') || c.objectiveId?.startsWith('208.')
       );
+    } else if (selectedTopic === 209) {
+      result = result.filter(
+        (c) => c.topicNumber === 209 || c.deck.includes('Topic 209') || c.objectiveId?.startsWith('209.')
+      );
+    } else if (selectedTopic === 210) {
+      result = result.filter(
+        (c) => c.topicNumber === 210 || c.deck.includes('Topic 210') || c.objectiveId?.startsWith('210.')
+      );
+    } else if (selectedTopic === 211) {
+      result = result.filter(
+        (c) => c.topicNumber === 211 || c.deck.includes('Topic 211') || c.objectiveId?.startsWith('211.')
+      );
+    } else if (selectedTopic === 212) {
+      result = result.filter(
+        (c) => c.topicNumber === 212 || c.deck.includes('Topic 212') || c.objectiveId?.startsWith('212.')
+      );
+    } else if (selectedTopic === 301) {
+      result = result.filter(
+        (c) => c.topicNumber === 301 || c.deck.includes('Topic 301') || c.objectiveId?.startsWith('301.')
+      );
+    } else if (selectedTopic === 302) {
+      result = result.filter(
+        (c) => c.topicNumber === 302 || c.deck.includes('Topic 302') || c.objectiveId?.startsWith('302.')
+      );
+    } else if (selectedTopic === 303) {
+      result = result.filter(
+        (c) => c.topicNumber === 303 || c.deck.includes('Topic 303') || c.objectiveId?.startsWith('303.')
+      );
+    } else if (selectedTopic === 304) {
+      result = result.filter(
+        (c) => c.topicNumber === 304 || c.deck.includes('Topic 304') || c.objectiveId?.startsWith('304.')
+      );
+    } else if (selectedTopic === 305) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 305 ||
+          c.deck.includes('Topic 305') ||
+          c.objectiveId?.startsWith('351.') ||
+          c.objectiveId?.startsWith('352.') ||
+          c.objectiveId?.startsWith('353.')
+      );
+    } else if (selectedTopic === 306) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 306 ||
+          c.deck.includes('Topic 306') ||
+          c.objectiveId?.startsWith('361.') ||
+          c.objectiveId?.startsWith('362.')
+      );
+    } else if (selectedTopic === 325) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 325 ||
+          c.deck.includes('Topic 325') ||
+          c.objectiveId?.startsWith('325.')
+      );
     }
 
     // Filter by sub-objective / state
@@ -407,6 +519,110 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '208.3');
     } else if (activeDeckFilter === '208.4') {
       result = result.filter((c) => c.objectiveId === '208.4');
+    } else if (activeDeckFilter === '209.1') {
+      result = result.filter((c) => c.objectiveId === '209.1');
+    } else if (activeDeckFilter === '209.2') {
+      result = result.filter((c) => c.objectiveId === '209.2');
+    } else if (activeDeckFilter === '210.1') {
+      result = result.filter((c) => c.objectiveId === '210.1');
+    } else if (activeDeckFilter === '210.2') {
+      result = result.filter((c) => c.objectiveId === '210.2');
+    } else if (activeDeckFilter === '210.3') {
+      result = result.filter((c) => c.objectiveId === '210.3');
+    } else if (activeDeckFilter === '211.1') {
+      result = result.filter((c) => c.objectiveId === '211.1');
+    } else if (activeDeckFilter === '211.2') {
+      result = result.filter((c) => c.objectiveId === '211.2');
+    } else if (activeDeckFilter === '211.3') {
+      result = result.filter((c) => c.objectiveId === '211.3');
+    } else if (activeDeckFilter === '212.1') {
+      result = result.filter((c) => c.objectiveId === '212.1');
+    } else if (activeDeckFilter === '212.2') {
+      result = result.filter((c) => c.objectiveId === '212.2');
+    } else if (activeDeckFilter === '212.3') {
+      result = result.filter((c) => c.objectiveId === '212.3');
+    } else if (activeDeckFilter === '301.1') {
+      result = result.filter((c) => c.objectiveId === '301.1');
+    } else if (activeDeckFilter === '301.2') {
+      result = result.filter((c) => c.objectiveId === '301.2');
+    } else if (activeDeckFilter === '301.3') {
+      result = result.filter((c) => c.objectiveId === '301.3');
+    } else if (activeDeckFilter === '301.4') {
+      result = result.filter((c) => c.objectiveId === '301.4');
+    } else if (activeDeckFilter === '302.1') {
+      result = result.filter((c) => c.objectiveId === '302.1');
+    } else if (activeDeckFilter === '302.2') {
+      result = result.filter((c) => c.objectiveId === '302.2');
+    } else if (activeDeckFilter === '302.3') {
+      result = result.filter((c) => c.objectiveId === '302.3');
+    } else if (activeDeckFilter === '302.4') {
+      result = result.filter((c) => c.objectiveId === '302.4');
+    } else if (activeDeckFilter === '302.5') {
+      result = result.filter((c) => c.objectiveId === '302.5');
+    } else if (activeDeckFilter === '303.1') {
+      result = result.filter((c) => c.objectiveId === '303.1');
+    } else if (activeDeckFilter === '303.2') {
+      result = result.filter((c) => c.objectiveId === '303.2');
+    } else if (activeDeckFilter === '303.3') {
+      result = result.filter((c) => c.objectiveId === '303.3');
+    } else if (activeDeckFilter === '303.4') {
+      result = result.filter((c) => c.objectiveId === '303.4');
+    } else if (activeDeckFilter === '304.1') {
+      result = result.filter((c) => c.objectiveId === '304.1');
+    } else if (activeDeckFilter === '304.2') {
+      result = result.filter((c) => c.objectiveId === '304.2');
+    } else if (activeDeckFilter === '304.3') {
+      result = result.filter((c) => c.objectiveId === '304.3');
+    } else if (activeDeckFilter === '351.1') {
+      result = result.filter((c) => c.objectiveId === '351.1');
+    } else if (activeDeckFilter === '351.2') {
+      result = result.filter((c) => c.objectiveId === '351.2');
+    } else if (activeDeckFilter === '351.3') {
+      result = result.filter((c) => c.objectiveId === '351.3');
+    } else if (activeDeckFilter === '351.4') {
+      result = result.filter((c) => c.objectiveId === '351.4');
+    } else if (activeDeckFilter === '351.5') {
+      result = result.filter((c) => c.objectiveId === '351.5');
+    } else if (activeDeckFilter === '352.1') {
+      result = result.filter((c) => c.objectiveId === '352.1');
+    } else if (activeDeckFilter === '352.2') {
+      result = result.filter((c) => c.objectiveId === '352.2');
+    } else if (activeDeckFilter === '352.3') {
+      result = result.filter((c) => c.objectiveId === '352.3');
+    } else if (activeDeckFilter === '352.4') {
+      result = result.filter((c) => c.objectiveId === '352.4');
+    } else if (activeDeckFilter === '353.1') {
+      result = result.filter((c) => c.objectiveId === '353.1');
+    } else if (activeDeckFilter === '353.2') {
+      result = result.filter((c) => c.objectiveId === '353.2');
+    } else if (activeDeckFilter === '353.3') {
+      result = result.filter((c) => c.objectiveId === '353.3');
+    } else if (activeDeckFilter === '353.4') {
+      result = result.filter((c) => c.objectiveId === '353.4');
+    } else if (activeDeckFilter === '361.1') {
+      result = result.filter((c) => c.objectiveId === '361.1');
+    } else if (activeDeckFilter === '361.2') {
+      result = result.filter((c) => c.objectiveId === '361.2');
+    } else if (activeDeckFilter === '361.3') {
+      result = result.filter((c) => c.objectiveId === '361.3');
+    } else if (activeDeckFilter === '361.4') {
+      result = result.filter((c) => c.objectiveId === '361.4');
+    } else if (activeDeckFilter === '362.1') {
+      result = result.filter((c) => c.objectiveId === '362.1');
+    } else if (activeDeckFilter === '362.2') {
+      result = result.filter((c) => c.objectiveId === '362.2');
+    } else if (activeDeckFilter === '362.3') {
+      result = result.filter((c) => c.objectiveId === '362.3');
+    } else if (activeDeckFilter === '362.4') {
+      result = result.filter((c) => c.objectiveId === '362.4');
+    } else if (activeDeckFilter === '325.1') {
+      result = result.filter((c) => c.objectiveId === '325.1');
+    } else if (activeDeckFilter === '325.2') {
+      result = result.filter((c) => c.objectiveId === '325.2');
+    } else if (activeDeckFilter === '325.3') {
+      result = result.filter((c) => c.objectiveId === '325.3');
+    } else if (activeDeckFilter === '325.4') {
+      result = result.filter((c) => c.objectiveId === '325.4');
     } else if (activeDeckFilter === 'starred') {
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
@@ -678,8 +894,117 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic208Mastered = topic208Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic209Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 209 || c.deck.includes('Topic 209') || c.objectiveId?.startsWith('209.')),
+    [cards]
+  );
+  const topic209Mastered = topic209Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic210Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 210 || c.deck.includes('Topic 210') || c.objectiveId?.startsWith('210.')),
+    [cards]
+  );
+  const topic210Mastered = topic210Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic211Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 211 || c.deck.includes('Topic 211') || c.objectiveId?.startsWith('211.')),
+    [cards]
+  );
+  const topic211Mastered = topic211Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic212Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 212 || c.deck.includes('Topic 212') || c.objectiveId?.startsWith('212.')),
+    [cards]
+  );
+  const topic212Mastered = topic212Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic301Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 301 || c.deck.includes('Topic 301') || c.objectiveId?.startsWith('301.')),
+    [cards]
+  );
+  const topic301Mastered = topic301Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic302Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 302 || c.deck.includes('Topic 302') || c.objectiveId?.startsWith('302.')),
+    [cards]
+  );
+  const topic302Mastered = topic302Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic303Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 303 || c.deck.includes('Topic 303') || c.objectiveId?.startsWith('303.')),
+    [cards]
+  );
+  const topic303Mastered = topic303Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic304Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 304 || c.deck.includes('Topic 304') || c.objectiveId?.startsWith('304.')),
+    [cards]
+  );
+  const topic304Mastered = topic304Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic305Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 305 ||
+          c.deck.includes('Topic 305') ||
+          c.objectiveId?.startsWith('351.') ||
+          c.objectiveId?.startsWith('352.') ||
+          c.objectiveId?.startsWith('353.')
+      ),
+    [cards]
+  );
+  const topic305Mastered = topic305Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic306Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 306 ||
+          c.deck.includes('Topic 306') ||
+          c.objectiveId?.startsWith('361.') ||
+          c.objectiveId?.startsWith('362.')
+      ),
+    [cards]
+  );
+  const topic306Mastered = topic306Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic325Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 325 ||
+          c.deck.includes('Topic 325') ||
+          c.objectiveId?.startsWith('325.')
+      ),
+    [cards]
+  );
+  const topic325Mastered = topic325Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 208
+    selectedTopic === 325
+      ? 'Topic 325: Cryptography'
+      : selectedTopic === 306
+      ? 'Topic 306: High Availability and Storage Clusters'
+      : selectedTopic === 305
+      ? 'Topic 305: Virtualization & Containerization'
+      : selectedTopic === 304
+      ? 'Topic 304: Samba Client Configuration'
+      : selectedTopic === 303
+      ? 'Topic 303: Samba Share Configuration'
+      : selectedTopic === 302
+      ? 'Topic 302: Samba and Active Directory Domains'
+      : selectedTopic === 301
+      ? 'Topic 301: Samba Basics'
+      : selectedTopic === 212
+      ? 'Topic 212: System Security'
+      : selectedTopic === 211
+      ? 'Topic 211: E-Mail Services'
+      : selectedTopic === 210
+      ? 'Topic 210: Network Client Management'
+      : selectedTopic === 209
+      ? 'Topic 209: File Sharing'
+      : selectedTopic === 208
       ? 'Topic 208: Web Services'
       : selectedTopic === 207
       ? 'Topic 207: Domain Name Server (DNS)'
@@ -718,7 +1043,29 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 208
+    selectedTopic === 325
+      ? '100 Cards • 4 Sub-Objectives (Weight 16)'
+      : selectedTopic === 306
+      ? '100 Cards • 2 Main Topics / 8 Objectives (Weight 58)'
+      : selectedTopic === 305
+      ? '100 Cards • 3 Main Areas / 13 Objectives (Weight 60)'
+      : selectedTopic === 304
+      ? '100 Cards • 3 Sub-Objectives (Weight 11)'
+      : selectedTopic === 303
+      ? '100 Cards • 4 Sub-Objectives (Weight 10)'
+      : selectedTopic === 302
+      ? '100 Cards • 5 Sub-Objectives (Weight 17)'
+      : selectedTopic === 301
+      ? '100 Cards • 4 Sub-Objectives (Weight 11)'
+      : selectedTopic === 212
+      ? '100 Cards • 3 Sub-Objectives (Weight 10)'
+      : selectedTopic === 211
+      ? '100 Cards • 3 Sub-Objectives (Weight 8)'
+      : selectedTopic === 210
+      ? '100 Cards • 3 Sub-Objectives (Weight 7)'
+      : selectedTopic === 209
+      ? '100 Cards • 2 Sub-Objectives (Weight 8/11)'
+      : selectedTopic === 208
       ? '100 Cards • 4 Sub-Objectives (Weight 12)'
       : selectedTopic === 207
       ? '100 Cards • 3 Sub-Objectives (Weight 12)'
@@ -757,7 +1104,29 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 208
+    selectedTopic === 325
+      ? topic325Mastered
+      : selectedTopic === 306
+      ? topic306Mastered
+      : selectedTopic === 305
+      ? topic305Mastered
+      : selectedTopic === 304
+      ? topic304Mastered
+      : selectedTopic === 303
+      ? topic303Mastered
+      : selectedTopic === 302
+      ? topic302Mastered
+      : selectedTopic === 301
+      ? topic301Mastered
+      : selectedTopic === 212
+      ? topic212Mastered
+      : selectedTopic === 211
+      ? topic211Mastered
+      : selectedTopic === 210
+      ? topic210Mastered
+      : selectedTopic === 209
+      ? topic209Mastered
+      : selectedTopic === 208
       ? topic208Mastered
       : selectedTopic === 207
       ? topic207Mastered
@@ -796,7 +1165,29 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 208
+    selectedTopic === 325
+      ? topic325Cards.length || 100
+      : selectedTopic === 306
+      ? topic306Cards.length || 100
+      : selectedTopic === 305
+      ? topic305Cards.length || 100
+      : selectedTopic === 304
+      ? topic304Cards.length || 100
+      : selectedTopic === 303
+      ? topic303Cards.length || 100
+      : selectedTopic === 302
+      ? topic302Cards.length || 100
+      : selectedTopic === 301
+      ? topic301Cards.length || 100
+      : selectedTopic === 212
+      ? topic212Cards.length || 100
+      : selectedTopic === 211
+      ? topic211Cards.length || 100
+      : selectedTopic === 210
+      ? topic210Cards.length || 100
+      : selectedTopic === 209
+      ? topic209Cards.length || 100
+      : selectedTopic === 208
       ? topic208Cards.length || 100
       : selectedTopic === 207
       ? topic207Cards.length || 100
@@ -841,6 +1232,156 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       {/* Top Topic Switcher Tabs */}
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
+          <button
+            onClick={() => handleTopicSelect(306)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 306
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Server className="w-4 h-4" />
+            <span>Topic 306 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (306)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(305)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 305
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>Topic 305 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (305)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(304)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 304
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Monitor className="w-4 h-4" />
+            <span>Topic 304 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (300)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(303)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 303
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Share2 className="w-4 h-4" />
+            <span>Topic 303 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (300)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(302)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 302
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>Topic 302 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (300)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(301)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 301
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <FolderTree className="w-4 h-4" />
+            <span>Topic 301 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (300)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(212)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 212
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Lock className="w-4 h-4" />
+            <span>Topic 212 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (202)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(211)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 211
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Mail className="w-4 h-4" />
+            <span>Topic 211 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (202)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(210)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 210
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span>Topic 210 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (202)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(209)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 209
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Share2 className="w-4 h-4" />
+            <span>Topic 209 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-2 (202)
+            </span>
+          </button>
+
           <button
             onClick={() => handleTopicSelect(208)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -1113,7 +1654,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  {selectedTopic === 200 || selectedTopic === 201 || selectedTopic === 202 ? 'LPIC-2 Exam 201-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
+                  {selectedTopic === 306 ? 'LPIC-3 Exam 306-300' : selectedTopic === 305 ? 'LPIC-3 Exam 305-300' : selectedTopic === 301 || selectedTopic === 302 || selectedTopic === 303 || selectedTopic === 304 ? 'LPIC-3 Exam 300-100' : selectedTopic === 200 || selectedTopic === 201 || selectedTopic === 202 ? 'LPIC-2 Exam 201-450' : selectedTopic >= 203 && selectedTopic <= 212 ? 'LPIC-2 Exam 202-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
                   {activeTopicBadge}
@@ -1128,7 +1669,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 207 ? 'Topic 207' : selectedTopic === 206 ? 'Topic 206' : selectedTopic === 205 ? 'Topic 205' : selectedTopic === 204 ? 'Topic 204' : selectedTopic === 203 ? 'Topic 203' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 306 ? 'Topic 306' : selectedTopic === 305 ? 'Topic 305' : selectedTopic === 304 ? 'Topic 304' : selectedTopic === 303 ? 'Topic 303' : selectedTopic === 302 ? 'Topic 302' : selectedTopic === 301 ? 'Topic 301' : selectedTopic === 212 ? 'Topic 212' : selectedTopic === 211 ? 'Topic 211' : selectedTopic === 210 ? 'Topic 210' : selectedTopic === 209 ? 'Topic 209' : selectedTopic === 208 ? 'Topic 208' : selectedTopic === 207 ? 'Topic 207' : selectedTopic === 206 ? 'Topic 206' : selectedTopic === 205 ? 'Topic 205' : selectedTopic === 204 ? 'Topic 204' : selectedTopic === 203 ? 'Topic 203' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -1156,8 +1697,634 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 208 ? topic208Cards.length : selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 306 ? topic306Cards.length : selectedTopic === 305 ? topic305Cards.length : selectedTopic === 304 ? topic304Cards.length : selectedTopic === 303 ? topic303Cards.length : selectedTopic === 302 ? topic302Cards.length : selectedTopic === 301 ? topic301Cards.length : selectedTopic === 212 ? topic212Cards.length : selectedTopic === 211 ? topic211Cards.length : selectedTopic === 210 ? topic210Cards.length : selectedTopic === 209 ? topic209Cards.length : selectedTopic === 208 ? topic208Cards.length : selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
+
+            {/* Topic 306 Sub-Objectives */}
+            {selectedTopic === 306 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('361.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '361.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="HA Concepts & Terminology (361.1) - 8 cards (Weight 5)"
+                >
+                  361.1 HA Concepts (8)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('361.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '361.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Load Balancing Clusters (361.2) - 14 cards (Weight 8)"
+                >
+                  361.2 Load Balancing (14)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('361.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '361.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Failover Clusters (361.3) - 18 cards (Weight 10)"
+                >
+                  361.3 Failover (18)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('361.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '361.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="High Availability Storage (DRBD) (361.4) - 10 cards (Weight 7)"
+                >
+                  361.4 DRBD (10)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('362.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '362.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="iSCSI Storage Area Network (362.1) - 14 cards (Weight 8)"
+                >
+                  362.1 iSCSI SAN (14)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('362.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '362.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Storage Multipathing (362.2) - 10 cards (Weight 6)"
+                >
+                  362.2 Multipath (10)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('362.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '362.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Distributed Storage (Ceph & GlusterFS) (362.3) - 14 cards (Weight 8)"
+                >
+                  362.3 Ceph / Gluster (14)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('362.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '362.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Clustered File Systems (GFS2 & OCFS2) (362.4) - 12 cards (Weight 8)"
+                >
+                  362.4 Clustered FS (12)
+                </button>
+              </>
+            )}
+
+            {/* Topic 305 Sub-Objectives */}
+            {selectedTopic === 305 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('351.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '351.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Virtualization Concepts (351.1) - 8 cards (Weight 4)"
+                >
+                  351.1 Concepts (8)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('351.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '351.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Xen Virtualization (351.2) - 10 cards (Weight 6)"
+                >
+                  351.2 Xen (10)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('351.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '351.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="QEMU (351.3) - 10 cards (Weight 6)"
+                >
+                  351.3 QEMU (10)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('351.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '351.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Libvirt Virtual Machine Management (351.4) - 10 cards (Weight 9)"
+                >
+                  351.4 Libvirt (10)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('351.5')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '351.5'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Disk Image Management (351.5) - 8 cards (Weight 8)"
+                >
+                  351.5 Disk Images (8)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('352.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Container Concepts (352.1) - 8 cards (Weight 7)"
+                >
+                  352.1 Container Concepts (8)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('352.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Linux Containers (LXC) (352.2) - 10 cards (Weight 6)"
+                >
+                  352.2 LXC (10)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('352.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Docker (352.3) - 14 cards (Weight 9)"
+                >
+                  352.3 Docker (14)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('352.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Container Orchestration (352.4) - 6 cards (Weight 3)"
+                >
+                  352.4 Orchestration (6)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('353.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Cloud Management Tools (353.1) - 4 cards (Weight 2)"
+                >
+                  353.1 Cloud Tools (4)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('353.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Packer (353.2) - 4 cards (Weight 2)"
+                >
+                  353.2 Packer (4)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('353.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="cloud-init (353.3) - 4 cards (Weight 3)"
+                >
+                  353.3 cloud-init (4)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('353.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Vagrant (353.4) - 4 cards (Weight 3)"
+                >
+                  353.4 Vagrant (4)
+                </button>
+              </>
+            )}
+
+            {/* Topic 304 Sub-Objectives */}
+            {selectedTopic === 304 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('304.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '304.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Linux Authentication Clients (304.1) - 45 cards (Weight 5)"
+                >
+                  304.1 Linux Auth Clients (45)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('304.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '304.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Linux CIFS Clients (304.2) - 30 cards (Weight 3)"
+                >
+                  304.2 Linux CIFS Clients (30)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('304.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '304.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Windows Clients (304.3) - 25 cards (Weight 3)"
+                >
+                  304.3 Windows Clients (25)
+                </button>
+              </>
+            )}
+
+            {/* Topic 303 Sub-Objectives */}
+            {selectedTopic === 303 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('303.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '303.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="File Share Configuration (303.1) - 40 cards (Weight 4)"
+                >
+                  303.1 File Shares (40)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('303.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '303.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="File Share Security and ACLs (303.2) - 25 cards (Weight 3)"
+                >
+                  303.2 Security & ACLs (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('303.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '303.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="DFS Share Configuration (303.3) - 15 cards (Weight 1)"
+                >
+                  303.3 MS-DFS (15)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('303.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '303.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Print Share Configuration (303.4) - 20 cards (Weight 2)"
+                >
+                  303.4 Print Shares (20)
+                </button>
+              </>
+            )}
+
+            {/* Topic 302 Sub-Objectives */}
+            {selectedTopic === 302 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('302.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '302.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Samba as an AD DC (302.1) - 25 cards (Weight 5)"
+                >
+                  302.1 AD DC (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('302.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '302.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Samba DC DNS (302.2) - 15 cards (Weight 3)"
+                >
+                  302.2 DNS (15)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('302.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '302.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="AD Domain Management (302.3) - 25 cards (Weight 4)"
+                >
+                  302.3 Domain Mgmt (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('302.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '302.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Domain Membership (302.4) - 20 cards (Weight 3)"
+                >
+                  302.4 Membership (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('302.5')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '302.5'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Local User Management (302.5) - 15 cards (Weight 2)"
+                >
+                  302.5 Local Users & PAM (15)
+                </button>
+              </>
+            )}
+
+            {/* Topic 301 Sub-Objectives */}
+            {selectedTopic === 301 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('301.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '301.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Samba Concepts and Architecture (301.1) - 20 cards (Weight 2)"
+                >
+                  301.1 Concepts (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('301.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '301.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Samba Configuration (301.2) - 35 cards (Weight 4)"
+                >
+                  301.2 Configuration (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('301.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '301.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Regular Samba Maintenance (301.3) - 20 cards (Weight 2)"
+                >
+                  301.3 Maintenance (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('301.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '301.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Troubleshooting Samba (301.4) - 25 cards (Weight 3)"
+                >
+                  301.4 Troubleshooting (25)
+                </button>
+              </>
+            )}
+
+            {/* Topic 212 Sub-Objectives */}
+            {selectedTopic === 212 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('212.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '212.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Configuring a Router (Firewalling & NAT) (212.1) - 35 cards (Weight 3)"
+                >
+                  212.1 Router & Firewall (35)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('212.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '212.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Managing Network Security (212.2) - 40 cards (Weight 4)"
+                >
+                  212.2 Network Security (40)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('212.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '212.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="OpenVPN & IPsec (212.3) - 25 cards (Weight 3)"
+                >
+                  212.3 OpenVPN & IPsec (25)
+                </button>
+              </>
+            )}
+
+            {/* Topic 211 Sub-Objectives */}
+            {selectedTopic === 211 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('211.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '211.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Using E-Mail Servers (211.1) - 50 cards (Weight 4)"
+                >
+                  211.1 Mail Servers (50)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('211.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '211.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Managing E-Mail Delivery (211.2) - 25 cards (Weight 2)"
+                >
+                  211.2 Mail Delivery (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('211.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '211.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Managing Remote E-Mail Delivery (211.3) - 25 cards (Weight 2)"
+                >
+                  211.3 Remote Delivery (25)
+                </button>
+              </>
+            )}
+
+            {/* Topic 210 Sub-Objectives */}
+            {selectedTopic === 210 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('210.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '210.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="DHCP Configuration (210.1) - 30 cards (Weight 2)"
+                >
+                  210.1 DHCP Config (30)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('210.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '210.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="PAM Authentication (210.2) - 40 cards (Weight 3)"
+                >
+                  210.2 PAM Auth (40)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('210.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '210.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="LDAP Client Usage (210.3) - 30 cards (Weight 2)"
+                >
+                  210.3 LDAP Client (30)
+                </button>
+              </>
+            )}
+
+            {/* Topic 209 Sub-Objectives */}
+            {selectedTopic === 209 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('209.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '209.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="SAMBA Server Configuration (209.1) - 60 cards (Weight 5)"
+                >
+                  209.1 SAMBA Server Config (60)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('209.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '209.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="NFS Server Configuration (209.2) - 40 cards (Weight 3)"
+                >
+                  209.2 NFS Server Config (40)
+                </button>
+              </>
+            )}
 
             {/* Topic 208 Sub-Objectives */}
             {selectedTopic === 208 && (
@@ -2511,7 +3678,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div className="p-4 border-b border-[#d3c5ab] flex justify-between items-center bg-[#fff8f2] rounded-t-2xl">
               <div>
                 <h3 className="font-bold text-base text-[#201b11]">
-                  {selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'LPIC-1'} Flashcard Index
+                  {selectedTopic !== 'all' ? `Topic ${selectedTopic}` : 'All LPIC'} Flashcard Index
                 </h3>
                 <p className="text-xs text-[#817660]">
                   Click on any card to jump directly to it ({filteredCards.length} cards available)

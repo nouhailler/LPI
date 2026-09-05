@@ -265,6 +265,17 @@ import { topic205Flashcards } from './topic205Flashcards';
 import { topic206Flashcards } from './topic206Flashcards';
 import { topic207Flashcards } from './topic207Flashcards';
 import { topic208Flashcards } from './topic208Flashcards';
+import { topic209Flashcards } from './topic209Flashcards';
+import { topic210Flashcards } from './topic210Flashcards';
+import { topic211Flashcards } from './topic211Flashcards';
+import { topic212Flashcards } from './topic212Flashcards';
+import { topic301Flashcards } from './topic301Flashcards';
+import { topic302Flashcards } from './topic302Flashcards';
+import { topic303Flashcards } from './topic303Flashcards';
+import { topic304Flashcards } from './topic304Flashcards';
+import { topic305Flashcards } from './topic305Flashcards';
+import { topic306Flashcards } from './topic306Flashcards';
+import { topic325Flashcards } from './topic325Flashcards';
 
 export {
   topic101Flashcards,
@@ -285,6 +296,17 @@ export {
   topic206Flashcards,
   topic207Flashcards,
   topic208Flashcards,
+  topic209Flashcards,
+  topic210Flashcards,
+  topic211Flashcards,
+  topic212Flashcards,
+  topic301Flashcards,
+  topic302Flashcards,
+  topic303Flashcards,
+  topic304Flashcards,
+  topic305Flashcards,
+  topic306Flashcards,
+  topic325Flashcards,
 };
 
 export const flashcardsData: Flashcard[] = [
@@ -306,6 +328,17 @@ export const flashcardsData: Flashcard[] = [
   ...topic206Flashcards,
   ...topic207Flashcards,
   ...topic208Flashcards,
+  ...topic209Flashcards,
+  ...topic210Flashcards,
+  ...topic211Flashcards,
+  ...topic212Flashcards,
+  ...topic301Flashcards,
+  ...topic302Flashcards,
+  ...topic303Flashcards,
+  ...topic304Flashcards,
+  ...topic305Flashcards,
+  ...topic306Flashcards,
+  ...topic325Flashcards,
   {
     id: 1,
     deck: 'Linux Essentials',
