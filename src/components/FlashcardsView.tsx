@@ -12,6 +12,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  GraduationCap,
   Lightbulb,
   Copy,
   CheckCheck,
@@ -46,10 +48,16 @@ import { Flashcard } from '../types';
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328 | 351 | 352 | 353 | 361 | 362 | 'all';
+  initialTopic?: SelectedTopic;
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328 | 351 | 352 | 353 | 361 | 362 | 'all';
+type SelectedTopic =
+  | 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110
+  | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212
+  | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328
+  | 351 | 352 | 353 | 361 | 362 | 363 | 364
+  | 'lpic1' | 'lpic2' | 'lpic3'
+  | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -168,6 +176,12 @@ type FilterObjective =
   | '362.2'
   | '362.3'
   | '362.4'
+  | '363.1'
+  | '363.2'
+  | '364.1'
+  | '364.2'
+  | '364.3'
+  | '364.4'
   | '325.1'
   | '325.2'
   | '325.3'
@@ -266,8 +280,32 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   const filteredCards = useMemo(() => {
     let result = cards;
 
-    // Filter by Topic level first
-    if (selectedTopic === 101) {
+    // Filter by Certification or Topic level first
+    if (selectedTopic === 'lpic1') {
+      result = result.filter(
+        (c) =>
+          (c.topicNumber && c.topicNumber >= 101 && c.topicNumber <= 110) ||
+          c.deck.includes('LPIC-1') ||
+          c.deck.includes('Topic 1') ||
+          c.objectiveId?.startsWith('10')
+      );
+    } else if (selectedTopic === 'lpic2') {
+      result = result.filter(
+        (c) =>
+          (c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 212) ||
+          c.deck.includes('LPIC-2') ||
+          c.deck.includes('Topic 2') ||
+          c.objectiveId?.startsWith('2')
+      );
+    } else if (selectedTopic === 'lpic3') {
+      result = result.filter(
+        (c) =>
+          (c.topicNumber && c.topicNumber >= 300 && c.topicNumber <= 364) ||
+          c.deck.includes('LPIC-3') ||
+          c.deck.includes('Topic 3') ||
+          c.objectiveId?.startsWith('3')
+      );
+    } else if (selectedTopic === 101) {
       result = result.filter(
         (c) => c.topicNumber === 101 || c.deck.includes('Topic 101') || c.objectiveId?.startsWith('101.')
       );
@@ -386,7 +424,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           c.topicNumber === 306 ||
           c.deck.includes('Topic 306') ||
           c.objectiveId?.startsWith('361.') ||
-          c.objectiveId?.startsWith('362.')
+          c.objectiveId?.startsWith('362.') ||
+          c.objectiveId?.startsWith('363.') ||
+          c.objectiveId?.startsWith('364.')
       );
     } else if (selectedTopic === 325) {
       result = result.filter(
@@ -450,6 +490,20 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           c.topicNumber === 362 ||
           c.deck.includes('Topic 362') ||
           c.objectiveId?.startsWith('362.')
+      );
+    } else if (selectedTopic === 363) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 363 ||
+          c.deck.includes('Topic 363') ||
+          c.objectiveId?.startsWith('363.')
+      );
+    } else if (selectedTopic === 364) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 364 ||
+          c.deck.includes('Topic 364') ||
+          c.objectiveId?.startsWith('364.')
       );
     }
 
@@ -684,6 +738,18 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '362.3');
     } else if (activeDeckFilter === '362.4') {
       result = result.filter((c) => c.objectiveId === '362.4');
+    } else if (activeDeckFilter === '363.1') {
+      result = result.filter((c) => c.objectiveId === '363.1');
+    } else if (activeDeckFilter === '363.2') {
+      result = result.filter((c) => c.objectiveId === '363.2');
+    } else if (activeDeckFilter === '364.1') {
+      result = result.filter((c) => c.objectiveId === '364.1');
+    } else if (activeDeckFilter === '364.2') {
+      result = result.filter((c) => c.objectiveId === '364.2');
+    } else if (activeDeckFilter === '364.3') {
+      result = result.filter((c) => c.objectiveId === '364.3');
+    } else if (activeDeckFilter === '364.4') {
+      result = result.filter((c) => c.objectiveId === '364.4');
     } else if (activeDeckFilter === '325.1') {
       result = result.filter((c) => c.objectiveId === '325.1');
     } else if (activeDeckFilter === '325.2') {
@@ -876,6 +942,46 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleFlip, handleGotIt, handleStudyAgain, toggleStarred]);
 
+  // Certification-level card groupings
+  const lpic1Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          (c.topicNumber && c.topicNumber >= 101 && c.topicNumber <= 110) ||
+          c.deck.includes('LPIC-1') ||
+          c.deck.includes('Topic 1') ||
+          c.objectiveId?.startsWith('10')
+      ),
+    [cards]
+  );
+  const lpic1Mastered = lpic1Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const lpic2Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          (c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 212) ||
+          c.deck.includes('LPIC-2') ||
+          c.deck.includes('Topic 2') ||
+          c.objectiveId?.startsWith('2')
+      ),
+    [cards]
+  );
+  const lpic2Mastered = lpic2Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const lpic3Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          (c.topicNumber && c.topicNumber >= 300 && c.topicNumber <= 364) ||
+          c.deck.includes('LPIC-3') ||
+          c.deck.includes('Topic 3') ||
+          c.objectiveId?.startsWith('3')
+      ),
+    [cards]
+  );
+  const lpic3Mastered = lpic3Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   // Compute metrics for Topic 101, Topic 102, Topic 103, Topic 104, and Topic 105
   const topic101Cards = useMemo(
     () => cards.filter((c) => c.topicNumber === 101 || c.deck.includes('Topic 101') || c.objectiveId?.startsWith('101.')),
@@ -1054,7 +1160,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           c.topicNumber === 306 ||
           c.deck.includes('Topic 306') ||
           c.objectiveId?.startsWith('361.') ||
-          c.objectiveId?.startsWith('362.')
+          c.objectiveId?.startsWith('362.') ||
+          c.objectiveId?.startsWith('363.') ||
+          c.objectiveId?.startsWith('364.')
       ),
     [cards]
   );
@@ -1168,8 +1276,42 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic362Mastered = topic362Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic363Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 363 ||
+          c.deck.includes('Topic 363') ||
+          c.objectiveId?.startsWith('363.')
+      ),
+    [cards]
+  );
+  const topic363Mastered = topic363Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic364Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 364 ||
+          c.deck.includes('Topic 364') ||
+          c.objectiveId?.startsWith('364.')
+      ),
+    [cards]
+  );
+  const topic364Mastered = topic364Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 362
+    selectedTopic === 'lpic1'
+      ? 'LPIC-1: Linux Administrator (All Decks)'
+      : selectedTopic === 'lpic2'
+      ? 'LPIC-2: Linux Engineer (All Decks)'
+      : selectedTopic === 'lpic3'
+      ? 'LPIC-3: Enterprise Professional (All Specialty Decks)'
+      : selectedTopic === 364
+      ? 'Topic 364: Single Node High Availability'
+      : selectedTopic === 363
+      ? 'Topic 363: High Availability Distributed Storage'
+      : selectedTopic === 362
       ? 'Topic 362: High Availability Cluster Storage'
       : selectedTopic === 361
       ? 'Topic 361: High Availability Cluster Management'
@@ -1246,7 +1388,17 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 362
+    selectedTopic === 'lpic1'
+      ? `${lpic1Cards.length} Cards • 9 Topics (Exams 101 & 102)`
+      : selectedTopic === 'lpic2'
+      ? `${lpic2Cards.length} Cards • 13 Topics (Exams 201 & 202)`
+      : selectedTopic === 'lpic3'
+      ? `${lpic3Cards.length} Cards • 15 Topics (Exams 300, 303, 305, 306)`
+      : selectedTopic === 364
+      ? '100 Cards • 4 Sub-Objectives (Weight 12)'
+      : selectedTopic === 363
+      ? '100 Cards • 2 Sub-Objectives (Weight 13)'
+      : selectedTopic === 362
       ? '100 Cards • 3 Sub-Objectives (Weight 13)'
       : selectedTopic === 361
       ? '100 Cards • 3 Sub-Objectives (Weight 22)'
@@ -1323,7 +1475,17 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 362
+    selectedTopic === 'lpic1'
+      ? lpic1Mastered
+      : selectedTopic === 'lpic2'
+      ? lpic2Mastered
+      : selectedTopic === 'lpic3'
+      ? lpic3Mastered
+      : selectedTopic === 364
+      ? topic364Mastered
+      : selectedTopic === 363
+      ? topic363Mastered
+      : selectedTopic === 362
       ? topic362Mastered
       : selectedTopic === 361
       ? topic361Mastered
@@ -1400,7 +1562,17 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 362
+    selectedTopic === 'lpic1'
+      ? lpic1Cards.length
+      : selectedTopic === 'lpic2'
+      ? lpic2Cards.length
+      : selectedTopic === 'lpic3'
+      ? lpic3Cards.length
+      : selectedTopic === 364
+      ? topic364Cards.length || 100
+      : selectedTopic === 363
+      ? topic363Cards.length || 100
+      : selectedTopic === 362
       ? topic362Cards.length || 100
       : selectedTopic === 361
       ? topic361Cards.length || 100
@@ -1480,553 +1652,316 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto w-full flex flex-col items-center justify-center pb-24 px-2">
-      {/* Top Topic Switcher Tabs */}
-      <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
-        <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
-          <button
-            onClick={() => handleTopicSelect(361)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 361
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Server className="w-4 h-4" />
-            <span>Topic 361 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (306)
-            </span>
-          </button>
+      {/* 3 Certification Comboboxes Section */}
+      <div className="w-full mb-5 bg-white border border-[#d3c5ab] rounded-2xl p-3 sm:p-4 shadow-2xs">
+        {/* Header with Title and All Certifications Quick Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#d3c5ab]/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#f8ecdb] text-[#785a00] flex items-center justify-center border border-[#d3c5ab]/80 shrink-0">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm sm:text-base font-bold text-[#201b11]">
+                Certification Topic Selectors
+              </h2>
+              <p className="text-xs text-[#817660]">
+                Select a topic from any certification combobox or study an entire certification deck
+              </p>
+            </div>
+          </div>
 
-          <button
-            onClick={() => handleTopicSelect(362)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 362
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <HardDrive className="w-4 h-4" />
-            <span>Topic 362 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (306)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(353)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 353
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Cloud className="w-4 h-4" />
-            <span>Topic 353 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (305)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(352)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 352
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Boxes className="w-4 h-4" />
-            <span>Topic 352 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (305)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(351)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 351
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Cpu className="w-4 h-4" />
-            <span>Topic 351 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (305)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(328)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 328
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Topic 328 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (303)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(327)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 327
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Lock className="w-4 h-4" />
-            <span>Topic 327 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (303)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(326)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 326
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Topic 326 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (303)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(325)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 325
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Topic 325 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (303)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(306)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 306
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Server className="w-4 h-4" />
-            <span>Topic 306 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (306)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(305)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 305
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Topic 305 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (305)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(304)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 304
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Monitor className="w-4 h-4" />
-            <span>Topic 304 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (300)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(303)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 303
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Share2 className="w-4 h-4" />
-            <span>Topic 303 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (300)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(302)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 302
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Topic 302 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (300)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(301)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 301
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <FolderTree className="w-4 h-4" />
-            <span>Topic 301 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-3 (300)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(212)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 212
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Lock className="w-4 h-4" />
-            <span>Topic 212 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (202)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(211)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 211
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Mail className="w-4 h-4" />
-            <span>Topic 211 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (202)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(210)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 210
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Topic 210 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (202)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(209)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 209
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Share2 className="w-4 h-4" />
-            <span>Topic 209 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (202)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(208)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 208
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Server className="w-4 h-4" />
-            <span>Topic 208 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (202)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(207)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 207
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Globe className="w-4 h-4" />
-            <span>Topic 207 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (202)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(206)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 206
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Wrench className="w-4 h-4" />
-            <span>Topic 206 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (201)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(205)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 205
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Network className="w-4 h-4" />
-            <span>Topic 205 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (201)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(204)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 204
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <FolderTree className="w-4 h-4" />
-            <span>Topic 204 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(203)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 203
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <HardDrive className="w-4 h-4" />
-            <span>Topic 203 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2 (201)
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(202)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 202
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Power className="w-4 h-4" />
-            <span>Topic 202 Deck (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(201)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 201
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Cpu className="w-4 h-4" />
-            <span>Topic 201 (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(200)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 200
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Activity className="w-4 h-4" />
-            <span>Topic 200 (100)</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
-              LPIC-2
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(110)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 110
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Topic 110 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(109)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 109
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Network className="w-4 h-4" />
-            <span>Topic 109 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(108)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 108
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Server className="w-4 h-4" />
-            <span>Topic 108 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(106)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 106
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Monitor className="w-4 h-4" />
-            <span>Topic 106 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(105)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 105
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Code2 className="w-4 h-4" />
-            <span>Topic 105 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(104)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 104
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <HardDrive className="w-4 h-4" />
-            <span>Topic 104 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(103)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 103
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Terminal className="w-4 h-4" />
-            <span>Topic 103 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(102)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 102
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Package className="w-4 h-4" />
-            <span>Topic 102 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect(101)}
-            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              selectedTopic === 101
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Cpu className="w-4 h-4" />
-            <span>Topic 101 (100)</span>
-          </button>
-
-          <button
-            onClick={() => handleTopicSelect('all')}
-            className={`hidden sm:flex px-3 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer items-center justify-center gap-1.5 ${
-              selectedTopic === 'all'
-                ? 'bg-[#785a00] text-white shadow-xs'
-                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>All ({cards.length})</span>
-          </button>
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            <button
+              onClick={() => handleTopicSelect('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                selectedTopic === 'all'
+                  ? 'bg-[#785a00] text-white shadow-xs'
+                  : 'bg-[#fffaf3] text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>All Certifications ({cards.length})</span>
+            </button>
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#f8ecdb]/50 border border-[#d3c5ab]/60 text-xs text-[#817660]">
+              <span>Mastered:</span>
+              <strong className="text-[#28A745] font-bold">{masteredCardIds.length}</strong>
+              <span>/ {cards.length}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 pr-2 text-xs text-[#817660]">
-          <span>Total Mastered:</span>
-          <strong className="text-[#28A745] font-bold">{masteredCardIds.length}</strong>
+        {/* 3 Combobox Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3">
+          {/* Combobox 1: LPIC-1 */}
+          <div
+            className={`rounded-xl p-3 border transition-all ${
+              selectedTopic === 'lpic1' ||
+              (typeof selectedTopic === 'number' && selectedTopic >= 101 && selectedTopic <= 110)
+                ? 'bg-[#fffaf3] border-[#785a00] ring-2 ring-[#785a00]/20 shadow-xs'
+                : 'bg-[#fcfaf7] border-[#d3c5ab] hover:border-[#b8a687]'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#e3f2fd] text-[#1976d2] flex items-center justify-center shrink-0">
+                  <Cpu className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-xs sm:text-sm text-[#201b11] leading-tight">
+                    LPIC-1
+                  </h3>
+                  <span className="text-[10px] text-[#817660] block leading-tight">
+                    Linux Administrator
+                  </span>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#1976d2] border border-[#d3c5ab]/60">
+                {lpic1Cards.length} Cards
+              </span>
+            </div>
+
+            {/* LPIC-1 Combobox Select */}
+            <div className="relative mt-2">
+              <select
+                aria-label="LPIC-1 Topics"
+                value={
+                  selectedTopic === 'lpic1' ||
+                  (typeof selectedTopic === 'number' && selectedTopic >= 101 && selectedTopic <= 110)
+                    ? String(selectedTopic)
+                    : ''
+                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (!val) return;
+                  if (val === 'lpic1') {
+                    handleTopicSelect('lpic1');
+                  } else {
+                    handleTopicSelect(Number(val) as SelectedTopic);
+                  }
+                }}
+                className="w-full text-xs font-semibold py-2 pl-2.5 pr-8 bg-white border border-[#d3c5ab] rounded-xl text-[#201b11] appearance-none focus:outline-none focus:ring-2 focus:ring-[#785a00] cursor-pointer shadow-2xs"
+              >
+                <option value="">— Select LPIC-1 Topic —</option>
+                <option value="lpic1">🎓 All LPIC-1 Topics (9 Topics • {lpic1Cards.length} Cards)</option>
+                <optgroup label="Exam 101-500 Topics">
+                  <option value="101">Topic 101: System Architecture (100)</option>
+                  <option value="102">Topic 102: Linux Installation & Package Management (100)</option>
+                  <option value="103">Topic 103: GNU & Unix Commands (100)</option>
+                  <option value="104">Topic 104: Devices, Filesystems & FHS (100)</option>
+                </optgroup>
+                <optgroup label="Exam 102-500 Topics">
+                  <option value="105">Topic 105: Shells & Shell Scripting (100)</option>
+                  <option value="106">Topic 106: User Interfaces & Desktops (100)</option>
+                  <option value="108">Topic 108: Essential System Services (100)</option>
+                  <option value="109">Topic 109: Networking Fundamentals (100)</option>
+                  <option value="110">Topic 110: Security (100)</option>
+                </optgroup>
+              </select>
+              <ChevronDown className="w-4 h-4 text-[#817660] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-2.5 flex items-center justify-between text-[10px] text-[#817660]">
+              <span>Mastery:</span>
+              <span className="font-semibold text-[#201b11]">
+                {lpic1Mastered} / {lpic1Cards.length} ({lpic1Cards.length > 0 ? Math.round((lpic1Mastered / lpic1Cards.length) * 100) : 0}%)
+              </span>
+            </div>
+            <div className="w-full bg-[#e8decd] h-1.5 rounded-full overflow-hidden mt-1">
+              <div
+                className="bg-[#1976d2] h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${lpic1Cards.length > 0 ? Math.round((lpic1Mastered / lpic1Cards.length) * 100) : 0}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Combobox 2: LPIC-2 */}
+          <div
+            className={`rounded-xl p-3 border transition-all ${
+              selectedTopic === 'lpic2' ||
+              (typeof selectedTopic === 'number' && selectedTopic >= 200 && selectedTopic <= 212)
+                ? 'bg-[#fffaf3] border-[#785a00] ring-2 ring-[#785a00]/20 shadow-xs'
+                : 'bg-[#fcfaf7] border-[#d3c5ab] hover:border-[#b8a687]'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#e8f5e9] text-[#2e7d32] flex items-center justify-center shrink-0">
+                  <Server className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-xs sm:text-sm text-[#201b11] leading-tight">
+                    LPIC-2
+                  </h3>
+                  <span className="text-[10px] text-[#817660] block leading-tight">
+                    Linux Engineer
+                  </span>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#2e7d32] border border-[#d3c5ab]/60">
+                {lpic2Cards.length} Cards
+              </span>
+            </div>
+
+            {/* LPIC-2 Combobox Select */}
+            <div className="relative mt-2">
+              <select
+                aria-label="LPIC-2 Topics"
+                value={
+                  selectedTopic === 'lpic2' ||
+                  (typeof selectedTopic === 'number' && selectedTopic >= 200 && selectedTopic <= 212)
+                    ? String(selectedTopic)
+                    : ''
+                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (!val) return;
+                  if (val === 'lpic2') {
+                    handleTopicSelect('lpic2');
+                  } else {
+                    handleTopicSelect(Number(val) as SelectedTopic);
+                  }
+                }}
+                className="w-full text-xs font-semibold py-2 pl-2.5 pr-8 bg-white border border-[#d3c5ab] rounded-xl text-[#201b11] appearance-none focus:outline-none focus:ring-2 focus:ring-[#785a00] cursor-pointer shadow-2xs"
+              >
+                <option value="">— Select LPIC-2 Topic —</option>
+                <option value="lpic2">🎓 All LPIC-2 Topics (13 Topics • {lpic2Cards.length} Cards)</option>
+                <optgroup label="Exam 201-450 Topics">
+                  <option value="200">Topic 200: Capacity Planning (100)</option>
+                  <option value="201">Topic 201: Linux Kernel (100)</option>
+                  <option value="202">Topic 202: System Startup (100)</option>
+                  <option value="203">Topic 203: Filesystem and Devices (100)</option>
+                  <option value="204">Topic 204: Advanced Storage Device Admin (100)</option>
+                  <option value="205">Topic 205: Network Configuration (100)</option>
+                  <option value="206">Topic 206: System Maintenance (100)</option>
+                </optgroup>
+                <optgroup label="Exam 202-450 Topics">
+                  <option value="207">Topic 207: Domain Name Server (100)</option>
+                  <option value="208">Topic 208: HTTP Servers (100)</option>
+                  <option value="209">Topic 209: File Sharing (100)</option>
+                  <option value="210">Topic 210: Network Client Management (100)</option>
+                  <option value="211">Topic 211: E-Mail Services (100)</option>
+                  <option value="212">Topic 212: System Security (100)</option>
+                </optgroup>
+              </select>
+              <ChevronDown className="w-4 h-4 text-[#817660] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-2.5 flex items-center justify-between text-[10px] text-[#817660]">
+              <span>Mastery:</span>
+              <span className="font-semibold text-[#201b11]">
+                {lpic2Mastered} / {lpic2Cards.length} ({lpic2Cards.length > 0 ? Math.round((lpic2Mastered / lpic2Cards.length) * 100) : 0}%)
+              </span>
+            </div>
+            <div className="w-full bg-[#e8decd] h-1.5 rounded-full overflow-hidden mt-1">
+              <div
+                className="bg-[#2e7d32] h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${lpic2Cards.length > 0 ? Math.round((lpic2Mastered / lpic2Cards.length) * 100) : 0}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Combobox 3: LPIC-3 */}
+          <div
+            className={`rounded-xl p-3 border transition-all ${
+              selectedTopic === 'lpic3' ||
+              (typeof selectedTopic === 'number' && selectedTopic >= 300 && selectedTopic <= 364)
+                ? 'bg-[#fffaf3] border-[#785a00] ring-2 ring-[#785a00]/20 shadow-xs'
+                : 'bg-[#fcfaf7] border-[#d3c5ab] hover:border-[#b8a687]'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#f3e5f5] text-[#7b1fa2] flex items-center justify-center shrink-0">
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-xs sm:text-sm text-[#201b11] leading-tight">
+                    LPIC-3
+                  </h3>
+                  <span className="text-[10px] text-[#817660] block leading-tight">
+                    Enterprise Professional
+                  </span>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#7b1fa2] border border-[#d3c5ab]/60">
+                {lpic3Cards.length} Cards
+              </span>
+            </div>
+
+            {/* LPIC-3 Combobox Select */}
+            <div className="relative mt-2">
+              <select
+                aria-label="LPIC-3 Topics"
+                value={
+                  selectedTopic === 'lpic3' ||
+                  (typeof selectedTopic === 'number' && selectedTopic >= 300 && selectedTopic <= 364)
+                    ? String(selectedTopic)
+                    : ''
+                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (!val) return;
+                  if (val === 'lpic3') {
+                    handleTopicSelect('lpic3');
+                  } else {
+                    handleTopicSelect(Number(val) as SelectedTopic);
+                  }
+                }}
+                className="w-full text-xs font-semibold py-2 pl-2.5 pr-8 bg-white border border-[#d3c5ab] rounded-xl text-[#201b11] appearance-none focus:outline-none focus:ring-2 focus:ring-[#785a00] cursor-pointer shadow-2xs"
+              >
+                <option value="">— Select LPIC-3 Topic —</option>
+                <option value="lpic3">🎓 All LPIC-3 Topics ({lpic3Cards.length} Cards)</option>
+                <optgroup label="Exam 306-300: High Availability & Storage">
+                  <option value="306">Exam 306: All HA & Storage Clusters Decks (400)</option>
+                  <option value="361">Topic 361: HA Cluster Management (100)</option>
+                  <option value="362">Topic 362: HA Cluster Storage (100)</option>
+                  <option value="363">Topic 363: HA Distributed Storage (100)</option>
+                  <option value="364">Topic 364: Single Node High Availability (100)</option>
+                </optgroup>
+                <optgroup label="Exam 305-300: Virtualization & Containers">
+                  <option value="305">Exam 305: All Virtualization & Containers Decks (300)</option>
+                  <option value="351">Topic 351: Full Virtualization (100)</option>
+                  <option value="352">Topic 352: Container Virtualization (100)</option>
+                  <option value="353">Topic 353: VM Deployment and Provisioning (100)</option>
+                </optgroup>
+                <optgroup label="Exam 303-300: Security">
+                  <option value="325">Topic 325: Cryptography (100)</option>
+                  <option value="326">Topic 326: Access Control & Host Security (100)</option>
+                  <option value="327">Topic 327: Access Control / SELinux (100)</option>
+                  <option value="328">Topic 328: Network Security (100)</option>
+                </optgroup>
+                <optgroup label="Exam 300-100: Mixed Environment">
+                  <option value="301">Topic 301: OpenLDAP Configuration (100)</option>
+                  <option value="302">Topic 302: OpenLDAP Authentication & Integration (100)</option>
+                  <option value="303">Topic 303: Samba Basics (100)</option>
+                  <option value="304">Topic 304: Samba Share Configuration (100)</option>
+                </optgroup>
+              </select>
+              <ChevronDown className="w-4 h-4 text-[#817660] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-2.5 flex items-center justify-between text-[10px] text-[#817660]">
+              <span>Mastery:</span>
+              <span className="font-semibold text-[#201b11]">
+                {lpic3Mastered} / {lpic3Cards.length} ({lpic3Cards.length > 0 ? Math.round((lpic3Mastered / lpic3Cards.length) * 100) : 0}%)
+              </span>
+            </div>
+            <div className="w-full bg-[#e8decd] h-1.5 rounded-full overflow-hidden mt-1">
+              <div
+                className="bg-[#7b1fa2] h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${lpic3Cards.length > 0 ? Math.round((lpic3Mastered / lpic3Cards.length) * 100) : 0}%`,
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2035,12 +1970,34 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-[#785a00] text-white flex items-center justify-center font-mono font-bold text-lg shadow-sm shrink-0">
-              {selectedTopic === 'all' ? '101+' : selectedTopic}
+              {selectedTopic === 'all' ? 'ALL' : selectedTopic === 'lpic1' ? 'LP-1' : selectedTopic === 'lpic2' ? 'LP-2' : selectedTopic === 'lpic3' ? 'LP-3' : selectedTopic}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  {selectedTopic === 362 || selectedTopic === 361 || selectedTopic === 306 ? 'LPIC-3 Exam 306-300' : selectedTopic === 353 || selectedTopic === 352 || selectedTopic === 351 || selectedTopic === 305 ? 'LPIC-3 Exam 305-300' : selectedTopic === 328 || selectedTopic === 327 || selectedTopic === 326 || selectedTopic === 325 ? 'LPIC-3 Exam 303-300' : selectedTopic === 301 || selectedTopic === 302 || selectedTopic === 303 || selectedTopic === 304 ? 'LPIC-3 Exam 300-100' : selectedTopic === 200 || selectedTopic === 201 || selectedTopic === 202 ? 'LPIC-2 Exam 201-450' : selectedTopic >= 203 && selectedTopic <= 212 ? 'LPIC-2 Exam 202-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
+                  {selectedTopic === 'lpic1'
+                    ? 'LPIC-1 Curriculum (Exams 101 & 102)'
+                    : selectedTopic === 'lpic2'
+                    ? 'LPIC-2 Curriculum (Exams 201 & 202)'
+                    : selectedTopic === 'lpic3'
+                    ? 'LPIC-3 Enterprise Specialty'
+                    : selectedTopic === 364 || selectedTopic === 363 || selectedTopic === 362 || selectedTopic === 361 || selectedTopic === 306
+                    ? 'LPIC-3 Exam 306-300'
+                    : selectedTopic === 353 || selectedTopic === 352 || selectedTopic === 351 || selectedTopic === 305
+                    ? 'LPIC-3 Exam 305-300'
+                    : selectedTopic === 328 || selectedTopic === 327 || selectedTopic === 326 || selectedTopic === 325
+                    ? 'LPIC-3 Exam 303-300'
+                    : selectedTopic === 301 || selectedTopic === 302 || selectedTopic === 303 || selectedTopic === 304
+                    ? 'LPIC-3 Exam 300-100'
+                    : selectedTopic === 200 || selectedTopic === 201 || selectedTopic === 202
+                    ? 'LPIC-2 Exam 201-450'
+                    : typeof selectedTopic === 'number' && selectedTopic >= 203 && selectedTopic <= 212
+                    ? 'LPIC-2 Exam 202-450'
+                    : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110
+                    ? 'LPIC-1 Exam 102-500'
+                    : selectedTopic === 101 || selectedTopic === 102 || selectedTopic === 103 || selectedTopic === 104
+                    ? 'LPIC-1 Exam 101-500'
+                    : 'All LPIC Certifications'}
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
                   {activeTopicBadge}
@@ -2055,7 +2012,15 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 362 ? 'Topic 362' : selectedTopic === 361 ? 'Topic 361' : selectedTopic === 353 ? 'Topic 353' : selectedTopic === 352 ? 'Topic 352' : selectedTopic === 351 ? 'Topic 351' : selectedTopic === 328 ? 'Topic 328' : selectedTopic === 327 ? 'Topic 327' : selectedTopic === 326 ? 'Topic 326' : selectedTopic === 325 ? 'Topic 325' : selectedTopic === 306 ? 'Topic 306' : selectedTopic === 305 ? 'Topic 305' : selectedTopic === 304 ? 'Topic 304' : selectedTopic === 303 ? 'Topic 303' : selectedTopic === 302 ? 'Topic 302' : selectedTopic === 301 ? 'Topic 301' : selectedTopic === 212 ? 'Topic 212' : selectedTopic === 211 ? 'Topic 211' : selectedTopic === 210 ? 'Topic 210' : selectedTopic === 209 ? 'Topic 209' : selectedTopic === 208 ? 'Topic 208' : selectedTopic === 207 ? 'Topic 207' : selectedTopic === 206 ? 'Topic 206' : selectedTopic === 205 ? 'Topic 205' : selectedTopic === 204 ? 'Topic 204' : selectedTopic === 203 ? 'Topic 203' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 'all'
+                  ? 'Overall'
+                  : selectedTopic === 'lpic1'
+                  ? 'LPIC-1'
+                  : selectedTopic === 'lpic2'
+                  ? 'LPIC-2'
+                  : selectedTopic === 'lpic3'
+                  ? 'LPIC-3'
+                  : `Topic ${selectedTopic}`} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -2083,8 +2048,153 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 362 ? topic362Cards.length : selectedTopic === 361 ? topic361Cards.length : selectedTopic === 353 ? topic353Cards.length : selectedTopic === 352 ? topic352Cards.length : selectedTopic === 351 ? topic351Cards.length : selectedTopic === 328 ? topic328Cards.length : selectedTopic === 327 ? topic327Cards.length : selectedTopic === 326 ? topic326Cards.length : selectedTopic === 325 ? topic325Cards.length : selectedTopic === 306 ? topic306Cards.length : selectedTopic === 305 ? topic305Cards.length : selectedTopic === 304 ? topic304Cards.length : selectedTopic === 303 ? topic303Cards.length : selectedTopic === 302 ? topic302Cards.length : selectedTopic === 301 ? topic301Cards.length : selectedTopic === 212 ? topic212Cards.length : selectedTopic === 211 ? topic211Cards.length : selectedTopic === 210 ? topic210Cards.length : selectedTopic === 209 ? topic209Cards.length : selectedTopic === 208 ? topic208Cards.length : selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({activeTopicTotal})
             </button>
+
+                        {/* Quick Topic Jump Pills for LPIC-1 */}
+            {selectedTopic === 'lpic1' && (
+              <div className="flex flex-wrap gap-1.5 items-center">
+                <span className="text-[11px] font-bold text-[#817660] mr-0.5">Jump to:</span>
+                {[101, 102, 103, 104, 105, 106, 108, 109, 110].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => handleTopicSelect(num as SelectedTopic)}
+                    className="px-2 py-1 rounded-lg text-xs font-semibold bg-white text-[#4f4632] hover:bg-[#f8ecdb] hover:text-[#785a00] border border-[#d3c5ab] transition-all cursor-pointer"
+                  >
+                    Topic {num}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Quick Topic Jump Pills for LPIC-2 */}
+            {selectedTopic === 'lpic2' && (
+              <div className="flex flex-wrap gap-1.5 items-center">
+                <span className="text-[11px] font-bold text-[#817660] mr-0.5">Jump to:</span>
+                {[200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => handleTopicSelect(num as SelectedTopic)}
+                    className="px-2 py-1 rounded-lg text-xs font-semibold bg-white text-[#4f4632] hover:bg-[#f8ecdb] hover:text-[#785a00] border border-[#d3c5ab] transition-all cursor-pointer"
+                  >
+                    Topic {num}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Quick Specialty Exam Pills for LPIC-3 */}
+            {selectedTopic === 'lpic3' && (
+              <div className="flex flex-wrap gap-1.5 items-center">
+                <span className="text-[11px] font-bold text-[#817660] mr-0.5">Jump to:</span>
+                <button
+                  onClick={() => handleTopicSelect(306)}
+                  className="px-2 py-1 rounded-lg text-xs font-semibold bg-white text-[#4f4632] hover:bg-[#f8ecdb] hover:text-[#785a00] border border-[#d3c5ab] transition-all cursor-pointer"
+                >
+                  Exam 306 (HA & Storage)
+                </button>
+                <button
+                  onClick={() => handleTopicSelect(305)}
+                  className="px-2 py-1 rounded-lg text-xs font-semibold bg-white text-[#4f4632] hover:bg-[#f8ecdb] hover:text-[#785a00] border border-[#d3c5ab] transition-all cursor-pointer"
+                >
+                  Exam 305 (Virtualization)
+                </button>
+                <button
+                  onClick={() => handleTopicSelect(325)}
+                  className="px-2 py-1 rounded-lg text-xs font-semibold bg-white text-[#4f4632] hover:bg-[#f8ecdb] hover:text-[#785a00] border border-[#d3c5ab] transition-all cursor-pointer"
+                >
+                  Exam 303 (Security)
+                </button>
+                <button
+                  onClick={() => handleTopicSelect(301)}
+                  className="px-2 py-1 rounded-lg text-xs font-semibold bg-white text-[#4f4632] hover:bg-[#f8ecdb] hover:text-[#785a00] border border-[#d3c5ab] transition-all cursor-pointer"
+                >
+                  Exam 300 (Mixed Env)
+                </button>
+              </div>
+            )}
+
+            {/* Topic 364 Sub-Objectives */}
+            {selectedTopic === 364 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('364.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '364.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Hardware and Resource High Availability (364.1) - 20 cards (Weight 2)"
+                >
+                  364.1 Hardware HA & IPMI (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('364.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '364.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Advanced RAID (364.2) - 20 cards (Weight 2)"
+                >
+                  364.2 Advanced RAID (20)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('364.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '364.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Advanced LVM (364.3) - 25 cards (Weight 3)"
+                >
+                  364.3 Advanced LVM (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('364.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '364.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Network High Availability (364.4) - 35 cards (Weight 5)"
+                >
+                  364.4 Network HA & Bonding (35)
+                </button>
+              </>
+            )}
+
+            {/* Topic 363 Sub-Objectives */}
+            {selectedTopic === 363 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('363.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '363.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="GlusterFS Storage Clusters (363.1) - 40 cards (Weight 5)"
+                >
+                  363.1 GlusterFS (40)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('363.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '363.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Ceph Storage Clusters (363.2) - 60 cards (Weight 8)"
+                >
+                  363.2 Ceph Clusters (60)
+                </button>
+              </>
+            )}
 
             {/* Topic 362 Sub-Objectives */}
             {selectedTopic === 362 && (
@@ -4517,7 +4627,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div className="p-4 border-b border-[#d3c5ab] flex justify-between items-center bg-[#fff8f2] rounded-t-2xl">
               <div>
                 <h3 className="font-bold text-base text-[#201b11]">
-                  {selectedTopic !== 'all' ? `Topic ${selectedTopic}` : 'All LPIC'} Flashcard Index
+                  {selectedTopic === 'all' ? 'All LPIC' : selectedTopic === 'lpic1' ? 'LPIC-1' : selectedTopic === 'lpic2' ? 'LPIC-2' : selectedTopic === 'lpic3' ? 'LPIC-3' : `Topic ${selectedTopic}`} Flashcard Index
                 </h3>
                 <p className="text-xs text-[#817660]">
                   Click on any card to jump directly to it ({filteredCards.length} cards available)
