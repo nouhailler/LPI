@@ -38,16 +38,18 @@ import {
   Mail,
   Lock,
   Users,
+  Boxes,
+  Cloud,
 } from 'lucide-react';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
   onCardLearned?: (cardId: number) => void;
-  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328 | 351 | 'all';
+  initialTopic?: 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328 | 351 | 352 | 353 | 361 | 362 | 'all';
 }
 
-type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328 | 351 | 'all';
+type SelectedTopic = 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212 | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328 | 351 | 352 | 353 | 361 | 362 | 'all';
 
 type FilterObjective =
   | 'all-topic'
@@ -420,6 +422,34 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           c.topicNumber === 351 ||
           c.deck.includes('Topic 351') ||
           c.objectiveId?.startsWith('351.')
+      );
+    } else if (selectedTopic === 352) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 352 ||
+          c.deck.includes('Topic 352') ||
+          c.objectiveId?.startsWith('352.')
+      );
+    } else if (selectedTopic === 353) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 353 ||
+          c.deck.includes('Topic 353') ||
+          c.objectiveId?.startsWith('353.')
+      );
+    } else if (selectedTopic === 361) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 361 ||
+          c.deck.includes('Topic 361') ||
+          c.objectiveId?.startsWith('361.')
+      );
+    } else if (selectedTopic === 362) {
+      result = result.filter(
+        (c) =>
+          c.topicNumber === 362 ||
+          c.deck.includes('Topic 362') ||
+          c.objectiveId?.startsWith('362.')
       );
     }
 
@@ -1090,8 +1120,64 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic351Mastered = topic351Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic352Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 352 ||
+          c.deck.includes('Topic 352') ||
+          c.objectiveId?.startsWith('352.')
+      ),
+    [cards]
+  );
+  const topic352Mastered = topic352Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic353Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 353 ||
+          c.deck.includes('Topic 353') ||
+          c.objectiveId?.startsWith('353.')
+      ),
+    [cards]
+  );
+  const topic353Mastered = topic353Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic361Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 361 ||
+          c.deck.includes('Topic 361') ||
+          c.objectiveId?.startsWith('361.')
+      ),
+    [cards]
+  );
+  const topic361Mastered = topic361Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
+  const topic362Cards = useMemo(
+    () =>
+      cards.filter(
+        (c) =>
+          c.topicNumber === 362 ||
+          c.deck.includes('Topic 362') ||
+          c.objectiveId?.startsWith('362.')
+      ),
+    [cards]
+  );
+  const topic362Mastered = topic362Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const activeTopicTitle =
-    selectedTopic === 351
+    selectedTopic === 362
+      ? 'Topic 362: High Availability Cluster Storage'
+      : selectedTopic === 361
+      ? 'Topic 361: High Availability Cluster Management'
+      : selectedTopic === 353
+      ? 'Topic 353: VM Deployment and Provisioning'
+      : selectedTopic === 352
+      ? 'Topic 352: Container Virtualization'
+      : selectedTopic === 351
       ? 'Topic 351: Full Virtualization'
       : selectedTopic === 328
       ? 'Topic 328: Network Security'
@@ -1160,7 +1246,15 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 351
+    selectedTopic === 362
+      ? '100 Cards • 3 Sub-Objectives (Weight 13)'
+      : selectedTopic === 361
+      ? '100 Cards • 3 Sub-Objectives (Weight 22)'
+      : selectedTopic === 353
+      ? '100 Cards • 4 Sub-Objectives (Weight 10)'
+      : selectedTopic === 352
+      ? '100 Cards • 4 Sub-Objectives (Weight 25)'
+      : selectedTopic === 351
       ? '100 Cards • 5 Sub-Objectives (Weight 25)'
       : selectedTopic === 328
       ? '100 Cards • 4 Sub-Objectives (Weight 17)'
@@ -1229,7 +1323,15 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : `${cards.length} Total Cards`;
 
   const activeTopicMastered =
-    selectedTopic === 351
+    selectedTopic === 362
+      ? topic362Mastered
+      : selectedTopic === 361
+      ? topic361Mastered
+      : selectedTopic === 353
+      ? topic353Mastered
+      : selectedTopic === 352
+      ? topic352Mastered
+      : selectedTopic === 351
       ? topic351Mastered
       : selectedTopic === 328
       ? topic328Mastered
@@ -1298,7 +1400,15 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : masteredCardIds.length;
 
   const activeTopicTotal =
-    selectedTopic === 351
+    selectedTopic === 362
+      ? topic362Cards.length || 100
+      : selectedTopic === 361
+      ? topic361Cards.length || 100
+      : selectedTopic === 353
+      ? topic353Cards.length || 100
+      : selectedTopic === 352
+      ? topic352Cards.length || 100
+      : selectedTopic === 351
       ? topic351Cards.length || 100
       : selectedTopic === 328
       ? topic328Cards.length || 100
@@ -1373,6 +1483,66 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       {/* Top Topic Switcher Tabs */}
       <div className="w-full flex items-center justify-between gap-2 mb-4 bg-white p-1.5 rounded-2xl border border-[#d3c5ab] shadow-2xs">
         <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
+          <button
+            onClick={() => handleTopicSelect(361)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 361
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Server className="w-4 h-4" />
+            <span>Topic 361 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (306)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(362)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 362
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <HardDrive className="w-4 h-4" />
+            <span>Topic 362 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (306)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(353)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 353
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Cloud className="w-4 h-4" />
+            <span>Topic 353 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (305)
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleTopicSelect(352)}
+            className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              selectedTopic === 352
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Boxes className="w-4 h-4" />
+            <span>Topic 352 Deck (100)</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-normal">
+              LPIC-3 (305)
+            </span>
+          </button>
+
           <button
             onClick={() => handleTopicSelect(351)}
             className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -1870,7 +2040,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-bold text-[#785a00] uppercase tracking-wider bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                  {selectedTopic === 351 || selectedTopic === 305 ? 'LPIC-3 Exam 305-300' : selectedTopic === 328 || selectedTopic === 327 || selectedTopic === 326 || selectedTopic === 325 ? 'LPIC-3 Exam 303-300' : selectedTopic === 306 ? 'LPIC-3 Exam 306-300' : selectedTopic === 301 || selectedTopic === 302 || selectedTopic === 303 || selectedTopic === 304 ? 'LPIC-3 Exam 300-100' : selectedTopic === 200 || selectedTopic === 201 || selectedTopic === 202 ? 'LPIC-2 Exam 201-450' : selectedTopic >= 203 && selectedTopic <= 212 ? 'LPIC-2 Exam 202-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
+                  {selectedTopic === 362 || selectedTopic === 361 || selectedTopic === 306 ? 'LPIC-3 Exam 306-300' : selectedTopic === 353 || selectedTopic === 352 || selectedTopic === 351 || selectedTopic === 305 ? 'LPIC-3 Exam 305-300' : selectedTopic === 328 || selectedTopic === 327 || selectedTopic === 326 || selectedTopic === 325 ? 'LPIC-3 Exam 303-300' : selectedTopic === 301 || selectedTopic === 302 || selectedTopic === 303 || selectedTopic === 304 ? 'LPIC-3 Exam 300-100' : selectedTopic === 200 || selectedTopic === 201 || selectedTopic === 202 ? 'LPIC-2 Exam 201-450' : selectedTopic >= 203 && selectedTopic <= 212 ? 'LPIC-2 Exam 202-450' : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110 ? 'LPIC-1 Exam 102-500' : 'LPIC-1 Exam 101-500'}
                 </span>
                 <span className="text-[11px] font-bold text-[#495e8a] bg-white px-2 py-0.5 rounded border border-[#d3c5ab]">
                   {activeTopicBadge}
@@ -1885,7 +2055,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           <div className="flex items-center gap-4 bg-white/80 border border-[#d3c5ab] px-4 py-2 rounded-xl self-start md:self-auto shrink-0">
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                {selectedTopic === 351 ? 'Topic 351' : selectedTopic === 328 ? 'Topic 328' : selectedTopic === 327 ? 'Topic 327' : selectedTopic === 326 ? 'Topic 326' : selectedTopic === 325 ? 'Topic 325' : selectedTopic === 306 ? 'Topic 306' : selectedTopic === 305 ? 'Topic 305' : selectedTopic === 304 ? 'Topic 304' : selectedTopic === 303 ? 'Topic 303' : selectedTopic === 302 ? 'Topic 302' : selectedTopic === 301 ? 'Topic 301' : selectedTopic === 212 ? 'Topic 212' : selectedTopic === 211 ? 'Topic 211' : selectedTopic === 210 ? 'Topic 210' : selectedTopic === 209 ? 'Topic 209' : selectedTopic === 208 ? 'Topic 208' : selectedTopic === 207 ? 'Topic 207' : selectedTopic === 206 ? 'Topic 206' : selectedTopic === 205 ? 'Topic 205' : selectedTopic === 204 ? 'Topic 204' : selectedTopic === 203 ? 'Topic 203' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
+                {selectedTopic === 362 ? 'Topic 362' : selectedTopic === 361 ? 'Topic 361' : selectedTopic === 353 ? 'Topic 353' : selectedTopic === 352 ? 'Topic 352' : selectedTopic === 351 ? 'Topic 351' : selectedTopic === 328 ? 'Topic 328' : selectedTopic === 327 ? 'Topic 327' : selectedTopic === 326 ? 'Topic 326' : selectedTopic === 325 ? 'Topic 325' : selectedTopic === 306 ? 'Topic 306' : selectedTopic === 305 ? 'Topic 305' : selectedTopic === 304 ? 'Topic 304' : selectedTopic === 303 ? 'Topic 303' : selectedTopic === 302 ? 'Topic 302' : selectedTopic === 301 ? 'Topic 301' : selectedTopic === 212 ? 'Topic 212' : selectedTopic === 211 ? 'Topic 211' : selectedTopic === 210 ? 'Topic 210' : selectedTopic === 209 ? 'Topic 209' : selectedTopic === 208 ? 'Topic 208' : selectedTopic === 207 ? 'Topic 207' : selectedTopic === 206 ? 'Topic 206' : selectedTopic === 205 ? 'Topic 205' : selectedTopic === 204 ? 'Topic 204' : selectedTopic === 203 ? 'Topic 203' : selectedTopic === 202 ? 'Topic 202' : selectedTopic === 201 ? 'Topic 201' : selectedTopic === 200 ? 'Topic 200' : selectedTopic === 110 ? 'Topic 110' : selectedTopic === 109 ? 'Topic 109' : selectedTopic === 108 ? 'Topic 108' : selectedTopic === 106 ? 'Topic 106' : selectedTopic === 105 ? 'Topic 105' : selectedTopic === 104 ? 'Topic 104' : selectedTopic === 103 ? 'Topic 103' : selectedTopic === 102 ? 'Topic 102' : selectedTopic === 101 ? 'Topic 101' : 'Overall'} Mastery
               </span>
               <span className="text-base font-bold text-[#785a00]">
                 {activeTopicMastered} / {activeTopicTotal}{' '}
@@ -1913,8 +2083,196 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              All In Deck ({selectedTopic === 351 ? topic351Cards.length : selectedTopic === 328 ? topic328Cards.length : selectedTopic === 327 ? topic327Cards.length : selectedTopic === 326 ? topic326Cards.length : selectedTopic === 325 ? topic325Cards.length : selectedTopic === 306 ? topic306Cards.length : selectedTopic === 305 ? topic305Cards.length : selectedTopic === 304 ? topic304Cards.length : selectedTopic === 303 ? topic303Cards.length : selectedTopic === 302 ? topic302Cards.length : selectedTopic === 301 ? topic301Cards.length : selectedTopic === 212 ? topic212Cards.length : selectedTopic === 211 ? topic211Cards.length : selectedTopic === 210 ? topic210Cards.length : selectedTopic === 209 ? topic209Cards.length : selectedTopic === 208 ? topic208Cards.length : selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
+              All In Deck ({selectedTopic === 362 ? topic362Cards.length : selectedTopic === 361 ? topic361Cards.length : selectedTopic === 353 ? topic353Cards.length : selectedTopic === 352 ? topic352Cards.length : selectedTopic === 351 ? topic351Cards.length : selectedTopic === 328 ? topic328Cards.length : selectedTopic === 327 ? topic327Cards.length : selectedTopic === 326 ? topic326Cards.length : selectedTopic === 325 ? topic325Cards.length : selectedTopic === 306 ? topic306Cards.length : selectedTopic === 305 ? topic305Cards.length : selectedTopic === 304 ? topic304Cards.length : selectedTopic === 303 ? topic303Cards.length : selectedTopic === 302 ? topic302Cards.length : selectedTopic === 301 ? topic301Cards.length : selectedTopic === 212 ? topic212Cards.length : selectedTopic === 211 ? topic211Cards.length : selectedTopic === 210 ? topic210Cards.length : selectedTopic === 209 ? topic209Cards.length : selectedTopic === 208 ? topic208Cards.length : selectedTopic === 207 ? topic207Cards.length : selectedTopic === 206 ? topic206Cards.length : selectedTopic === 205 ? topic205Cards.length : selectedTopic === 204 ? topic204Cards.length : selectedTopic === 203 ? topic203Cards.length : selectedTopic === 202 ? topic202Cards.length : selectedTopic === 201 ? topic201Cards.length : selectedTopic === 200 ? topic200Cards.length : selectedTopic === 110 ? topic110Cards.length : selectedTopic === 109 ? topic109Cards.length : selectedTopic === 108 ? topic108Cards.length : selectedTopic === 106 ? topic106Cards.length : selectedTopic === 105 ? topic105Cards.length : selectedTopic === 104 ? topic104Cards.length : selectedTopic === 103 ? topic103Cards.length : selectedTopic === 102 ? topic102Cards.length : selectedTopic === 101 ? topic101Cards.length : cards.length})
             </button>
+
+            {/* Topic 362 Sub-Objectives */}
+            {selectedTopic === 362 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('362.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '362.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="DRBD (362.1) - 45 cards (Weight 6)"
+                >
+                  362.1 DRBD (45)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('362.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '362.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Clustered Storage / SAN & iSCSI (362.2) - 25 cards (Weight 3)"
+                >
+                  362.2 SAN & iSCSI (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('362.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '362.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Clustered File Systems (362.3) - 30 cards (Weight 4)"
+                >
+                  362.3 Clustered FS (30)
+                </button>
+              </>
+            )}
+
+            {/* Topic 361 Sub-Objectives */}
+            {selectedTopic === 361 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('361.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '361.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="High Availability Concepts (361.1) - 25 cards (Weight 6)"
+                >
+                  361.1 HA Concepts (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('361.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '361.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Load Balanced Clusters (361.2) - 38 cards (Weight 8)"
+                >
+                  361.2 Load Balanced (38)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('361.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '361.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Failover Clusters (361.3) - 37 cards (Weight 8)"
+                >
+                  361.3 Failover Clusters (37)
+                </button>
+              </>
+            )}
+
+            {/* Topic 353 Sub-Objectives */}
+            {selectedTopic === 353 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('353.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Cloud Management Tools (353.1) - 24 cards (Weight 2)"
+                >
+                  353.1 Cloud Tools (24)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('353.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Packer (353.2) - 21 cards (Weight 2)"
+                >
+                  353.2 Packer (21)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('353.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="cloud-init (353.3) - 25 cards (Weight 3)"
+                >
+                  353.3 cloud-init (25)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('353.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '353.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Vagrant (353.4) - 30 cards (Weight 3)"
+                >
+                  353.4 Vagrant (30)
+                </button>
+              </>
+            )}
+
+            {/* Topic 352 Sub-Objectives */}
+            {selectedTopic === 352 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('352.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Container Concepts (352.1) - 28 cards (Weight 7)"
+                >
+                  352.1 Container Concepts (28)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('352.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="LXC (Linux Containers) (352.2) - 24 cards (Weight 6)"
+                >
+                  352.2 LXC (24)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('352.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Docker (352.3) - 36 cards (Weight 9)"
+                >
+                  352.3 Docker (36)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('352.4')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '352.4'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Container Orchestration Platforms (352.4) - 12 cards (Weight 3)"
+                >
+                  352.4 Orchestration (12)
+                </button>
+              </>
+            )}
 
             {/* Topic 351 Sub-Objectives */}
             {selectedTopic === 351 && (
