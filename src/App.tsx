@@ -8,12 +8,15 @@ import { LearningObjectivesView } from './components/LearningObjectivesView';
 import { PracticeExamView } from './components/PracticeExamView';
 import { FlashcardsView } from './components/FlashcardsView';
 import { GlossaryView } from './components/GlossaryView';
+import { TrainingHubView } from './components/training/TrainingHubView';
 import { ExplanationModal } from './components/ExplanationModal';
 import { ProfileModal } from './components/ProfileModal';
 import { SettingsModal } from './components/SettingsModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
 import { PracticeQuestion, TabType, UserStats } from './types';
+import { useLanguage } from './i18n/LanguageContext';
+import { frenchCertificationTiers, frenchPracticeQuestions } from './i18n/frenchData';
 import {
   initServiceWorker,
   subscribeToUpdateEvents,
@@ -22,6 +25,7 @@ import {
 } from './utils/updateService';
 
 export default function App() {
+  const { isFrench } = useLanguage();
   const [currentTab, setCurrentTab] = useState<TabType>('dashboard');
   const [userStats, setUserStats] = useState<UserStats>(initialUserStats);
   const [examTimerSeconds, setExamTimerSeconds] = useState(45 * 60 + 10); // 45:10
@@ -29,7 +33,7 @@ export default function App() {
   const [activeExplanation, setActiveExplanation] = useState<PracticeQuestion | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settingsInitialTab, setSettingsInitialTab] = useState<'updates' | 'profile' | 'preferences'>('updates');
+  const [settingsInitialTab, setSettingsInitialTab] = useState<'updates' | 'profile' | 'preferences' | 'language'>('updates');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedLearningTopic, setSelectedLearningTopic] = useState<string | undefined>(undefined);
 
@@ -105,7 +109,7 @@ export default function App() {
     setIsMenuOpen(false);
   };
 
-  const handleOpenSettings = (tab: 'updates' | 'profile' | 'preferences' = 'updates') => {
+  const handleOpenSettings = (tab: 'updates' | 'profile' | 'preferences' | 'language' = 'updates') => {
     setSettingsInitialTab(tab);
     setIsSettingsOpen(true);
     setIsMenuOpen(false);
@@ -124,6 +128,9 @@ export default function App() {
     setExamTimerSeconds(45 * 60 + 10);
     setIsProfileOpen(false);
   };
+
+  const currentTiers = isFrench ? frenchCertificationTiers : certificationTiers;
+  const currentQuestions = isFrench ? frenchPracticeQuestions : practiceQuestions;
 
   return (
     <div className="min-h-screen bg-[#fff8f2] text-[#201b11] font-sans flex flex-col selection:bg-[#ffc20e] selection:text-[#6d5100]">
@@ -168,7 +175,7 @@ export default function App() {
           {currentTab === 'dashboard' && (
             <DashboardView
               userStats={userStats}
-              tiers={certificationTiers}
+              tiers={currentTiers}
               onNavigate={handleSelectTab}
               onSelectTier={() => handleSelectTab('path')}
               onStartExam={handleStartExam}
@@ -194,7 +201,7 @@ export default function App() {
           {currentTab === 'path' && (
             <CertificationPathView
               userStats={userStats}
-              tiers={certificationTiers}
+              tiers={currentTiers}
               onStartExam={handleStartExam}
               onNavigate={handleSelectTab}
               onOpenLearning={handleOpenLearningTopic}
@@ -203,7 +210,7 @@ export default function App() {
 
           {currentTab === 'practice' && (
             <PracticeExamView
-              questions={practiceQuestions}
+              questions={currentQuestions}
               onCompleteSession={handleCompletePracticeSession}
               onExit={() => handleSelectTab('dashboard')}
               onOpenExplanation={(q) => setActiveExplanation(q)}
@@ -219,6 +226,12 @@ export default function App() {
                   questionsDoneToday: Math.min(prev.dailyGoal, prev.questionsDoneToday + 1),
                 }));
               }}
+            />
+          )}
+
+          {currentTab === 'training' && (
+            <TrainingHubView
+              onNavigateTab={handleSelectTab}
             />
           )}
         </main>

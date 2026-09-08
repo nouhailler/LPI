@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Lightbulb, Terminal, BookOpen, CheckCircle } from 'lucide-react';
 import { PracticeQuestion } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface ExplanationModalProps {
   question: PracticeQuestion | null;
@@ -8,6 +9,7 @@ interface ExplanationModalProps {
 }
 
 export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, onClose }) => {
+  const { t } = useLanguage();
   if (!question) return null;
 
   return (
@@ -16,10 +18,11 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, on
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2 text-[#785a00]">
             <Lightbulb className="w-5 h-5 fill-[#ffc20e] text-[#785a00]" />
-            <h3 className="font-bold text-lg text-[#201b11]">Detailed Explanation</h3>
+            <h3 className="font-bold text-lg text-[#201b11]">{t.explanation.title}</h3>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="p-1 rounded-full text-[#817660] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -29,7 +32,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, on
         {/* Question excerpt */}
         <div className="bg-[#f8ecdb] p-3.5 rounded-xl border border-[#d3c5ab]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[#817660] block mb-1">
-            Question
+            {t.practice.question}
           </span>
           <p className="font-semibold text-sm text-[#201b11]">{question.question}</p>
         </div>
@@ -39,7 +42,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, on
           <CheckCircle className="w-5 h-5 text-[#28A745] shrink-0" />
           <div>
             <span className="text-[10px] font-bold uppercase text-[#28A745] block">
-              Correct Answer
+              {t.practice.correctAnswer}
             </span>
             <code className="font-mono text-sm font-bold text-[#201b11]">
               {question.options[question.correctIndex]}
@@ -51,7 +54,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, on
         <div className="space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-bold text-[#495e8a] uppercase tracking-wider">
             <BookOpen className="w-4 h-4" />
-            Concept Breakdown
+            {t.explanation.conceptBreakdown}
           </div>
           <p className="text-sm text-[#4f4632] leading-relaxed bg-[#ffffff] p-4 rounded-xl border border-[#d3c5ab]">
             {question.explanation}
@@ -63,7 +66,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, on
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#495e8a] uppercase tracking-wider">
               <Terminal className="w-4 h-4" />
-              Terminal Command
+              {t.explanation.terminalCommand}
             </div>
             <div className="bg-[#1A1A1A] text-[#ffffff] p-3 rounded-xl font-mono text-xs overflow-x-auto shadow-inner flex items-center justify-between">
               <code>$ {question.commandSnippet}</code>
@@ -75,7 +78,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, on
           onClick={onClose}
           className="mt-2 w-full py-3 bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-xs cursor-pointer"
         >
-          Got it, return to quiz
+          {t.explanation.gotIt}
         </button>
       </div>
     </div>

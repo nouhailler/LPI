@@ -1,7 +1,8 @@
 import React from 'react';
-import { Play, CheckCircle2, Flame, BookOpen, ChevronRight, Layers, Library } from 'lucide-react';
+import { Play, CheckCircle2, Flame, BookOpen, ChevronRight, Layers, Library, Zap } from 'lucide-react';
 import { ExamTier, TabType, UserStats } from '../types';
 import { flashcardsData } from '../data/lpiData';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -20,6 +21,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onStartExam,
   onOpenLearning,
 }) => {
+  const { t, isFrench } = useLanguage();
   const totalCardsCount = flashcardsData.length;
   const lpic1CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 101 && c.topicNumber <= 110).length;
   const lpic2CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 212).length;
@@ -44,34 +46,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h2 className="font-sans text-2xl md:text-3xl font-bold text-[#201b11] tracking-tight">
-            Welcome back, {userStats.name}
+            {t.dashboard.welcomeBack}, {userStats.name}
           </h2>
           <p className="text-[#4f4632] text-sm md:text-base mt-1">
-            Ready to master Linux and pass your LPIC-1 certification?
+            {t.dashboard.welcomeSubtitle}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
+            onClick={() => onNavigate('training')}
+            className="bg-[#f8ecdb] text-[#785a00] border border-[#d3c5ab] px-3.5 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider hover:bg-[#ebdcc8] transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+          >
+            <Zap className="w-4 h-4 text-[#785a00]" />
+            <span>{t.nav.training}</span>
+          </button>
+          <button
             onClick={() => onNavigate('glossary')}
             className="bg-[#f8ecdb] text-[#785a00] border border-[#d3c5ab] px-3.5 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider hover:bg-[#ebdcc8] transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
           >
             <Library className="w-4 h-4" />
-            <span>Glossary & Index</span>
+            <span>{t.nav.glossary}</span>
           </button>
           <button
             onClick={() => (onOpenLearning ? onOpenLearning() : onNavigate('learning'))}
             className="bg-[#f8ecdb] text-[#785a00] border border-[#d3c5ab] px-3.5 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider hover:bg-[#ebdcc8] transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
           >
             <BookOpen className="w-4 h-4" />
-            <span>Study Modules</span>
+            <span>{t.dashboard.studyModules}</span>
           </button>
           <button
             onClick={() => onStartExam('exam-101')}
             className="bg-[#ffc20e] text-[#6d5100] px-4 md:px-5 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider hover:bg-[#f9bd00] transition-colors flex items-center justify-center gap-2 shadow-xs active:scale-[0.99] cursor-pointer"
           >
             <Play className="w-4 h-4 fill-current" />
-            <span>Continue LPIC-1</span>
+            <span>{t.dashboard.continueExam}</span>
           </button>
         </div>
       </section>
@@ -85,7 +94,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs font-bold text-[#495e8a] uppercase tracking-wider">
-                  Current Target
+                  {t.dashboard.currentTarget}
                 </span>
                 <h3 className="text-xl font-bold text-[#201b11] mt-0.5">
                   {userStats.currentTarget}
@@ -97,7 +106,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {/* System Architecture */}
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-xs font-bold text-[#4f4632]">
-                <span>System Architecture</span>
+                <span>{t.dashboard.systemArchitecture}</span>
                 <span>{userStats.systemArchitectureProgress}%</span>
               </div>
               <div className="w-full bg-[#ece1d0] rounded-full h-2 overflow-hidden">
@@ -111,7 +120,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {/* Linux Installation */}
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-xs font-bold text-[#4f4632]">
-                <span>Linux Installation</span>
+                <span>{t.dashboard.linuxInstallation}</span>
                 <span>{userStats.linuxInstallationProgress}%</span>
               </div>
               <div className="w-full bg-[#ece1d0] rounded-full h-2 overflow-hidden">
@@ -127,19 +136,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="bg-[#d8e2ff] rounded-xl p-5 md:p-6 border border-[#b7ccfe] shadow-xs flex items-center justify-between">
             <div>
               <span className="text-xs font-bold text-[#314671] uppercase tracking-wider">
-                Daily Streak
+                {t.dashboard.dailyStreak}
               </span>
               <div className="flex items-center gap-2 mt-1">
                 <Flame className="w-6 h-6 text-[#E67E22] fill-[#E67E22]" />
                 <span className="text-xl font-bold text-[#001a42]">
-                  {userStats.streakDays} Days
+                  {userStats.streakDays} {t.common.days}
                 </span>
               </div>
             </div>
 
             <div className="text-right">
               <span className="text-xs font-bold text-[#314671] uppercase tracking-wider">
-                Questions
+                {t.common.questions}
               </span>
               <div className="text-xl font-bold text-[#001a42] mt-1 font-mono">
                 {userStats.questionsDoneToday} / {userStats.dailyGoal}
@@ -151,12 +160,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Right Column: Certification Path Grid */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-bold text-[#201b11]">Certification Path</h3>
+            <h3 className="text-xl font-bold text-[#201b11]">{t.dashboard.certPath}</h3>
             <button
               onClick={() => onNavigate('path')}
               className="text-xs font-bold text-[#785a00] hover:underline uppercase tracking-wider"
             >
-              View Full Path →
+              {t.dashboard.viewFullPath} →
             </button>
           </div>
 
@@ -184,7 +193,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div className="flex justify-between items-center">
                   <h4 className="font-bold text-lg text-[#201b11]">LPIC-1</h4>
                   <span className="bg-[#ffc20e]/25 text-[#6d5100] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                    In Progress
+                    {t.common.inProgress}
                   </span>
                 </div>
                 <p className="text-sm text-[#4f4632]">System Administrator</p>
@@ -263,15 +272,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#ebdcc8] text-[#785a00]">
-                Curriculum Dictionary
+                {isFrench ? 'Dictionnaire du programme' : 'Curriculum Dictionary'}
               </span>
               <span className="text-xs font-bold text-[#28A745]">LPIC-1 · LPIC-2 · LPIC-3</span>
             </div>
             <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
-              Comprehensive Linux Glossary & Command Index
+              {isFrench ? 'Glossaire Linux exhaustif & Index des commandes' : 'Comprehensive Linux Glossary & Command Index'}
             </h3>
             <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
-              Look up any Linux command, configuration file, kernel parameter, or architecture term tested across all LPI certification exams with syntax, flags, practical examples, and exam gotchas.
+              {isFrench
+                ? 'Consultez n\'importe quelle commande Linux, fichier de configuration, paramètre noyau ou terme d\'architecture évalué lors des examens LPI avec syntaxe, options, exemples concrets et pièges d\'examen.'
+                : 'Look up any Linux command, configuration file, kernel parameter, or architecture term tested across all LPI certification exams with syntax, flags, practical examples, and exam gotchas.'}
             </p>
           </div>
         </div>
@@ -280,7 +291,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           onClick={() => onNavigate('glossary')}
           className="px-5 py-3 rounded-xl bg-[#785a00] hover:bg-[#624900] text-[#ffffff] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer"
         >
-          <span>Open Glossary & Index</span>
+          <span>{isFrench ? 'Ouvrir le glossaire & index' : 'Open Glossary & Index'}</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
@@ -294,20 +305,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#ffc20e] text-[#6d5100]">
-                {totalCardsCount} Interactive Flashcards
+                {totalCardsCount} {isFrench ? 'Cartes Mémoire Interactives' : 'Interactive Flashcards'}
               </span>
               <span className="text-xs font-bold text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                LPIC-1: {lpic1CardsCount} Cards (Topics 101–110)
+                LPIC-1: {lpic1CardsCount} {t.common.cards} (Topics 101–110)
               </span>
               <span className="text-xs font-bold text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                LPIC-2: {lpic2CardsCount} Cards (Topics 200–210)
+                LPIC-2: {lpic2CardsCount} {t.common.cards} (Topics 200–210)
               </span>
             </div>
             <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
-              Master System Admin & Linux Engineering Concepts Across 20 Comprehensive Topics
+              {isFrench
+                ? 'Maîtrisez les concepts d\'administration système & ingénierie Linux à travers 20 thèmes complets'
+                : 'Master System Admin & Linux Engineering Concepts Across 20 Comprehensive Topics'}
             </h3>
             <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
-              100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands (103), filesystems/FHS (104), shells/scripting (105), desktops (106), services/logs (108), networking (109), security (110), capacity planning (200), kernel (201), system startup (202), filesystems & devices (203), advanced storage (204), network configuration (205), system maintenance (206), BIND 9 DNS (207), web services (208), file sharing with Samba & NFS (209), and network client management with DHCP, PAM & LDAP (210).
+              {isFrench
+                ? '100 cartes par thème couvrant le matériel/systemd (101), paquets/GRUB (102), commandes Unix (103), systèmes de fichiers/FHS (104), shells/scripts (105), bureaux (106), services/journaux (108), réseau (109), sécurité (110) et les thèmes avancés LPIC-2.'
+                : '100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands (103), filesystems/FHS (104), shells/scripting (105), desktops (106), services/logs (108), networking (109), security (110), capacity planning (200), kernel (201), system startup (202), and advanced networking.'}
             </p>
           </div>
         </div>
@@ -317,7 +332,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           className="px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer whitespace-nowrap"
         >
           <Layers className="w-4 h-4" />
-          <span>Launch Flashcards ({totalCardsCount})</span>
+          <span>{isFrench ? `Lancer les cartes (${totalCardsCount})` : `Launch Flashcards (${totalCardsCount})`}</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
@@ -328,14 +343,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 bg-[#ffc20e] text-[#6d5100] text-[10px] font-bold uppercase tracking-wider rounded">
-                Learning Modules
+                {t.dashboard.studyModules}
               </span>
               <h3 className="text-lg md:text-xl font-bold text-[#201b11]">
-                Official LPIC-1, LPIC-2 & LPIC-3 Study Chapters
+                {isFrench ? 'Chapitres de cours officiels LPIC-1, LPIC-2 & LPIC-3' : 'Official LPIC-1, LPIC-2 & LPIC-3 Study Chapters'}
               </h3>
             </div>
             <p className="text-xs md:text-sm text-[#4f4632] mt-0.5">
-              Explore key knowledge areas, command syntax, and configuration files for Exams 101, 102, 201, 202, 300, 303, 305 & 306.
+              {isFrench
+                ? 'Explorez les domaines clés, syntaxes de commandes et fichiers de configuration pour les examens 101, 102, 201, 202, 300, 303, 305 & 306.'
+                : 'Explore key knowledge areas, command syntax, and configuration files for Exams 101, 102, 201, 202, 300, 303, 305 & 306.'}
             </p>
           </div>
 
@@ -343,7 +360,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             onClick={() => (onOpenLearning ? onOpenLearning() : onNavigate('learning'))}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#785a00] hover:underline"
           >
-            <span>View All Topics & Objectives</span>
+            <span>{isFrench ? 'Voir tous les thèmes & objectifs' : 'View All Topics & Objectives'}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -362,16 +379,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     {topic.exam}
                   </span>
                   <span className="text-[11px] font-semibold text-[#817660]">
-                    Weight: {topic.weight}
+                    {isFrench ? 'Poids' : 'Weight'}: {topic.weight}
                   </span>
                 </div>
                 <h4 className="font-bold text-sm text-[#201b11] group-hover:text-[#785a00] transition-colors">
-                  Topic {topic.number}: {topic.title}
+                  {isFrench ? 'Thème' : 'Topic'} {topic.number}: {topic.title}
                 </h4>
               </div>
 
               <div className="flex items-center justify-between pt-3 text-xs font-bold text-[#785a00]">
-                <span>Study Objectives</span>
+                <span>{isFrench ? 'Objectifs d\'étude' : 'Study Objectives'}</span>
                 <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
               </div>
             </div>

@@ -29,9 +29,12 @@ import {
   Settings,
   RefreshCw,
   Wrench,
+  Zap,
 } from 'lucide-react';
 import { TabType, UserStats } from '../types';
 import { CURRENT_APP_VERSION, CURRENT_RELEASE_DATE } from '../utils/updateService';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 interface HamburgerMenuProps {
   isOpen: boolean;
@@ -76,6 +79,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   onOpenSettings,
   userStats,
 }) => {
+  const { t, isFrench } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     'core-nav': true,
@@ -163,6 +167,17 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           keywords: ['commands', 'utilities', 'dictionary', 'search', 'syntax', 'manual'],
         },
         {
+          id: 'nav-training',
+          title: 'Hands-on Labs & Ateliers Pratiques',
+          subtitle: '5 practical modes: Fill-in-the-blank, Troubleshooting, Ordering, Matching & Mini-Labs',
+          icon: Zap,
+          badge: '5 Ateliers',
+          badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
+          tabTarget: 'training',
+          action: () => onSelectTab('training'),
+          keywords: ['training', 'ateliers', 'labs', 'fill-in-the-blank', 'troubleshooting', 'ordering', 'matching', 'saisie', 'ordonnancement', 'dépannage', 'appariement'],
+        },
+        {
           id: 'nav-practice',
           title: 'Timed Practice Exam Simulator',
           subtitle: 'Realistic multiple-choice test engine with scoring',
@@ -176,13 +191,13 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         {
           id: 'nav-flashcards',
           title: 'Interactive Flashcards Decks',
-          subtitle: '2,000+ interactive cards across LPIC-1 & LPIC-2 (20 Topics)',
+          subtitle: 'Comprehensive interactive cards across LPIC-1, LPIC-2 & LPIC-3',
           icon: Layers,
-          badge: '2,000+ Cards',
+          badge: 'Decks',
           badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
           tabTarget: 'flashcards',
           action: () => onSelectTab('flashcards'),
-          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', '201', '202', '210', 'topic 101', 'topic 208', 'topic 209', 'topic 210', 'apache', 'bind', 'nginx', 'samba', 'nfs', 'dhcp', 'pam', 'ldap'],
+          keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', '107', '201', '202', '210', 'topic 101', 'topic 107', 'topic 208', 'topic 209', 'topic 210', 'useradd', 'cron', 'crontab', 'systemd-timer', 'locale', 'apache', 'bind', 'nginx', 'samba', 'nfs', 'dhcp', 'pam', 'ldap'],
         },
         {
           id: 'nav-path',
@@ -614,10 +629,10 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
             />
             <div>
               <h2 id="menu-title" className="font-sans font-bold text-base md:text-lg text-[#785a00]">
-                All Features & Curriculum
+                {t.hamburger.menuTitle}
               </h2>
               <p className="text-[11px] text-[#4f4632]">
-                Categorized navigation directory for LPI Prep
+                {t.hamburger.searchHint}
               </p>
             </div>
           </div>
@@ -625,15 +640,15 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           <button
             id="close-hamburger-menu-btn"
             onClick={onClose}
-            aria-label="Close navigation menu"
+            aria-label={t.common.close}
             className="w-8 h-8 rounded-full flex items-center justify-center text-[#4f4632] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Search inside menu */}
-        <div className="p-3 bg-[#f8ecdb]/60 border-b border-[#d3c5ab] shrink-0">
+        {/* Search & Language Selector inside menu */}
+        <div className="p-3 bg-[#f8ecdb]/60 border-b border-[#d3c5ab] shrink-0 space-y-2.5">
           <div className="relative">
             <Search className="w-4 h-4 text-[#817660] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -641,7 +656,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
               id="menu-search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search features, exams, commands (e.g. BIND, LVM, Bash)..."
+              placeholder={t.hamburger.searchPlaceholder}
               className="w-full bg-[#fff8f2] border border-[#d3c5ab] rounded-lg pl-9 pr-8 py-2 text-xs md:text-sm text-[#201b11] placeholder-[#817660] focus:outline-hidden focus:border-[#785a00] focus:ring-1 focus:ring-[#785a00]"
               autoFocus
             />
@@ -653,6 +668,11 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
+          </div>
+
+          {/* Quick Language Selector in Drawer */}
+          <div className="pt-0.5">
+            <LanguageSelector variant="drawer" />
           </div>
         </div>
 
@@ -791,19 +811,19 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
             </div>
             <div>
               <div className="text-xs font-bold text-[#201b11]">
-                {userStats.streakDays}-Day Study Streak
+                {userStats.streakDays} {t.common.days} • {t.hamburger.studyStreak}
               </div>
               <div className="text-[10px] text-[#4f4632]">
-                Goal: {userStats.questionsDoneToday}/{userStats.dailyGoal} questions today
+                {t.common.goal}: {userStats.questionsDoneToday}/{userStats.dailyGoal} {t.common.questions.toLowerCase()}
               </div>
             </div>
           </div>
 
           <button
             onClick={() => handleAction(onOpenProfile)}
-            className="px-3 py-1.5 bg-[#fff8f2] border border-[#d3c5ab] rounded-lg text-xs font-bold text-[#785a00] hover:bg-[#ebdcc8] transition-colors"
+            className="px-3 py-1.5 bg-[#fff8f2] border border-[#d3c5ab] rounded-lg text-xs font-bold text-[#785a00] hover:bg-[#ebdcc8] transition-colors cursor-pointer"
           >
-            My Stats
+            {t.hamburger.myStats}
           </button>
         </div>
       </div>

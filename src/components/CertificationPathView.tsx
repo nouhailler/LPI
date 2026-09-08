@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, Lock, ArrowRight, ShieldCheck, Award, BookOpen } from 'lucide-react';
 import { ExamTier, TabType, UserStats } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface CertificationPathViewProps {
   userStats: UserStats;
@@ -17,15 +18,17 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
   onNavigate,
   onOpenLearning,
 }) => {
+  const { t, isFrench } = useLanguage();
+
   return (
     <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-16">
       {/* Page Header */}
       <div>
         <h1 className="font-sans text-2xl md:text-3xl font-bold text-[#201b11] tracking-tight">
-          Certification Path
+          {t.certPath.title}
         </h1>
         <p className="text-[#4f4632] text-sm md:text-base mt-1 max-w-2xl">
-          Track your progress through the Linux Professional Institute certification tiers. Master each level to advance your IT career.
+          {t.certPath.subtitle}
         </p>
       </div>
 
@@ -33,9 +36,9 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
       <div className="bg-[#fef2e1] border border-[#d3c5ab] rounded-xl p-5 md:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
           <div>
-            <h2 className="font-bold text-lg md:text-xl text-[#201b11]">Overall Progress</h2>
+            <h2 className="font-bold text-lg md:text-xl text-[#201b11]">{t.certPath.overallProgress}</h2>
             <p className="text-sm text-[#4f4632] mt-0.5">
-              You are currently preparing for <span className="font-semibold text-[#785a00]">LPIC-1</span>.
+              {t.certPath.preparingFor} <span className="font-semibold text-[#785a00]">LPIC-1</span>.
             </p>
           </div>
           <div className="text-left md:text-right">
@@ -43,7 +46,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
               {userStats.pathCompletionPct}%
             </span>
             <span className="text-[11px] font-bold text-[#817660] block uppercase tracking-wider">
-              Path Completion
+              {t.certPath.pathCompletion}
             </span>
           </div>
         </div>
@@ -63,11 +66,11 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
           <div className="flex justify-between items-start mb-4">
             <div>
               <span className="inline-block px-2.5 py-0.5 bg-[#f2e7d6] text-[#4f4632] rounded-full text-[11px] font-bold tracking-wider mb-2">
-                ENTRY LEVEL
+                {t.certPath.entryLevel}
               </span>
               <h3 className="font-bold text-xl text-[#201b11]">Linux Essentials</h3>
               <p className="text-sm text-[#4f4632] mt-0.5">
-                Fundamentals of Linux systems and open source.
+                {isFrench ? 'Fondamentaux des systèmes Linux et de l\'open source.' : 'Fundamentals of Linux systems and open source.'}
               </p>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#28A745]/15 flex items-center justify-center text-[#28A745] shrink-0">
@@ -81,11 +84,11 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                 <ShieldCheck className="w-5 h-5 text-[#28A745]" />
                 <div>
                   <h4 className="font-bold text-sm text-[#201b11]">Exam 010-160</h4>
-                  <p className="text-xs text-[#4f4632]">Linux Essentials Certificate Exam</p>
+                  <p className="text-xs text-[#4f4632]">{isFrench ? 'Examen de certificat Linux Essentials' : 'Linux Essentials Certificate Exam'}</p>
                 </div>
               </div>
               <span className="text-[11px] font-bold text-[#28A745] bg-[#28A745]/10 border border-[#28A745]/20 px-2.5 py-1 rounded">
-                PASSED
+                {isFrench ? 'RÉUSSI' : 'PASSED'}
               </span>
             </div>
           </div>
@@ -115,28 +118,30 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#28A745] animate-pulse" />
                 <span className="text-[11px] font-bold text-[#6d5100] uppercase tracking-wider">
-                  Active Preparation
+                  {t.certPath.activePrep}
                 </span>
               </div>
               <h3 className="font-sans text-xl md:text-2xl font-bold text-[#201b11] mb-2">
                 LPIC-1: Linux Administrator
               </h3>
               <p className="text-sm text-[#4f4632] mb-4 leading-relaxed">
-                Validate your ability to perform maintenance tasks on the command line, install and configure a computer running Linux and configure basic networking.
+                {isFrench
+                  ? 'Validez votre capacité à exécuter des tâches de maintenance en ligne de commande, installer et configurer un ordinateur Linux et configurer un réseau de base.'
+                  : 'Validate your ability to perform maintenance tasks on the command line, install and configure a computer running Linux and configure basic networking.'}
               </p>
 
               <div className="flex gap-4">
                 <div className="bg-[#fef2e1] px-4 py-2 rounded-lg border border-[#d3c5ab]/60">
                   <span className="text-[10px] font-bold text-[#817660] block uppercase tracking-wider">
-                    Validity
+                    {t.certPath.validity}
                   </span>
-                  <span className="text-sm font-bold text-[#201b11]">5 Years</span>
+                  <span className="text-sm font-bold text-[#201b11]">{t.certPath.fiveYears}</span>
                 </div>
                 <div className="bg-[#fef2e1] px-4 py-2 rounded-lg border border-[#d3c5ab]/60">
                   <span className="text-[10px] font-bold text-[#817660] block uppercase tracking-wider">
-                    Prerequisites
+                    {t.certPath.prerequisites}
                   </span>
-                  <span className="text-sm font-bold text-[#201b11]">None</span>
+                  <span className="text-sm font-bold text-[#201b11]">{t.certPath.none}</span>
                 </div>
               </div>
             </div>
@@ -150,17 +155,19 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-bold text-[#201b11] text-base">Exam 101-500</h4>
                   <span className="text-[11px] font-bold text-[#0061a4] bg-[#a7ceff]/30 px-2 py-0.5 rounded">
-                    Active
+                    {isFrench ? 'Actif' : 'Active'}
                   </span>
                 </div>
                 <p className="text-xs text-[#4f4632] mb-3">
-                  System Architecture, Linux Installation, GNU/Unix Commands
+                  {isFrench
+                    ? 'Architecture système, Installation Linux, Commandes GNU/Unix'
+                    : 'System Architecture, Linux Installation, GNU/Unix Commands'}
                 </p>
               </div>
 
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="font-bold text-[#817660]">Progress</span>
+                  <span className="font-bold text-[#817660]">{t.certPath.progress}</span>
                   <span className="font-bold text-[#0061a4]">70%</span>
                 </div>
                 <div className="w-full h-2 bg-[#ece1d0] rounded-full mb-3 overflow-hidden">
@@ -172,13 +179,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                     className="flex-1 py-2.5 bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] border border-[#d3c5ab] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5" />
-                    Objectives
+                    {isFrench ? 'Objectifs' : 'Objectives'}
                   </button>
                   <button
                     onClick={() => onStartExam('exam-101')}
                     className="flex-1 py-2.5 bg-[#495e8a] hover:bg-[#314671] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    Practice
+                    {isFrench ? 'Pratique' : 'Practice'}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -195,14 +202,16 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-[#4f4632] mb-3">
-                  Shells, Scripting, Data Management, Interfaces, Security & Networking
+                  {isFrench
+                    ? 'Shells, Scripts, Gestion des données, Interfaces, Sécurité & Réseau'
+                    : 'Shells, Scripting, Data Management, Interfaces, Security & Networking'}
                 </p>
               </div>
 
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="font-bold text-[#817660]">Objectives Status</span>
-                  <span className="font-bold text-[#785a00]">Available</span>
+                  <span className="font-bold text-[#817660]">{t.certPath.objectivesStatus}</span>
+                  <span className="font-bold text-[#785a00]">{t.certPath.available}</span>
                 </div>
                 <div className="w-full h-2 bg-[#ece1d0] rounded-full mb-3 overflow-hidden">
                   <div className="h-full bg-[#ffc20e]" style={{ width: '10%' }} />
@@ -213,7 +222,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                     className="w-full py-2.5 bg-[#785a00] hover:bg-[#604700] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <BookOpen className="w-3.5 h-3.5" />
-                    Study Exam 102 Objectives
+                    {isFrench ? 'Étudier les objectifs Examen 102' : 'Study Exam 102 Objectives'}
                   </button>
                 </div>
               </div>
@@ -240,11 +249,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
             </div>
             <div>
               <span className="inline-block px-2 py-0.5 bg-[#e7f0f8] text-[#0061a4] rounded text-[10px] font-bold uppercase tracking-wider mb-1">
-                Advanced Certification
+                {t.certPath.advancedCert}
               </span>
               <h3 className="font-bold text-lg text-[#201b11]">LPIC-2: Linux Engineer</h3>
               <p className="text-xs md:text-sm text-[#4f4632] mt-0.5">
-                Administer small to medium-sized mixed networks, capacity planning, kernel compilation, web/mail servers, DNS, and network security.
+                {isFrench
+                  ? 'Administrer des réseaux mixtes de petite à moyenne taille, planification de capacité, compilation du noyau, serveurs web/mail, DNS et sécurité réseau.'
+                  : 'Administer small to medium-sized mixed networks, capacity planning, kernel compilation, web/mail servers, DNS, and network security.'}
               </p>
             </div>
           </div>
@@ -260,7 +271,9 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-[#4f4632] mb-3">
-                  Capacity Planning, Linux Kernel, System Startup & Recovery, Filesystems & Devices, Storage (RAID/LVM), Network Config.
+                  {isFrench
+                    ? 'Planification de capacité, Noyau Linux, Démarrage et récupération du système, Systèmes de fichiers et périphériques, Stockage (RAID/LVM), Configuration réseau.'
+                    : 'Capacity Planning, Linux Kernel, System Startup & Recovery, Filesystems & Devices, Storage (RAID/LVM), Network Config.'}
                 </p>
               </div>
 
@@ -270,7 +283,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   className="w-full py-2.5 bg-[#0061a4] hover:bg-[#004f87] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  Study Exam 201 Objectives
+                  {isFrench ? 'Étudier les objectifs Examen 201' : 'Study Exam 201 Objectives'}
                 </button>
               </div>
             </div>
@@ -285,7 +298,9 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-[#4f4632] mb-3">
-                  DNS (BIND 9), Web Services (Apache, Nginx, Squid), File Sharing (Samba, NFS), Client Management, E-Mail (Postfix, Dovecot), System Security.
+                  {isFrench
+                    ? 'DNS (BIND 9), Services Web (Apache, Nginx, Squid), Partage de fichiers (Samba, NFS), Gestion de clients, Messagerie électronique (Postfix, Dovecot), Sécurité système.'
+                    : 'DNS (BIND 9), Web Services (Apache, Nginx, Squid), File Sharing (Samba, NFS), Client Management, E-Mail (Postfix, Dovecot), System Security.'}
                 </p>
               </div>
 
@@ -295,7 +310,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   className="w-full py-2.5 bg-[#0061a4] hover:bg-[#004f87] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  Study Exam 202 Objectives
+                  {isFrench ? 'Étudier les objectifs Examen 202' : 'Study Exam 202 Objectives'}
                 </button>
               </div>
             </div>
@@ -321,11 +336,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
             </div>
             <div>
               <span className="inline-block px-2 py-0.5 bg-[#5c3566]/10 text-[#5c3566] rounded text-[10px] font-bold uppercase tracking-wider mb-1">
-                Enterprise Specialty (Tier 3)
+                {t.certPath.enterpriseCert}
               </span>
               <h3 className="font-bold text-lg text-[#201b11]">LPIC-3: Enterprise Professional (Mixed Environments, Security, HA & Storage)</h3>
               <p className="text-xs md:text-sm text-[#4f4632] mt-0.5">
-                Highest level Linux certification for enterprise specialists: Choose between Mixed Environments (300), Enterprise Security (303), or High Availability and Storage Clusters (306).
+                {isFrench
+                  ? 'Plus haut niveau de certification Linux pour les spécialistes d\'entreprise : choisissez entre Environnements Mixtes (300), Sécurité d\'Entreprise (303) ou Haute Disponibilité et Grappes de Stockage (306).'
+                  : 'Highest level Linux certification for enterprise specialists: Choose between Mixed Environments (300), Enterprise Security (303), or High Availability and Storage Clusters (306).'}
               </p>
             </div>
           </div>
@@ -337,11 +354,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-bold text-[#201b11] text-base">Exam 300-300</h4>
                   <span className="text-[11px] font-bold text-[#5c3566] bg-[#5c3566]/15 px-2 py-0.5 rounded">
-                    Mixed Environments
+                    {isFrench ? 'Environnements Mixtes' : 'Mixed Environments'}
                   </span>
                 </div>
                 <p className="text-xs text-[#4f4632] mb-3">
-                  Topics 301–305: Samba Basics, Samba as AD DC & Member Server, Share Security, Client Auth (SSSD/Winbind/CIFS), Linux Identity Management (FreeIPA & NFSv4).
+                  {isFrench
+                    ? 'Thèmes 301–305 : Fondamentaux Samba, Samba comme AD DC et serveur membre, Sécurité des partages, Authentification client (SSSD/Winbind/CIFS), Gestion des identités Linux (FreeIPA et NFSv4).'
+                    : 'Topics 301–305: Samba Basics, Samba as AD DC & Member Server, Share Security, Client Auth (SSSD/Winbind/CIFS), Linux Identity Management (FreeIPA & NFSv4).'}
                 </p>
               </div>
 
@@ -351,7 +370,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   className="w-full py-2.5 bg-[#5c3566] hover:bg-[#472750] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  Study Exam 300 Objectives
+                  {isFrench ? 'Étudier les objectifs Examen 300' : 'Study Exam 300 Objectives'}
                 </button>
               </div>
             </div>
@@ -362,11 +381,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-bold text-[#201b11] text-base">Exam 303-300</h4>
                   <span className="text-[11px] font-bold text-[#991b1b] bg-[#991b1b]/15 px-2 py-0.5 rounded">
-                    Enterprise Security
+                    {isFrench ? 'Sécurité d\'Entreprise' : 'Enterprise Security'}
                   </span>
                 </div>
                 <p className="text-xs text-[#4f4632] mb-3">
-                  Topics 325–328: Cryptography (PKI, X.509, LUKS, DNSSEC), Host Security (Hardening, Audit, AIDE, PAM, FreeIPA), Access Control (ACLs, SELinux, NFSv4), and Network Security (FreeRADIUS, NIDS, Netfilter, VPNs).
+                  {isFrench
+                    ? 'Thèmes 325–328 : Cryptographie (PKI, X.509, LUKS, DNSSEC), Sécurité des hôtes (Durcissement, Audit, AIDE, PAM, FreeIPA), Contrôle d\'accès (ACLs, SELinux, NFSv4) et Sécurité réseau (FreeRADIUS, NIDS, Netfilter, VPNs).'
+                    : 'Topics 325–328: Cryptography (PKI, X.509, LUKS, DNSSEC), Host Security (Hardening, Audit, AIDE, PAM, FreeIPA), Access Control (ACLs, SELinux, NFSv4), and Network Security (FreeRADIUS, NIDS, Netfilter, VPNs).'}
                 </p>
               </div>
 
@@ -376,7 +397,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   className="w-full py-2.5 bg-[#991b1b] hover:bg-[#7f1d1d] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  Study Exam 303 Objectives
+                  {isFrench ? 'Étudier les objectifs Examen 303' : 'Study Exam 303 Objectives'}
                 </button>
               </div>
             </div>
@@ -387,11 +408,13 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-bold text-[#201b11] text-base">Exam 306-300</h4>
                   <span className="text-[11px] font-bold text-[#047857] bg-[#047857]/15 px-2 py-0.5 rounded">
-                    HA & Storage
+                    {isFrench ? 'HA & Stockage' : 'HA & Storage'}
                   </span>
                 </div>
                 <p className="text-xs text-[#4f4632] mb-3">
-                  Topics 361–364: HA Cluster Management (LVS, Keepalived, Pacemaker, Corosync, STONITH), Cluster Storage (DRBD, SAN/iSCSI, GFS2/OCFS2), Distributed Storage (GlusterFS, Ceph), and Single Node HA (Watchdog, RAID, LVM, Teaming).
+                  {isFrench
+                    ? 'Thèmes 361–364 : Gestion des clusters HA (LVS, Keepalived, Pacemaker, Corosync, STONITH), Stockage en cluster (DRBD, SAN/iSCSI, GFS2/OCFS2), Stockage distribué (GlusterFS, Ceph) et HA sur nœud unique.'
+                    : 'Topics 361–364: HA Cluster Management (LVS, Keepalived, Pacemaker, Corosync, STONITH), Cluster Storage (DRBD, SAN/iSCSI, GFS2/OCFS2), Distributed Storage (GlusterFS, Ceph), and Single Node HA (Watchdog, RAID, LVM, Teaming).'}
                 </p>
               </div>
 
@@ -401,7 +424,7 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
                   className="w-full py-2.5 bg-[#047857] hover:bg-[#065f46] text-[#ffffff] rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  Study Exam 306 Objectives
+                  {isFrench ? 'Étudier les objectifs Examen 306' : 'Study Exam 306 Objectives'}
                 </button>
               </div>
             </div>

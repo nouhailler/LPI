@@ -19,9 +19,12 @@ import {
   Sliders,
   Bell,
   Trash2,
-  HardDrive
+  HardDrive,
+  Globe
 } from 'lucide-react';
 import { UserStats } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 import {
   CURRENT_APP_VERSION,
   CURRENT_RELEASE_DATE,
@@ -39,7 +42,7 @@ interface SettingsModalProps {
   onClose: () => void;
   userStats: UserStats;
   onResetStats: () => void;
-  initialTab?: 'updates' | 'profile' | 'preferences';
+  initialTab?: 'updates' | 'profile' | 'preferences' | 'language';
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -49,7 +52,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onResetStats,
   initialTab = 'updates',
 }) => {
-  const [activeTab, setActiveTab] = useState<'updates' | 'profile' | 'preferences'>(initialTab);
+  const { t, language } = useLanguage();
+  const [activeTab, setActiveTab] = useState<'updates' | 'profile' | 'preferences' | 'language'>(initialTab);
   const [updateSettings, setUpdateSettings] = useState<UpdateSettings>(getUpdateSettings());
   const [isChecking, setIsChecking] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -212,7 +216,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Sliders className="w-4 h-4" />
-            <span>Preferences</span>
+            <span>{t.settings.tabs.preferences}</span>
+          </button>
+
+          <button
+            id="settings-tab-language"
+            onClick={() => setActiveTab('language')}
+            className={`py-2.5 px-3 text-xs sm:text-sm font-bold border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+              activeTab === 'language'
+                ? 'border-[#785a00] text-[#785a00]'
+                : 'border-transparent text-[#817660] hover:text-[#201b11]'
+            }`}
+          >
+            <Globe className="w-4 h-4" />
+            <span>{t.common.language}</span>
+            <span className="text-[10px] px-1.5 py-0.2 bg-[#ebdcc8] text-[#785a00] rounded font-mono uppercase font-bold">
+              {language}
+            </span>
           </button>
         </div>
 
@@ -537,6 +557,43 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* ============================================================ */}
+          {/* TAB 4: LANGUAGE SELECTION                                   */}
+          {/* ============================================================ */}
+          {activeTab === 'language' && (
+            <div className="space-y-4">
+              <div className="bg-[#ffffff] rounded-2xl border border-[#d3c5ab] p-4 sm:p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center shrink-0 shadow-xs">
+                    <Globe className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base text-[#201b11]">
+                      {t.settings.languageTitle}
+                    </h3>
+                    <p className="text-xs text-[#4f4632]">
+                      {t.settings.languageDesc}
+                    </p>
+                  </div>
+                </div>
+
+                <LanguageSelector variant="settings" />
+
+                <div className="p-3.5 bg-[#f8ecdb] rounded-xl border border-[#d3c5ab] text-xs text-[#4f4632] space-y-1">
+                  <div className="font-bold text-[#785a00] flex items-center gap-1.5">
+                    <span>✨</span>
+                    <span>{language === 'fr' ? 'Traduction Intégrale' : 'Full Localized Experience'}</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    {language === 'fr'
+                      ? 'L\'interface, les questions d\'examen blanc LPIC-1/2/3 avec scénarios pratiques et explications détaillées, le glossaire, les cartes mémoire et la navigation sont immédiatement disponibles en Français.'
+                      : 'The full user interface, LPIC-1/2/3 practice exam questions with deep explanations, glossary, flashcards, and navigation are instantly available in English.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Modal Footer */}
@@ -551,7 +608,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 bg-[#785a00] hover:bg-[#5f4600] text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
           >
-            Done
+            {t.common.close}
           </button>
         </div>
       </div>

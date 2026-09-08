@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { getAllGlossaryEntries } from '../data/glossaryData';
 import { GlossaryEntry, GlossaryItemType, TabType } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface GlossaryViewProps {
   onNavigate: (tab: TabType) => void;
@@ -39,6 +40,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
   onNavigate,
   onOpenLearningTopic,
 }) => {
+  const { t, isFrench } = useLanguage();
   const allEntries = useMemo(() => getAllGlossaryEntries(), []);
 
   // Filter States
@@ -243,17 +245,19 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#ffc20e] text-[#6d5100]">
-                Curriculum Reference
+                {isFrench ? 'Référence du Programme' : 'Curriculum Reference'}
               </span>
               <span className="text-xs text-[#817660] font-semibold">
                 LPIC-1, LPIC-2 & LPIC-3
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#201b11] tracking-tight">
-              Linux Glossary & Command Index
+              {t.glossary.title}
             </h1>
             <p className="text-[#4f4632] text-sm md:text-base max-w-3xl mt-1">
-              Comprehensive reference library containing all commands, configuration files, kernel parameters, directives, and core architecture concepts defined across LPIC-1 (101 & 102), LPIC-2 (201 & 202), and LPIC-3 (300, 303, 305, and 306).
+              {isFrench
+                ? 'Bibliothèque de référence exhaustive contenant toutes les commandes, fichiers de configuration, paramètres du noyau, directives et concepts architecturaux clés définis pour LPIC-1 (101 & 102), LPIC-2 (201 & 202) et LPIC-3 (300, 303, 305 & 306).'
+                : 'Comprehensive reference library containing all commands, configuration files, kernel parameters, directives, and core architecture concepts defined across LPIC-1 (101 & 102), LPIC-2 (201 & 202), and LPIC-3 (300, 303, 305, and 306).'}
             </p>
           </div>
 
@@ -267,7 +271,11 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               }`}
             >
               <Lightbulb className="w-4 h-4" />
-              <span>{studyQuizMode ? 'Exit Recall Mode' : 'Recall Flashcard Mode'}</span>
+              <span>
+                {studyQuizMode
+                  ? (isFrench ? 'Quitter le mode mémorisation' : 'Exit Recall Mode')
+                  : (isFrench ? 'Mode Cartes Mémoire' : 'Recall Flashcard Mode')}
+              </span>
             </button>
 
             <button
@@ -279,7 +287,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               }`}
             >
               <Bookmark className={`w-4 h-4 ${showBookmarksOnly ? 'fill-current' : ''}`} />
-              <span>Saved ({stats.bookmarked})</span>
+              <span>{isFrench ? `Favoris (${stats.bookmarked})` : `Saved (${stats.bookmarked})`}</span>
             </button>
           </div>
         </div>
@@ -287,8 +295,12 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
         {/* Quick Stats Metric Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
           <div className="bg-[#f8ecdb] p-3 rounded-xl border border-[#d3c5ab] flex flex-col">
-            <span className="text-[10px] font-bold uppercase text-[#817660] tracking-wider">Total Index</span>
-            <span className="text-xl font-extrabold text-[#201b11]">{stats.total} Terms</span>
+            <span className="text-[10px] font-bold uppercase text-[#817660] tracking-wider">
+              {isFrench ? 'Total Index' : 'Total Index'}
+            </span>
+            <span className="text-xl font-extrabold text-[#201b11]">
+              {stats.total} {isFrench ? 'Termes' : 'Terms'}
+            </span>
           </div>
 
           <div className="bg-[#fff8f2] p-3 rounded-xl border border-[#d3c5ab] flex flex-col">
@@ -302,22 +314,30 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
           </div>
 
           <div className="bg-[#fff8f2] p-3 rounded-xl border border-[#d3c5ab] flex flex-col">
-            <span className="text-[10px] font-bold uppercase text-[#5c3566] tracking-wider">LPIC-3 (Enterprise)</span>
+            <span className="text-[10px] font-bold uppercase text-[#5c3566] tracking-wider">
+              {isFrench ? 'LPIC-3 (Entreprise)' : 'LPIC-3 (Enterprise)'}
+            </span>
             <span className="text-xl font-extrabold text-[#5c3566]">{stats.lpic3}</span>
           </div>
 
           <div className="bg-[#fff8f2] p-3 rounded-xl border border-[#d3c5ab] flex flex-col">
-            <span className="text-[10px] font-bold uppercase text-[#047857] tracking-wider">Commands</span>
+            <span className="text-[10px] font-bold uppercase text-[#047857] tracking-wider">
+              {isFrench ? 'Commandes' : 'Commands'}
+            </span>
             <span className="text-xl font-extrabold text-[#047857]">{stats.commands}</span>
           </div>
 
           <div className="bg-[#fff8f2] p-3 rounded-xl border border-[#d3c5ab] flex flex-col">
-            <span className="text-[10px] font-bold uppercase text-[#b45309] tracking-wider">Config Files</span>
+            <span className="text-[10px] font-bold uppercase text-[#b45309] tracking-wider">
+              {isFrench ? 'Fichiers Conf' : 'Config Files'}
+            </span>
             <span className="text-xl font-extrabold text-[#b45309]">{stats.files}</span>
           </div>
 
           <div className="bg-[#fff8f2] p-3 rounded-xl border border-[#d3c5ab] flex flex-col">
-            <span className="text-[10px] font-bold uppercase text-[#4338ca] tracking-wider">Concepts</span>
+            <span className="text-[10px] font-bold uppercase text-[#4338ca] tracking-wider">
+              {isFrench ? 'Concepts' : 'Concepts'}
+            </span>
             <span className="text-xl font-extrabold text-[#4338ca]">{stats.concepts}</span>
           </div>
         </div>
@@ -333,7 +353,11 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by command (systemctl), file (/etc/fstab), concept (cgroups), flag (-u), or objective (101.1)..."
+              placeholder={
+                isFrench
+                  ? 'Rechercher commande (systemctl), fichier (/etc/fstab), concept (cgroups), option (-u) ou objectif (101.1)...'
+                  : 'Search by command (systemctl), file (/etc/fstab), concept (cgroups), flag (-u), or objective (101.1)...'
+              }
               className="w-full pl-10 pr-10 py-2.5 bg-[#ffffff] border border-[#d3c5ab] rounded-xl text-sm text-[#201b11] placeholder:text-[#817660]/70 focus:outline-none focus:ring-2 focus:ring-[#785a00] transition-all font-mono"
             />
             {searchQuery && (
@@ -350,10 +374,10 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              aria-label="Filter by Topic Domain"
+              aria-label={isFrench ? 'Filtrer par domaine' : 'Filter by Topic Domain'}
               className="px-3.5 py-2.5 bg-[#ffffff] border border-[#d3c5ab] rounded-xl text-xs md:text-sm font-bold text-[#201b11] focus:outline-none focus:ring-2 focus:ring-[#785a00] cursor-pointer"
             >
-              <option value="all">All Topic Domains</option>
+              <option value="all">{isFrench ? 'Tous les domaines' : 'All Topic Domains'}</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -367,7 +391,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 className="px-3 py-2.5 bg-[#ebdcc8] hover:bg-[#d3c5ab] text-[#4f4632] rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset</span>
+                <span>{isFrench ? 'Réinitialiser' : 'Reset'}</span>
               </button>
             )}
           </div>
@@ -375,7 +399,9 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
 
         {/* Certification Tier Tabs */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-[#817660] uppercase tracking-wider mr-1">Certification:</span>
+          <span className="text-xs font-bold text-[#817660] uppercase tracking-wider mr-1">
+            {isFrench ? 'Certification :' : 'Certification:'}
+          </span>
           
           <button
             onClick={() => handleTierChange('all')}
@@ -385,7 +411,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#ebdcc8] border border-[#d3c5ab]'
             }`}
           >
-            All Tiers ({stats.total})
+            {isFrench ? `Tous les niveaux (${stats.total})` : `All Tiers (${stats.total})`}
           </button>
 
           <button
@@ -418,13 +444,15 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 : 'bg-[#ffffff] text-[#5c3566] hover:bg-[#ebdcc8] border border-[#d3c5ab]'
             }`}
           >
-            LPIC-3 Enterprise ({stats.lpic3})
+            {isFrench ? `LPIC-3 Entreprise (${stats.lpic3})` : `LPIC-3 Enterprise (${stats.lpic3})`}
           </button>
         </div>
 
         {/* Specific Exam Badges Filter */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[#d3c5ab]/60">
-          <span className="text-xs font-bold text-[#817660] uppercase tracking-wider mr-1">Exam Code:</span>
+          <span className="text-xs font-bold text-[#817660] uppercase tracking-wider mr-1">
+            {isFrench ? 'Code Examen :' : 'Exam Code:'}
+          </span>
           
           <button
             onClick={() => setSelectedExam('all')}
@@ -434,7 +462,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#ebdcc8] border border-[#d3c5ab]'
             }`}
           >
-            All Exams
+            {isFrench ? 'Tous les examens' : 'All Exams'}
           </button>
 
           {(selectedTier === 'all' || selectedTier === 'lpic-1') && (
@@ -535,7 +563,9 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
 
         {/* Type / Resource Classification Filters */}
         <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#d3c5ab]/60">
-          <span className="text-xs font-bold text-[#817660] uppercase tracking-wider mr-1">Classification:</span>
+          <span className="text-xs font-bold text-[#817660] uppercase tracking-wider mr-1">
+            {isFrench ? 'Classification :' : 'Classification:'}
+          </span>
 
           <button
             onClick={() => setSelectedType('all')}
@@ -545,7 +575,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#ebdcc8] border border-[#d3c5ab]'
             }`}
           >
-            All Types
+            {isFrench ? 'Tous les types' : 'All Types'}
           </button>
 
           <button
@@ -557,7 +587,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             }`}
           >
             <Terminal className="w-3.5 h-3.5" />
-            <span>Commands ({stats.commands})</span>
+            <span>{isFrench ? `Commandes (${stats.commands})` : `Commands (${stats.commands})`}</span>
           </button>
 
           <button
@@ -569,7 +599,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             }`}
           >
             <FileCode className="w-3.5 h-3.5" />
-            <span>Config Files & Paths ({stats.files})</span>
+            <span>{isFrench ? `Fichiers de conf & Chemins (${stats.files})` : `Config Files & Paths (${stats.files})`}</span>
           </button>
 
           <button
@@ -581,7 +611,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Concepts & Architectures ({stats.concepts})</span>
+            <span>{isFrench ? `Concepts & Architectures (${stats.concepts})` : `Concepts & Architectures (${stats.concepts})`}</span>
           </button>
         </div>
 
@@ -606,15 +636,21 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
       {/* Result Status Header */}
       <div className="flex justify-between items-center px-1">
         <div className="text-xs font-bold text-[#817660] uppercase tracking-wider">
-          Showing <span className="text-[#201b11] font-extrabold">{filteredEntries.length}</span> terms & commands
-          {selectedLetter !== 'ALL' && ` starting with "${selectedLetter}"`}
-          {searchQuery && ` matching "${searchQuery}"`}
+          {isFrench ? 'Affichage de ' : 'Showing '}
+          <span className="text-[#201b11] font-extrabold">{filteredEntries.length}</span>{' '}
+          {isFrench ? 'termes & commandes' : 'terms & commands'}
+          {selectedLetter !== 'ALL' && (isFrench ? ` commençant par "${selectedLetter}"` : ` starting with "${selectedLetter}"`)}
+          {searchQuery && (isFrench ? ` correspondant à "${searchQuery}"` : ` matching "${searchQuery}"`)}
         </div>
 
         {studyQuizMode && (
           <div className="text-xs font-semibold text-[#785a00] flex items-center gap-1.5 bg-[#f8ecdb] px-2.5 py-1 rounded-lg border border-[#d3c5ab]">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Click any card to reveal definition & exam tips</span>
+            <span>
+              {isFrench
+                ? 'Cliquez sur une carte pour révéler la définition et les astuces'
+                : 'Click any card to reveal definition & exam tips'}
+            </span>
           </div>
         )}
       </div>
@@ -623,15 +659,19 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
       {filteredEntries.length === 0 && (
         <div className="bg-[#ffffff] border-2 border-dashed border-[#d3c5ab] rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3">
           <BookOpen className="w-12 h-12 text-[#817660]" />
-          <h3 className="text-lg font-bold text-[#201b11]">No matching glossary terms found</h3>
+          <h3 className="text-lg font-bold text-[#201b11]">
+            {isFrench ? 'Aucun terme correspondant trouvé' : 'No matching glossary terms found'}
+          </h3>
           <p className="text-xs md:text-sm text-[#4f4632] max-w-md">
-            Try adjusting your search keywords, switching the certification filter, or clearing the active category and alphabetical jump filters.
+            {isFrench
+              ? "Essayez d'ajuster vos mots-clés de recherche, de changer de niveau de certification ou de réinitialiser les filtres."
+              : 'Try adjusting your search keywords, switching the certification filter, or clearing the active category and alphabetical jump filters.'}
           </p>
           <button
             onClick={resetAllFilters}
             className="mt-2 px-4 py-2 bg-[#ffc20e] text-[#6d5100] font-bold text-xs rounded-xl shadow-xs hover:bg-[#f9bd00] transition-colors cursor-pointer"
           >
-            Reset All Filters
+            {isFrench ? 'Réinitialiser tous les filtres' : 'Reset All Filters'}
           </button>
         </div>
       )}
@@ -667,7 +707,13 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                       {entry.type === 'command' && <Terminal className="w-2.5 h-2.5" />}
                       {entry.type === 'file' && <FileCode className="w-2.5 h-2.5" />}
                       {entry.type === 'concept' && <Layers className="w-2.5 h-2.5" />}
-                      <span>{entry.type === 'file' ? 'Config File' : entry.type}</span>
+                      <span>
+                        {entry.type === 'file'
+                          ? (isFrench ? 'Fichier Conf' : 'Config File')
+                          : entry.type === 'command'
+                          ? (isFrench ? 'Commande' : 'Command')
+                          : (isFrench ? 'Concept' : 'Concept')}
+                      </span>
                     </span>
 
                     {/* Cert Tier Badge */}
@@ -680,7 +726,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                           : 'bg-[#fef08a] text-[#854d0e]'
                       }`}
                     >
-                      {entry.certification.toUpperCase()} · {entry.examId.replace('exam-', 'Exam ')}
+                      {entry.certification.toUpperCase()} · {entry.examId.replace('exam-', isFrench ? 'Examen ' : 'Exam ')}
                     </span>
 
                     {/* Objective Link Chip */}
@@ -689,7 +735,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                         e.stopPropagation();
                         handleJumpToObjective(entry);
                       }}
-                      title="Jump to Learning Objective module"
+                      title={isFrench ? "Aller au module d'objectifs" : "Jump to Learning Objective module"}
                       className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#ebdcc8] hover:bg-[#d3c5ab] text-[#4f4632] transition-colors cursor-pointer"
                     >
                       Obj {entry.objectiveId}
@@ -703,7 +749,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                     </h3>
                     <button
                       onClick={(e) => handleCopy(entry.term, entry.id, e)}
-                      title="Copy term name"
+                      title={isFrench ? 'Copier le nom du terme' : 'Copy term name'}
                       className="text-[#817660] hover:text-[#201b11] p-1 rounded transition-colors"
                     >
                       {copiedId === entry.id ? (
@@ -718,7 +764,11 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 {/* Bookmark Toggle Button */}
                 <button
                   onClick={(e) => toggleBookmark(entry.id, e)}
-                  title={isBookmarked ? 'Remove bookmark' : 'Bookmark this term'}
+                  title={
+                    isBookmarked
+                      ? (isFrench ? 'Supprimer le favori' : 'Remove bookmark')
+                      : (isFrench ? 'Ajouter aux favoris' : 'Bookmark this term')
+                  }
                   className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                     isBookmarked
                       ? 'bg-[#ffc20e] text-[#6d5100]'
@@ -738,12 +788,16 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 {studyQuizMode && !isRevealed ? (
                   <div className="py-6 flex flex-col items-center justify-center text-center gap-2 text-[#817660]">
                     <Lightbulb className="w-6 h-6 text-[#ffc20e]" />
-                    <span className="text-xs font-bold text-[#201b11]">Test your recall!</span>
+                    <span className="text-xs font-bold text-[#201b11]">
+                      {isFrench ? 'Testez votre mémoire !' : 'Test your recall!'}
+                    </span>
                     <p className="text-[11px] text-[#4f4632]">
-                      What does this {entry.type} do, where is it used, and what key flags are tested on Exam {entry.examId.replace('exam-', '')}?
+                      {isFrench
+                        ? `Quel est le rôle de cette ressource (${entry.term}), où est-elle utilisée et quelles options sont évaluées à l'Examen ${entry.examId.replace('exam-', '')} ?`
+                        : `What does this ${entry.type} do, where is it used, and what key flags are tested on Exam ${entry.examId.replace('exam-', '')}?`}
                     </p>
                     <span className="text-[10px] font-bold text-[#785a00] uppercase tracking-wider mt-1">
-                      Click to reveal
+                      {isFrench ? 'Cliquer pour révéler' : 'Click to reveal'}
                     </span>
                   </div>
                 ) : (
@@ -759,7 +813,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                         <code className="truncate">{entry.syntaxOrLocation}</code>
                         <button
                           onClick={(e) => handleCopy(entry.syntaxOrLocation!, `${entry.id}-syntax`, e)}
-                          title="Copy syntax"
+                          title={isFrench ? 'Copier la syntaxe' : 'Copy syntax'}
                           className="text-[#d3c5ab] hover:text-[#ffffff] shrink-0"
                         >
                           <Copy className="w-3 h-3" />
@@ -771,7 +825,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                     {entry.flagsOrParameters && entry.flagsOrParameters.length > 0 && (
                       <div className="space-y-1.5 pt-1">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#817660] block">
-                          Essential Flags & Parameters
+                          {isFrench ? 'Options & Paramètres Essentiels' : 'Essential Flags & Parameters'}
                         </span>
                         <div className="bg-[#fff8f2] rounded-xl p-2 border border-[#ebdcc8] space-y-1">
                           {entry.flagsOrParameters.slice(0, 3).map((f, idx) => (
@@ -784,7 +838,9 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                           ))}
                           {entry.flagsOrParameters.length > 3 && (
                             <div className="text-[10px] font-bold text-[#785a00] pt-0.5">
-                              +{entry.flagsOrParameters.length - 3} more options in detail view
+                              {isFrench
+                                ? `+${entry.flagsOrParameters.length - 3} autres options en vue détaillée`
+                                : `+${entry.flagsOrParameters.length - 3} more options in detail view`}
                             </div>
                           )}
                         </div>
@@ -796,7 +852,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                       <div className="bg-[#fffbeb] border border-[#fef08a] rounded-xl p-2.5 text-[11px] text-[#854d0e] flex items-start gap-1.5">
                         <Lightbulb className="w-3.5 h-3.5 text-[#b45309] shrink-0 mt-0.5" />
                         <span className="line-clamp-2">
-                          <strong>Exam Tip:</strong> {entry.examTips}
+                          <strong>{isFrench ? 'Conseil Examen :' : 'Exam Tip:'}</strong> {entry.examTips}
                         </span>
                       </div>
                     )}
@@ -807,7 +863,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               {/* Card Footer Actions */}
               <div className="p-3 bg-[#fef9f4] border-t border-[#ebdcc8] flex items-center justify-between gap-2 mt-auto">
                 <span className="text-[10px] font-semibold text-[#817660] truncate">
-                  Topic {entry.topicNumber}: {entry.topicTitle}
+                  {isFrench ? 'Thème' : 'Topic'} {entry.topicNumber}: {entry.topicTitle}
                 </span>
 
                 <div className="flex items-center gap-1 shrink-0">
@@ -818,7 +874,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                     }}
                     className="px-2.5 py-1 rounded-lg bg-[#ffffff] hover:bg-[#ebdcc8] text-[#201b11] text-xs font-bold transition-colors border border-[#d3c5ab] flex items-center gap-1 cursor-pointer"
                   >
-                    <span>Inspect</span>
+                    <span>{isFrench ? 'Inspecter' : 'Inspect'}</span>
                     <ArrowUpRight className="w-3 h-3" />
                   </button>
 
@@ -827,7 +883,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                       e.stopPropagation();
                       handleJumpToObjective(entry);
                     }}
-                    title="Open full learning module"
+                    title={isFrench ? "Ouvrir le module d'apprentissage complet" : "Open full learning module"}
                     className="p-1 rounded-lg bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] transition-colors cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5" />
@@ -856,15 +912,19 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                         : 'bg-[#e0e7ff] text-[#4338ca]'
                     }`}
                   >
-                    {inspectEntry.type}
+                    {inspectEntry.type === 'file'
+                      ? (isFrench ? 'Fichier Conf' : 'Config File')
+                      : inspectEntry.type === 'command'
+                      ? (isFrench ? 'Commande' : 'Command')
+                      : (isFrench ? 'Concept' : 'Concept')}
                   </span>
 
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#ffc20e] text-[#6d5100]">
-                    {inspectEntry.certification.toUpperCase()} · Exam {inspectEntry.examId.replace('exam-', '')}
+                    {inspectEntry.certification.toUpperCase()} · {isFrench ? 'Examen ' : 'Exam '}{inspectEntry.examId.replace('exam-', '')}
                   </span>
 
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#ebdcc8] text-[#4f4632]">
-                    Objective {inspectEntry.objectiveId}
+                    {isFrench ? 'Objectif' : 'Objective'} {inspectEntry.objectiveId}
                   </span>
                 </div>
 
@@ -872,13 +932,18 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                   {inspectEntry.term}
                 </h2>
                 <p className="text-xs text-[#817660] mt-0.5">
-                  Topic {inspectEntry.topicNumber}: {inspectEntry.topicTitle} ({inspectEntry.category})
+                  {isFrench ? 'Thème' : 'Topic'} {inspectEntry.topicNumber}: {inspectEntry.topicTitle} ({inspectEntry.category})
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleBookmark(inspectEntry.id)}
+                  title={
+                    bookmarks[inspectEntry.id]
+                      ? (isFrench ? 'Supprimer le favori' : 'Remove bookmark')
+                      : (isFrench ? 'Ajouter aux favoris' : 'Bookmark this term')
+                  }
                   className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                     bookmarks[inspectEntry.id]
                       ? 'bg-[#ffc20e] text-[#6d5100] border-[#ffc20e]'
@@ -890,6 +955,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
 
                 <button
                   onClick={() => setInspectEntry(null)}
+                  title={isFrench ? 'Fermer' : 'Close'}
                   className="p-2 rounded-xl bg-[#ffffff] border border-[#d3c5ab] text-[#817660] hover:text-[#201b11] hover:bg-[#f8ecdb] transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
@@ -902,7 +968,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               {/* Definition */}
               <div>
                 <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#817660] mb-1.5">
-                  Definition & Functionality
+                  {isFrench ? 'Définition & Fonctionnalité' : 'Definition & Functionality'}
                 </h4>
                 <p className="text-sm md:text-base text-[#201b11] leading-relaxed">
                   {inspectEntry.definition}
@@ -914,14 +980,14 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
                     <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#817660]">
-                      Syntax / File Location
+                      {isFrench ? 'Syntaxe / Emplacement' : 'Syntax / File Location'}
                     </h4>
                     <button
                       onClick={() => handleCopy(inspectEntry.syntaxOrLocation!, 'modal-syntax')}
                       className="text-xs text-[#785a00] font-bold hover:underline flex items-center gap-1"
                     >
                       <Copy className="w-3 h-3" />
-                      <span>Copy</span>
+                      <span>{isFrench ? 'Copier' : 'Copy'}</span>
                     </button>
                   </div>
                   <div className="bg-[#201b11] rounded-xl p-3 font-mono text-xs text-[#ffc20e] overflow-x-auto border border-[#3b3222]">
@@ -934,7 +1000,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               {inspectEntry.flagsOrParameters && inspectEntry.flagsOrParameters.length > 0 && (
                 <div>
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#817660] mb-2">
-                    Command Options & Key Parameters
+                    {isFrench ? 'Options de commande & Paramètres clés' : 'Command Options & Key Parameters'}
                   </h4>
                   <div className="bg-[#fef9f4] border border-[#ebdcc8] rounded-xl divide-y divide-[#ebdcc8] overflow-hidden">
                     {inspectEntry.flagsOrParameters.map((param, idx) => (
@@ -954,7 +1020,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
                     <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#817660]">
-                      Practical Terminal Example
+                      {isFrench ? 'Exemple Pratique dans le Terminal' : 'Practical Terminal Example'}
                     </h4>
                     <button
                       onClick={() => handleCopySnippet(inspectEntry.exampleSnippet!, 'modal-snip')}
@@ -963,12 +1029,12 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                       {copiedSnippetId === 'modal-snip' ? (
                         <>
                           <Check className="w-3 h-3 text-[#28A745]" />
-                          <span className="text-[#28A745]">Copied!</span>
+                          <span className="text-[#28A745]">{isFrench ? 'Copié !' : 'Copied!'}</span>
                         </>
                       ) : (
                         <>
                           <Copy className="w-3 h-3" />
-                          <span>Copy Snippet</span>
+                          <span>{isFrench ? "Copier l'extrait" : 'Copy Snippet'}</span>
                         </>
                       )}
                     </button>
@@ -989,7 +1055,9 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 <div className="bg-[#fffbeb] border border-[#fef08a] rounded-2xl p-4 flex items-start gap-3 text-xs md:text-sm text-[#854d0e]">
                   <Lightbulb className="w-5 h-5 text-[#b45309] shrink-0 mt-0.5" />
                   <div>
-                    <strong className="font-bold block text-sm mb-0.5">LPI Certification Exam Gotchas:</strong>
+                    <strong className="font-bold block text-sm mb-0.5">
+                      {isFrench ? 'Pièges des examens de certification LPI :' : 'LPI Certification Exam Gotchas:'}
+                    </strong>
                     <p className="leading-relaxed">{inspectEntry.examTips}</p>
                   </div>
                 </div>
@@ -999,7 +1067,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               {inspectEntry.relatedTerms && inspectEntry.relatedTerms.length > 0 && (
                 <div>
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#817660] mb-2">
-                    Related Concepts & Terms
+                    {isFrench ? 'Concepts & Termes Associés' : 'Related Concepts & Terms'}
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {inspectEntry.relatedTerms.map((rt, idx) => (
@@ -1026,14 +1094,18 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 className="px-4 py-2.5 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] text-xs md:text-sm font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
               >
                 <BookOpen className="w-4 h-4" />
-                <span>Open Objective {inspectEntry.objectiveId} Module</span>
+                <span>
+                  {isFrench
+                    ? `Ouvrir le module Objectif ${inspectEntry.objectiveId}`
+                    : `Open Objective ${inspectEntry.objectiveId} Module`}
+                </span>
               </button>
 
               <button
                 onClick={() => setInspectEntry(null)}
                 className="px-4 py-2.5 rounded-xl bg-[#ffffff] hover:bg-[#ebdcc8] text-[#4f4632] text-xs md:text-sm font-bold transition-colors border border-[#d3c5ab] cursor-pointer"
               >
-                Close
+                {isFrench ? 'Fermer' : 'Close'}
               </button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-export type TabType = 'dashboard' | 'learning' | 'path' | 'practice' | 'flashcards' | 'glossary';
+export type TabType = 'dashboard' | 'learning' | 'path' | 'practice' | 'flashcards' | 'glossary' | 'training';
 
 export type GlossaryItemType = 'command' | 'concept' | 'file' | 'function_or_directive';
 
@@ -128,3 +128,137 @@ export interface UserStats {
   systemArchitectureProgress: number;
   linuxInstallationProgress: number;
 }
+
+// ----------------------------------------------------
+// Specialized Interactive Training Modules
+// ----------------------------------------------------
+
+export type TrainingModeType = 'fill_in_blank' | 'troubleshooting' | 'sequencing' | 'matching' | 'guided_labs';
+
+export interface FillInTheBlankChallenge {
+  id: string;
+  certification: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  topicNumber: number;
+  objectiveId: string;
+  category: string;
+  prompt: string;
+  promptFr?: string;
+  scenario?: string;
+  scenarioFr?: string;
+  contextCode?: string;
+  expectedAnswers: string[];
+  caseSensitive?: boolean;
+  placeholder: string;
+  hint: string;
+  hintFr?: string;
+  explanation: string;
+  explanationFr?: string;
+}
+
+export interface TroubleshootingOption {
+  id: string;
+  label: string;
+  labelFr?: string;
+  isCorrect: boolean;
+  explanation: string;
+  explanationFr?: string;
+}
+
+export interface TroubleshootingChallenge {
+  id: string;
+  title: string;
+  titleFr?: string;
+  certification: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  topicNumber: number;
+  objectiveId: string;
+  category: string;
+  scenario: string;
+  scenarioFr?: string;
+  codeSnippet: string;
+  language?: 'bash' | 'config' | 'fstab' | 'cron' | 'systemd';
+  bugDescription: string;
+  bugDescriptionFr?: string;
+  options: TroubleshootingOption[];
+  correctedSnippet: string;
+  fixExplanation: string;
+  fixExplanationFr?: string;
+}
+
+export interface SequencingStep {
+  id: string;
+  label: string;
+  labelFr?: string;
+  detail: string;
+  detailFr?: string;
+}
+
+export interface SequencingChallenge {
+  id: string;
+  title: string;
+  titleFr?: string;
+  certification: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  topicNumber: number;
+  objectiveId: string;
+  category: string;
+  description: string;
+  descriptionFr?: string;
+  steps: SequencingStep[]; // correct chronological order
+  explanation: string;
+  explanationFr?: string;
+}
+
+export interface MatchingPair {
+  id: string;
+  left: string;
+  leftFr?: string;
+  right: string;
+  rightFr?: string;
+  note?: string;
+  noteFr?: string;
+}
+
+export interface MatchingGame {
+  id: string;
+  title: string;
+  titleFr?: string;
+  certification: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  topicNumber: number;
+  objectiveId: string;
+  category: string;
+  description: string;
+  descriptionFr?: string;
+  pairs: MatchingPair[];
+}
+
+export interface GuidedLabStep {
+  id: string;
+  stepNumber: number;
+  title: string;
+  titleFr?: string;
+  instruction: string;
+  instructionFr?: string;
+  hint?: string;
+  hintFr?: string;
+  expectedCommands: string[];
+  simulatedOutput: string;
+  explanation: string;
+  explanationFr?: string;
+}
+
+export interface GuidedLabScenario {
+  id: string;
+  title: string;
+  titleFr?: string;
+  certification: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  topicNumber: number;
+  objectiveId: string;
+  category: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  estimatedMinutes: number;
+  goal: string;
+  goalFr?: string;
+  context: string;
+  contextFr?: string;
+  steps: GuidedLabStep[];
+}
+

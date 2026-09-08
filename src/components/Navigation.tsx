@@ -1,6 +1,8 @@
 import React from 'react';
-import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library } from 'lucide-react';
+import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library, Zap } from 'lucide-react';
 import { TabType } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 interface NavigationProps {
   currentTab: TabType;
@@ -8,13 +10,15 @@ interface NavigationProps {
 }
 
 export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }) => {
+  const { t } = useLanguage();
+
   const tabs: { id: TabType; label: string; icon: React.FC<{ className?: string }> }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
-    { id: 'learning', label: 'Learning', icon: BookOpen },
-    { id: 'glossary', label: 'Glossary', icon: Library },
-    { id: 'path', label: 'Path', icon: GraduationCap },
-    { id: 'practice', label: 'Practice', icon: HelpCircle },
-    { id: 'flashcards', label: 'Cards', icon: Layers },
+    { id: 'dashboard', label: t.nav.dashboard, icon: LayoutGrid },
+    { id: 'learning', label: t.nav.learning, icon: BookOpen },
+    { id: 'training', label: t.nav.training, icon: Zap },
+    { id: 'practice', label: t.nav.practice, icon: HelpCircle },
+    { id: 'flashcards', label: t.nav.flashcards, icon: Layers },
+    { id: 'glossary', label: t.nav.glossary, icon: Library },
   ];
 
   return (
@@ -34,7 +38,7 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }
             }`}
           >
             <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
-            <span className="text-[10px] uppercase tracking-wider font-sans leading-none">
+            <span className="text-[9.5px] uppercase tracking-wider font-sans leading-none truncate max-w-full">
               {tab.label}
             </span>
           </button>
@@ -45,19 +49,23 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }
 };
 
 export const DesktopSidebar: React.FC<NavigationProps> = ({ currentTab, onTabChange }) => {
+  const { t } = useLanguage();
+
   const navItems: { id: TabType; label: string; icon: React.FC<{ className?: string }>; badge?: string }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
-    { id: 'learning', label: 'Learning Objectives', icon: BookOpen, badge: 'LPIC-1/2/3' },
-    { id: 'glossary', label: 'Glossary & Index', icon: Library, badge: 'All Exams' },
-    { id: 'path', label: 'Certification Path', icon: GraduationCap },
-    { id: 'practice', label: 'Practice Exams', icon: HelpCircle },
-    { id: 'flashcards', label: 'Flashcards', icon: Layers, badge: '1,800+ Cards' },
+    { id: 'dashboard', label: t.nav.dashboard, icon: LayoutGrid },
+    { id: 'learning', label: t.nav.learning, icon: BookOpen, badge: t.nav.learningBadge },
+    { id: 'training', label: t.nav.training, icon: Zap, badge: t.nav.trainingBadge },
+    { id: 'glossary', label: t.nav.glossary, icon: Library, badge: t.nav.glossaryBadge },
+    { id: 'path', label: t.nav.path, icon: GraduationCap },
+    { id: 'practice', label: t.nav.practice, icon: HelpCircle },
+    { id: 'flashcards', label: t.nav.flashcards, icon: Layers, badge: t.nav.flashcardsBadge },
   ];
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-[#fff8f2] border-r border-[#d3c5ab] h-screen fixed left-0 top-16 pt-6 px-4 z-30">
-      <div className="text-xs font-bold text-[#817660] uppercase tracking-wider px-3 mb-2">
-        Study Modules
+      <div className="flex items-center justify-between text-xs font-bold text-[#817660] uppercase tracking-wider px-3 mb-2">
+        <span>{t.nav.studyModules}</span>
+        <LanguageSelector variant="compact" />
       </div>
       <nav className="space-y-1.5">
         {navItems.map((item) => {
@@ -90,11 +98,12 @@ export const DesktopSidebar: React.FC<NavigationProps> = ({ currentTab, onTabCha
 
       <div className="mt-auto mb-20 p-4 bg-[#f8ecdb] rounded-xl border border-[#d3c5ab]">
         <div className="text-xs font-bold uppercase text-[#785a00] tracking-wider mb-1">
-          LPI Complete Curriculum
+          {t.nav.curriculumTitle}
         </div>
-        <div className="font-bold text-[#201b11] text-sm">LPIC-1, LPIC-2 & LPIC-3</div>
-        <div className="text-xs text-[#4f4632] mt-0.5">Exams 101, 102, 201, 202, 300, 303, 305, 306</div>
+        <div className="font-bold text-[#201b11] text-sm">{t.nav.curriculumSubtitle}</div>
+        <div className="text-xs text-[#4f4632] mt-0.5">{t.nav.curriculumExams}</div>
       </div>
     </aside>
   );
 };
+

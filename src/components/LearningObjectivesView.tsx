@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { allLpicTopicsData } from '../data/lpicObjectivesData';
 import { LPICObjective, LPICTopic, TabType } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface LearningObjectivesViewProps {
   onNavigate: (tab: TabType) => void;
@@ -44,6 +45,8 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
   initialTopicId,
   initialObjectiveId,
 }) => {
+  const { t, isFrench } = useLanguage();
+
   // Determine initial cert & exam from topic/objective if provided
   const getInitialExam = (): ExamIdType => {
     if (initialTopicId) {
@@ -290,17 +293,21 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 bg-[#ffc20e] text-[#6d5100] font-bold text-xs rounded-md uppercase tracking-wider">
-              Official Curriculum
+              {isFrench ? 'Programme Officiel' : 'Official Curriculum'}
             </span>
             <span className="text-xs font-semibold text-[#817660]">
-              LPIC-1 (v5.0), LPIC-2 (v4.5) & LPIC-3 (v3.0) Objectives
+              {isFrench
+                ? 'Objectifs LPIC-1 (v5.0), LPIC-2 (v4.5) et LPIC-3 (v3.0)'
+                : 'LPIC-1 (v5.0), LPIC-2 (v4.5) & LPIC-3 (v3.0) Objectives'}
             </span>
           </div>
           <h1 className="font-sans text-2xl md:text-3xl font-bold text-[#201b11] tracking-tight">
-            LPI Study Modules & Learning Objectives
+            {t.objectives.title}
           </h1>
           <p className="text-[#4f4632] text-sm md:text-base max-w-3xl">
-            Exhaustive, chapter-by-chapter curriculum covering LPIC-1 (101 & 102), LPIC-2 (201 & 202), LPIC-3 Mixed Environments (300), LPIC-3 Security (303), LPIC-3 Virtualization & Containerization (305), and LPIC-3 High Availability & Storage Clusters (306) topics, key knowledge areas, command syntax, essential configuration files, and practice checkpoints defined by the Linux Professional Institute.
+            {isFrench
+              ? 'Curriculum exhaustif chapitre par chapitre couvrant LPIC-1 (101 & 102), LPIC-2 (201 & 202), LPIC-3 Environnements Mixtes (300), LPIC-3 Sécurité (303), LPIC-3 Virtualisation & Conteneurs (305) et LPIC-3 Haute Disponibilité (306), avec zones clés de connaissances, syntaxe des commandes, fichiers de configuration essentiels et points de contrôle d\'entraînement définis par le Linux Professional Institute.'
+              : 'Exhaustive, chapter-by-chapter curriculum covering LPIC-1 (101 & 102), LPIC-2 (201 & 202), LPIC-3 Mixed Environments (300), LPIC-3 Security (303), LPIC-3 Virtualization & Containerization (305), and LPIC-3 High Availability & Storage Clusters (306) topics, key knowledge areas, command syntax, essential configuration files, and practice checkpoints defined by the Linux Professional Institute.'}
           </p>
         </div>
 
@@ -372,7 +379,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#f8ecdb] text-[#785a00] hover:bg-[#ebdcc8] text-xs font-bold transition-colors border border-[#d3c5ab] cursor-pointer"
           >
             <Layers className="w-4 h-4" />
-            <span>200 Flashcards (Topics 101 & 102)</span>
+            <span>{isFrench ? '200 Flashcards (Thèmes 101 & 102)' : '200 Flashcards (Topics 101 & 102)'}</span>
           </button>
 
           <button
@@ -380,7 +387,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ffc20e] text-[#6d5100] hover:bg-[#f9bd00] font-bold text-xs md:text-sm shadow-xs transition-transform active:scale-[0.98] cursor-pointer"
           >
             <Play className="w-4 h-4 fill-current" />
-            <span>Practice Exam Mode</span>
+            <span>{isFrench ? 'Mode Examen d\'entraînement' : 'Practice Exam Mode'}</span>
           </button>
         </div>
       </div>
@@ -397,7 +404,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         >
           <Award className={`w-5 h-5 shrink-0 ${selectedCert === 'lpic-1' ? 'text-[#ffc20e]' : 'text-[#817660]'}`} />
           <div className="text-left">
-            <span className="block text-[10px] uppercase tracking-wider font-extrabold text-[#785a00]">Tier 1 (Core)</span>
+            <span className="block text-[10px] uppercase tracking-wider font-extrabold text-[#785a00]">
+              {isFrench ? 'Niveau 1 (Fondamental)' : 'Tier 1 (Core)'}
+            </span>
             <span className="block font-bold leading-tight truncate">LPIC-1: Linux Admin</span>
           </div>
         </button>
@@ -412,7 +421,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         >
           <Server className={`w-5 h-5 shrink-0 ${selectedCert === 'lpic-2' ? 'text-[#0061a4]' : 'text-[#817660]'}`} />
           <div className="text-left">
-            <span className="block text-[10px] uppercase tracking-wider font-extrabold text-[#0061a4]">Tier 2 (Advanced)</span>
+            <span className="block text-[10px] uppercase tracking-wider font-extrabold text-[#0061a4]">
+              {isFrench ? 'Niveau 2 (Avancé)' : 'Tier 2 (Advanced)'}
+            </span>
             <span className="block font-bold leading-tight truncate">LPIC-2: Linux Engineer</span>
           </div>
         </button>
@@ -427,7 +438,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         >
           <Layers className={`w-5 h-5 shrink-0 ${selectedCert === 'lpic-3' ? 'text-[#5c3566]' : 'text-[#817660]'}`} />
           <div className="text-left">
-            <span className="block text-[10px] uppercase tracking-wider font-extrabold text-[#5c3566]">Tier 3 (Enterprise)</span>
+            <span className="block text-[10px] uppercase tracking-wider font-extrabold text-[#5c3566]">
+              {isFrench ? 'Niveau 3 (Entreprise)' : 'Tier 3 (Enterprise)'}
+            </span>
             <span className="block font-bold leading-tight truncate">LPIC-3: Enterprise (300, 303, 305 & 306)</span>
           </div>
         </button>
@@ -827,7 +840,11 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search objectives, commands, files, or keywords (e.g. named.conf, mdadm, sysctl, pam)..."
+            placeholder={
+              isFrench
+                ? 'Rechercher objectifs, commandes, fichiers ou mots-clés (ex: named.conf, mdadm, sysctl)...'
+                : 'Search objectives, commands, files, or keywords (e.g. named.conf, mdadm, sysctl, pam)...'
+            }
             className="w-full pl-9 pr-8 py-2 bg-[#f8ecdb]/50 border border-[#d3c5ab] rounded-lg text-sm text-[#201b11] focus:outline-none focus:border-[#785a00] focus:ring-1 focus:ring-[#785a00]"
           />
           {searchQuery && (
@@ -843,7 +860,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
           <div className="flex items-center gap-1.5 text-xs text-[#4f4632] font-semibold">
             <Filter className="w-3.5 h-3.5 text-[#817660]" />
-            <span>Filter Weight:</span>
+            <span>{isFrench ? 'Filtrer le poids :' : 'Filter Weight:'}</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -857,7 +874,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                     : 'bg-[#f8ecdb] text-[#4f4632] hover:bg-[#ebdcc8]'
                 }`}
               >
-                {w === 'all' ? 'All' : `W${w}`}
+                {w === 'all' ? (isFrench ? 'Tous' : 'All') : `W${w}`}
               </button>
             ))}
           </div>
@@ -869,18 +886,22 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         {filteredTopics.length === 0 ? (
           <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-2xl p-10 text-center space-y-3">
             <HelpCircle className="w-10 h-10 text-[#817660] mx-auto" />
-            <h3 className="font-bold text-lg text-[#201b11]">No objectives matched your search</h3>
+            <h3 className="font-bold text-lg text-[#201b11]">
+              {isFrench ? 'Aucun objectif ne correspond à votre recherche' : 'No objectives matched your search'}
+            </h3>
             <p className="text-sm text-[#4f4632] max-w-md mx-auto">
-              Try searching for common Linux terms like <span className="font-mono font-bold">bind</span>, <span className="font-mono font-bold">raid</span>, <span className="font-mono font-bold">lvm</span>, <span className="font-mono font-bold">postfix</span>, or <span className="font-mono font-bold">iptables</span>.
+              {isFrench
+                ? 'Essayez de chercher des termes Linux courants comme bind, raid, lvm, postfix ou iptables.'
+                : 'Try searching for common Linux terms like bind, raid, lvm, postfix, or iptables.'}
             </p>
             <button
               onClick={() => {
                 setSearchQuery('');
                 setSelectedWeightFilter('all');
               }}
-              className="px-4 py-2 bg-[#ffc20e] text-[#6d5100] rounded-lg text-xs font-bold hover:bg-[#f9bd00]"
+              className="px-4 py-2 bg-[#ffc20e] text-[#6d5100] rounded-lg text-xs font-bold hover:bg-[#f9bd00] cursor-pointer"
             >
-              Reset Filters
+              {isFrench ? 'Réinitialiser les filtres' : 'Reset Filters'}
             </button>
           </div>
         ) : (
@@ -914,7 +935,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                         ? 'bg-[#0061a4] text-[#ffffff]'
                         : 'bg-[#ffc20e] text-[#6d5100]'
                     }`}>
-                      <span className="text-[10px] leading-tight uppercase font-sans">Topic</span>
+                      <span className="text-[10px] leading-tight uppercase font-sans">
+                        {isFrench ? 'Thème' : 'Topic'}
+                      </span>
                       <span className="text-base md:text-lg leading-none font-mono">
                         {topic.topicNumber}
                       </span>
@@ -926,7 +949,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                           {topic.title}
                         </h3>
                         <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#ebdcc8] text-[#785a00]">
-                          Weight: {topic.totalWeight}
+                          {isFrench ? 'Poids :' : 'Weight:'} {topic.totalWeight}
                         </span>
                       </div>
                       <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 line-clamp-1">
@@ -937,7 +960,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
 
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="hidden sm:inline-block text-xs font-bold text-[#817660]">
-                      {topicMasteredCount}/{topic.objectives.length} Mastered
+                      {topicMasteredCount}/{topic.objectives.length} {isFrench ? 'Maîtrisés' : 'Mastered'}
                     </span>
                     <div className="w-8 h-8 rounded-full bg-[#ebdcc8] flex items-center justify-center text-[#785a00]">
                       {isExpanded ? (
@@ -971,12 +994,12 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                                 {obj.title}
                               </h4>
                               <span className="px-2 py-0.5 bg-[#ebdcc8] text-[#4f4632] text-xs font-semibold rounded">
-                                Weight: {obj.weight}
+                                {isFrench ? 'Poids :' : 'Weight:'} {obj.weight}
                               </span>
                               {isMastered && (
                                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#28A745] bg-[#28A745]/10 px-2 py-0.5 rounded">
                                   <CheckCircle2 className="w-3 h-3" />
-                                  Mastered
+                                  {isFrench ? 'Maîtrisé' : 'Mastered'}
                                 </span>
                               )}
                             </div>
@@ -997,7 +1020,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                               ))}
                               {obj.termsAndUtilities.length > 6 && (
                                 <span className="px-1.5 py-0.5 text-[11px] font-semibold text-[#817660]">
-                                  +{obj.termsAndUtilities.length - 6} more
+                                  +{obj.termsAndUtilities.length - 6} {isFrench ? 'de plus' : 'more'}
                                 </span>
                               )}
                             </div>
@@ -1010,7 +1033,11 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                                 e.stopPropagation();
                                 toggleMasterObjective(obj.id);
                               }}
-                              title={isMastered ? 'Mark as In Progress' : 'Mark as Mastered'}
+                              title={
+                                isMastered
+                                  ? (isFrench ? 'Marquer comme en cours' : 'Mark as In Progress')
+                                  : (isFrench ? 'Marquer comme maîtrisé' : 'Mark as Mastered')
+                              }
                               className={`p-2 rounded-lg border transition-colors ${
                                 isMastered
                                   ? 'bg-[#28A745]/10 border-[#28A745]/40 text-[#28A745] hover:bg-[#28A745]/20'
@@ -1040,7 +1067,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                                   : 'bg-[#785a00] hover:bg-[#604700]'
                               }`}
                             >
-                              <span>Study Chapter</span>
+                              <span>{isFrench ? 'Étudier le chapitre' : 'Study Chapter'}</span>
                               <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -1064,13 +1091,13 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-0.5 bg-[#201b11] text-[#ffc20e] font-mono font-bold text-xs rounded">
-                    Objective {activeObjective.objective.id}
+                    {isFrench ? 'Objectif' : 'Objective'} {activeObjective.objective.id}
                   </span>
                   <span className="text-xs font-bold text-[#785a00] bg-[#ebdcc8] px-2.5 py-0.5 rounded">
-                    Topic {activeObjective.topic.topicNumber}: {activeObjective.topic.title}
+                    {isFrench ? 'Thème' : 'Topic'} {activeObjective.topic.topicNumber}: {activeObjective.topic.title}
                   </span>
                   <span className="text-xs font-bold text-[#4f4632] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                    Exam Weight: {activeObjective.objective.weight}
+                    {isFrench ? 'Poids à l\'examen :' : 'Exam Weight:'} {activeObjective.objective.weight}
                   </span>
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold text-[#201b11]">
@@ -1095,7 +1122,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
               <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-5 space-y-3 shadow-xs">
                 <div className="flex items-center gap-2 text-[#785a00]">
                   <BookOpen className="w-5 h-5" />
-                  <h3 className="font-bold text-base text-[#201b11]">Key Knowledge Areas</h3>
+                  <h3 className="font-bold text-base text-[#201b11]">
+                    {isFrench ? 'Domaines clés de connaissances' : 'Key Knowledge Areas'}
+                  </h3>
                 </div>
                 <ul className="space-y-2 text-sm text-[#4f4632]">
                   {activeObjective.objective.keyKnowledgeAreas.map((area, idx) => (
@@ -1112,7 +1141,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                 <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-4 space-y-2.5 shadow-xs">
                   <div className="flex items-center gap-2 text-[#785a00]">
                     <Terminal className="w-4 h-4" />
-                    <h4 className="font-bold text-sm text-[#201b11]">Terms & Utilities</h4>
+                    <h4 className="font-bold text-sm text-[#201b11]">
+                      {isFrench ? 'Termes & Utilitaires' : 'Terms & Utilities'}
+                    </h4>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {activeObjective.objective.termsAndUtilities.map((term, idx) => (
@@ -1129,7 +1160,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                 <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-4 space-y-2.5 shadow-xs">
                   <div className="flex items-center gap-2 text-[#785a00]">
                     <FileCode className="w-4 h-4" />
-                    <h4 className="font-bold text-sm text-[#201b11]">Key Files & Paths</h4>
+                    <h4 className="font-bold text-sm text-[#201b11]">
+                      {isFrench ? 'Fichiers & Chemins Clés' : 'Key Files & Paths'}
+                    </h4>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {activeObjective.objective.filesAndPaths.map((filePath, idx) => (
@@ -1150,7 +1183,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                   <div className="flex items-center gap-2 text-[#785a00]">
                     <Terminal className="w-5 h-5" />
                     <h3 className="font-bold text-base text-[#201b11]">
-                      Practical Command Examples & Syntax
+                      {isFrench
+                        ? 'Exemples de commandes pratiques & syntaxe'
+                        : 'Practical Command Examples & Syntax'}
                     </h3>
                   </div>
 
@@ -1171,12 +1206,12 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                             {copiedIndex === idx ? (
                               <>
                                 <Check className="w-3.5 h-3.5 text-[#28A745]" />
-                                <span className="text-[#28A745]">Copied</span>
+                                <span className="text-[#28A745]">{isFrench ? 'Copié' : 'Copied'}</span>
                               </>
                             ) : (
                               <>
                                 <Copy className="w-3.5 h-3.5" />
-                                <span>Copy</span>
+                                <span>{isFrench ? 'Copier' : 'Copy'}</span>
                               </>
                             )}
                           </button>
@@ -1188,7 +1223,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
 
                         {cmd.example && (
                           <div className="text-neutral-400 text-[11px] pt-1">
-                            <span className="text-neutral-500">Example:</span> {cmd.example}
+                            <span className="text-neutral-500">{isFrench ? 'Exemple :' : 'Example:'}</span> {cmd.example}
                           </div>
                         )}
 
@@ -1209,7 +1244,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                   <div className="flex items-center gap-2 text-[#785a00]">
                     <Lightbulb className="w-5 h-5 text-[#E67E22]" />
                     <h3 className="font-bold text-base text-[#201b11]">
-                      High-Yield Exam Tips & Traps
+                      {isFrench
+                        ? 'Conseils & Pièges essentiels pour l\'examen'
+                        : 'High-Yield Exam Tips & Traps'}
                     </h3>
                   </div>
 
@@ -1231,7 +1268,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                     <div className="flex items-center gap-2 text-[#785a00]">
                       <HelpCircle className="w-5 h-5" />
                       <h3 className="font-bold text-base text-[#201b11]">
-                        Knowledge Check ({activeObjective.objective.quickQuestions.length} Questions)
+                        {isFrench
+                          ? `Contrôle des connaissances (${activeObjective.objective.quickQuestions.length} questions)`
+                          : `Knowledge Check (${activeObjective.objective.quickQuestions.length} Questions)`}
                       </h3>
                     </div>
                     {quizSubmitted && (
@@ -1240,10 +1279,10 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                           setUserQuizAnswers({});
                           setQuizSubmitted(false);
                         }}
-                        className="inline-flex items-center gap-1 text-xs text-[#785a00] hover:underline font-bold"
+                        className="inline-flex items-center gap-1 text-xs text-[#785a00] hover:underline font-bold cursor-pointer"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
-                        <span>Retry</span>
+                        <span>{isFrench ? 'Recommencer' : 'Retry'}</span>
                       </button>
                     )}
                   </div>
@@ -1302,7 +1341,9 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                               }`}
                             >
                               <span className="font-bold block mb-0.5">
-                                {isCorrect ? '✓ Correct!' : '✗ Explanation:'}
+                                {isCorrect
+                                  ? (isFrench ? '✓ Correct !' : '✓ Correct!')
+                                  : (isFrench ? '✗ Explication :' : '✗ Explanation:')}
                               </span>
                               {q.explanation}
                             </div>
@@ -1320,11 +1361,13 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                         }
                         className="w-full py-2.5 rounded-lg bg-[#785a00] text-[#ffffff] font-bold text-xs uppercase tracking-wider hover:bg-[#604700] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       >
-                        Submit Answers
+                        {isFrench ? 'Valider les réponses' : 'Submit Answers'}
                       </button>
                     ) : (
                       <div className="p-3 bg-[#f8ecdb] rounded-lg text-center font-bold text-xs text-[#785a00]">
-                        Great job reviewing Objective {activeObjective.objective.id}!
+                        {isFrench
+                          ? `Bravo pour la révision de l'objectif ${activeObjective.objective.id} !`
+                          : `Great job reviewing Objective ${activeObjective.objective.id}!`}
                       </div>
                     )}
                   </div>
@@ -1345,8 +1388,8 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                 <CheckCircle2 className="w-4 h-4" />
                 <span>
                   {masteredObjectives.includes(activeObjective.objective.id)
-                    ? 'Mastered (Click to Undo)'
-                    : 'Mark Objective as Mastered'}
+                    ? (isFrench ? 'Maîtrisé (cliquer pour annuler)' : 'Mastered (Click to Undo)')
+                    : (isFrench ? 'Marquer l\'objectif comme maîtrisé' : 'Mark Objective as Mastered')}
                 </span>
               </button>
 
@@ -1358,13 +1401,13 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                   }}
                   className="px-4 py-2.5 rounded-xl bg-[#ffc20e] text-[#6d5100] hover:bg-[#f9bd00] font-bold text-xs md:text-sm shadow-xs cursor-pointer"
                 >
-                  Take Practice Questions
+                  {isFrench ? 'Faire des questions d\'entraînement' : 'Take Practice Questions'}
                 </button>
                 <button
                   onClick={() => setActiveObjective(null)}
                   className="px-4 py-2.5 rounded-xl bg-[#f8ecdb] text-[#4f4632] hover:bg-[#ebdcc8] font-bold text-xs md:text-sm cursor-pointer"
                 >
-                  Close
+                  {isFrench ? 'Fermer' : 'Close'}
                 </button>
               </div>
             </div>

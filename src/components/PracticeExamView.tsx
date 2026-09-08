@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lightbulb, ArrowRight, CheckCircle2, XCircle, RotateCcw, Award } from 'lucide-react';
 import { PracticeQuestion } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface PracticeExamViewProps {
   questions: PracticeQuestion[];
@@ -15,6 +16,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
   onExit,
   onOpenExplanation,
 }) => {
+  const { t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -84,25 +86,25 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
           </div>
 
           <span className="text-xs font-bold uppercase tracking-wider text-[#817660]">
-            Practice Session Results
+            {t.practice.results}
           </span>
           <h2 className="text-2xl md:text-3xl font-bold text-[#201b11] mt-1 mb-2">
-            {passed ? 'Great Job, Administrator!' : 'Keep Practicing!'}
+            {passed ? t.practice.passedTitle : t.practice.failedTitle}
           </h2>
           <p className="text-sm text-[#4f4632] max-w-md mb-6">
             {passed
-              ? 'You have demonstrated strong proficiency in LPI Exam 101 core competencies.'
-              : 'Review the explanations below to master the Linux system architecture topics.'}
+              ? t.practice.passedDesc
+              : t.practice.failedDesc}
           </p>
 
           {/* Score Badge */}
           <div className="flex gap-6 justify-center mb-6">
             <div className="bg-[#fef2e1] border border-[#d3c5ab] rounded-xl px-6 py-3">
-              <span className="text-xs text-[#817660] font-bold block">SCORE</span>
+              <span className="text-xs text-[#817660] font-bold block">{t.practice.score}</span>
               <span className="text-3xl font-bold text-[#201b11]">{scorePct}%</span>
             </div>
             <div className="bg-[#fef2e1] border border-[#d3c5ab] rounded-xl px-6 py-3">
-              <span className="text-xs text-[#817660] font-bold block">CORRECT</span>
+              <span className="text-xs text-[#817660] font-bold block">{t.practice.correct}</span>
               <span className="text-3xl font-bold text-[#28A745]">
                 {correctCount} / {questions.length}
               </span>
@@ -115,20 +117,20 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
               className="flex-1 py-3 px-4 rounded-lg bg-[#f8ecdb] hover:bg-[#f2e7d6] text-[#201b11] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-[#d3c5ab]"
             >
               <RotateCcw className="w-4 h-4" />
-              Retake Exam
+              {t.practice.retake}
             </button>
             <button
               onClick={onExit}
               className="flex-1 py-3 px-4 rounded-lg bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider transition-colors shadow-xs"
             >
-              Back to Dashboard
+              {t.practice.backToDashboard}
             </button>
           </div>
         </div>
 
         {/* Review Question Breakdown */}
         <div className="flex flex-col gap-3">
-          <h3 className="font-bold text-lg text-[#201b11]">Question Review</h3>
+          <h3 className="font-bold text-lg text-[#201b11]">{t.practice.review}</h3>
           {questions.map((q, i) => {
             const isCorrect = userAnswers[q.id] === q.correctIndex;
             return (
@@ -154,11 +156,11 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
                         : 'bg-[#ffdad6] text-[#ba1a1a]'
                     }`}
                   >
-                    {isCorrect ? 'Correct' : 'Incorrect'}
+                    {isCorrect ? t.practice.correctAnswer : t.practice.incorrectAnswer}
                   </span>
                 </div>
                 <div className="text-xs text-[#4f4632] bg-[#fff8f2] p-3 rounded-lg border border-[#d3c5ab]/60">
-                  <span className="font-semibold block mb-0.5 text-[#201b11]">Correct Answer:</span>
+                  <span className="font-semibold block mb-0.5 text-[#201b11]">{t.practice.correctAnswer}:</span>
                   <code className="font-mono text-[#785a00] font-bold">
                     {q.options[q.correctIndex]}
                   </code>
@@ -181,7 +183,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
             {currentQuestion.category}
           </span>
           <span className="text-xs md:text-sm font-bold text-[#785a00]">
-            Question {currentIndex + 1} of {questions.length}
+            {t.practice.question} {currentIndex + 1} {t.practice.of} {questions.length}
           </span>
         </div>
         <div className="w-full h-2 bg-[#ece1d0] rounded-full overflow-hidden">
@@ -260,7 +262,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
           className="flex items-center gap-2 px-4 py-2.5 border border-[#495e8a] text-[#495e8a] rounded-lg font-bold text-xs md:text-sm hover:bg-[#495e8a] hover:text-[#ffffff] transition-colors cursor-pointer"
         >
           <Lightbulb className="w-4 h-4" />
-          Explain
+          {t.practice.explain}
         </button>
 
         <button
@@ -272,7 +274,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
               : 'bg-[#d3c5ab]/50 text-[#817660] cursor-not-allowed'
           }`}
         >
-          {currentIndex === questions.length - 1 ? 'Finish Exam' : 'Next Question'}
+          {currentIndex === questions.length - 1 ? t.practice.finish : t.practice.next}
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

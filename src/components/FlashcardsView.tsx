@@ -52,7 +52,7 @@ interface FlashcardsViewProps {
 }
 
 type SelectedTopic =
-  | 101 | 102 | 103 | 104 | 105 | 106 | 108 | 109 | 110
+  | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110
   | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 210 | 211 | 212
   | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328
   | 351 | 352 | 353 | 361 | 362 | 363 | 364
@@ -90,6 +90,9 @@ type FilterObjective =
   | '106.1'
   | '106.2'
   | '106.3'
+  | '107.1'
+  | '107.2'
+  | '107.3'
   | '108.1'
   | '108.2'
   | '108.3'
@@ -329,6 +332,10 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter(
         (c) => c.topicNumber === 106 || c.deck.includes('Topic 106') || c.objectiveId?.startsWith('106.')
       );
+    } else if (selectedTopic === 107) {
+      result = result.filter(
+        (c) => c.topicNumber === 107 || c.deck.includes('Topic 107') || c.objectiveId?.startsWith('107.')
+      );
     } else if (selectedTopic === 108) {
       result = result.filter(
         (c) => c.topicNumber === 108 || c.deck.includes('Topic 108') || c.objectiveId?.startsWith('108.')
@@ -566,6 +573,12 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => c.objectiveId === '106.2');
     } else if (activeDeckFilter === '106.3') {
       result = result.filter((c) => c.objectiveId === '106.3');
+    } else if (activeDeckFilter === '107.1') {
+      result = result.filter((c) => c.objectiveId === '107.1');
+    } else if (activeDeckFilter === '107.2') {
+      result = result.filter((c) => c.objectiveId === '107.2');
+    } else if (activeDeckFilter === '107.3') {
+      result = result.filter((c) => c.objectiveId === '107.3');
     } else if (activeDeckFilter === '108.1') {
       result = result.filter((c) => c.objectiveId === '108.1');
     } else if (activeDeckFilter === '108.2') {
@@ -1019,6 +1032,12 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   );
   const topic106Mastered = topic106Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
+  const topic107Cards = useMemo(
+    () => cards.filter((c) => c.topicNumber === 107 || c.deck.includes('Topic 107') || c.objectiveId?.startsWith('107.')),
+    [cards]
+  );
+  const topic107Mastered = topic107Cards.filter((c) => masteredCardIds.includes(c.id)).length;
+
   const topic108Cards = useMemo(
     () => cards.filter((c) => c.topicNumber === 108 || c.deck.includes('Topic 108') || c.objectiveId?.startsWith('108.')),
     [cards]
@@ -1373,6 +1392,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       ? 'Topic 109: Networking Fundamentals'
       : selectedTopic === 108
       ? 'Topic 108: Essential System Services'
+      : selectedTopic === 107
+      ? 'Topic 107: Administrative Tasks'
       : selectedTopic === 106
       ? 'Topic 106: User Interfaces and Desktops'
       : selectedTopic === 105
@@ -1389,7 +1410,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
 
   const activeTopicBadge =
     selectedTopic === 'lpic1'
-      ? `${lpic1Cards.length} Cards • 9 Topics (Exams 101 & 102)`
+      ? `${lpic1Cards.length} Cards • 10 Topics (Exams 101 & 102)`
       : selectedTopic === 'lpic2'
       ? `${lpic2Cards.length} Cards • 13 Topics (Exams 201 & 202)`
       : selectedTopic === 'lpic3'
@@ -1460,6 +1481,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       ? '100 Cards • 4 Sub-Objectives (Weight 14)'
       : selectedTopic === 108
       ? '100 Cards • 4 Sub-Objectives (Weight 12)'
+      : selectedTopic === 107
+      ? '100 Cards • 3 Sub-Objectives (Weight 12)'
       : selectedTopic === 106
       ? '100 Cards • 3 Sub-Objectives (Weight 4)'
       : selectedTopic === 105
@@ -1547,6 +1570,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       ? topic109Mastered
       : selectedTopic === 108
       ? topic108Mastered
+      : selectedTopic === 107
+      ? topic107Mastered
       : selectedTopic === 106
       ? topic106Mastered
       : selectedTopic === 105
@@ -1634,6 +1659,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       ? topic109Cards.length || 100
       : selectedTopic === 108
       ? topic108Cards.length || 100
+      : selectedTopic === 107
+      ? topic107Cards.length || 100
       : selectedTopic === 106
       ? topic106Cards.length || 100
       : selectedTopic === 105
@@ -1742,7 +1769,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                 className="w-full text-xs font-semibold py-2 pl-2.5 pr-8 bg-white border border-[#d3c5ab] rounded-xl text-[#201b11] appearance-none focus:outline-none focus:ring-2 focus:ring-[#785a00] cursor-pointer shadow-2xs"
               >
                 <option value="">— Select LPIC-1 Topic —</option>
-                <option value="lpic1">🎓 All LPIC-1 Topics (9 Topics • {lpic1Cards.length} Cards)</option>
+                <option value="lpic1">🎓 All LPIC-1 Topics (10 Topics • {lpic1Cards.length} Cards)</option>
                 <optgroup label="Exam 101-500 Topics">
                   <option value="101">Topic 101: System Architecture (100)</option>
                   <option value="102">Topic 102: Linux Installation & Package Management (100)</option>
@@ -1752,6 +1779,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                 <optgroup label="Exam 102-500 Topics">
                   <option value="105">Topic 105: Shells & Shell Scripting (100)</option>
                   <option value="106">Topic 106: User Interfaces & Desktops (100)</option>
+                  <option value="107">Topic 107: Administrative Tasks (100)</option>
                   <option value="108">Topic 108: Essential System Services (100)</option>
                   <option value="109">Topic 109: Networking Fundamentals (100)</option>
                   <option value="110">Topic 110: Security (100)</option>
@@ -1993,7 +2021,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                     ? 'LPIC-2 Exam 201-450'
                     : typeof selectedTopic === 'number' && selectedTopic >= 203 && selectedTopic <= 212
                     ? 'LPIC-2 Exam 202-450'
-                    : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110
+                    : selectedTopic === 105 || selectedTopic === 106 || selectedTopic === 107 || selectedTopic === 108 || selectedTopic === 109 || selectedTopic === 110
                     ? 'LPIC-1 Exam 102-500'
                     : selectedTopic === 101 || selectedTopic === 102 || selectedTopic === 103 || selectedTopic === 104
                     ? 'LPIC-1 Exam 101-500'
@@ -2055,7 +2083,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             {selectedTopic === 'lpic1' && (
               <div className="flex flex-wrap gap-1.5 items-center">
                 <span className="text-[11px] font-bold text-[#817660] mr-0.5">Jump to:</span>
-                {[101, 102, 103, 104, 105, 106, 108, 109, 110].map((num) => (
+                {[101, 102, 103, 104, 105, 106, 107, 108, 109, 110].map((num) => (
                   <button
                     key={num}
                     onClick={() => handleTopicSelect(num as SelectedTopic)}
@@ -3787,6 +3815,47 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                   title="Manage printers and printing (108.4)"
                 >
                   108.4 Printing & CUPS (15)
+                </button>
+              </>
+            )}
+
+            {/* Topic 107 Sub-Objectives */}
+            {selectedTopic === 107 && (
+              <>
+                <button
+                  onClick={() => setActiveDeckFilter('107.1')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '107.1'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Manage user and group accounts and related system files (107.1)"
+                >
+                  107.1 User & Group Accounts (42)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('107.2')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '107.2'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Automate system administration tasks by scheduling jobs (107.2)"
+                >
+                  107.2 Scheduled Jobs & Cron (34)
+                </button>
+
+                <button
+                  onClick={() => setActiveDeckFilter('107.3')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDeckFilter === '107.3'
+                      ? 'bg-[#785a00] text-white shadow-xs'
+                      : 'bg-white text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
+                  }`}
+                  title="Localisation and internationalisation (107.3)"
+                >
+                  107.3 Localisation & i18n (24)
                 </button>
               </>
             )}

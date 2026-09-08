@@ -2,6 +2,8 @@ import React from 'react';
 import { User, X, Timer, MoreVertical, Menu, Settings } from 'lucide-react';
 import { TabType } from '../types';
 import { CURRENT_APP_VERSION } from '../utils/updateService';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 interface HeaderProps {
   currentTab: TabType;
@@ -30,6 +32,8 @@ export const Header: React.FC<HeaderProps> = ({
   isMenuOpen = false,
   hasUpdateAvailable = false,
 }) => {
+  const { t } = useLanguage();
+
   if (currentTab === 'practice') {
     return (
       <header className="fixed top-0 left-0 w-full z-50 bg-[#fff8f2] border-b border-[#d3c5ab] flex justify-between items-center px-3 md:px-4 py-2 h-14 md:h-16 shadow-xs">
@@ -38,8 +42,8 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="header-hamburger-exam-btn"
               onClick={onToggleMenu}
-              aria-label="Toggle all features menu"
-              title="All Features & Topics Menu"
+              aria-label={t.header.toggleMenu}
+              title={t.header.toggleMenu}
               className="p-2 rounded-lg text-[#785a00] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
             >
               <Menu className="w-5 h-5 md:w-6 md:h-6" />
@@ -48,17 +52,18 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="close-practice-btn"
             onClick={onClosePractice || (() => onTabChange('dashboard'))}
-            aria-label="Close practice exam"
+            aria-label={t.header.closeExam}
+            title={t.header.closeExam}
             className="p-1.5 rounded-full text-[#785a00] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 md:w-6 md:h-6" />
           </button>
           <h1 className="font-sans font-bold text-base md:text-xl text-[#785a00] truncate">
-            LPI Practice Exam
+            {t.header.practiceExamTitle}
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1.5 md:gap-2.5">
           <div
             className={`flex items-center gap-1.5 px-2.5 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold transition-colors ${
               isExamTimerLow
@@ -70,12 +75,15 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-mono">{examTimer}</span>
           </div>
 
+          {/* Language Selector in practice mode */}
+          <LanguageSelector variant="header" />
+
           {onOpenSettings && (
             <button
               id="exam-settings-btn"
               onClick={onOpenSettings}
-              aria-label="Open Settings"
-              title="Settings & System Info"
+              aria-label={t.header.settingsAndUpdates}
+              title={t.header.settingsAndUpdates}
               className="p-1.5 rounded-full text-[#4f4632] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
             >
               <Settings className="w-5 h-5" />
@@ -85,7 +93,8 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="exam-options-btn"
             onClick={onOpenExamMenu}
-            aria-label="Exam Options"
+            aria-label={t.header.examOptions}
+            title={t.header.examOptions}
             className="p-1.5 rounded-full text-[#4f4632] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
           >
             <MoreVertical className="w-5 h-5" />
@@ -102,8 +111,8 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="header-hamburger-btn"
             onClick={onToggleMenu}
-            aria-label="Open features and curriculum menu"
-            title="Browse all categories & features"
+            aria-label={t.header.toggleMenu}
+            title={t.header.toggleMenu}
             className={`p-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center ${
               isMenuOpen
                 ? 'bg-[#ffc20e] text-[#6d5100]'
@@ -127,20 +136,23 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-sans font-bold text-base md:text-xl text-[#785a00] leading-tight">
-                LPI Certification Prep
+                {t.header.title}
               </h1>
               <span className="hidden sm:inline-block px-1.5 py-0.2 bg-[#ebdcc8] text-[#785a00] text-[10px] font-bold rounded">
                 v{CURRENT_APP_VERSION}
               </span>
             </div>
             <span className="hidden sm:inline-block text-[10px] text-[#817660] font-medium leading-none">
-              LPIC-1 • LPIC-2 • LPIC-3 Curriculum
+              {t.header.subtitle}
             </span>
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-1.5 md:gap-2">
+        {/* Prominent Language Switcher Button in Header */}
+        <LanguageSelector variant="header" />
+
         {onToggleMenu && (
           <button
             id="quick-features-menu-chip"
@@ -148,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f8ecdb] hover:bg-[#ebdcc8] border border-[#d3c5ab] text-xs font-bold text-[#785a00] transition-colors cursor-pointer"
           >
             <Menu className="w-3.5 h-3.5" />
-            <span>All Features Directory</span>
+            <span>{t.header.allFeaturesDirectory}</span>
           </button>
         )}
 
@@ -156,8 +168,8 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="header-settings-btn"
             onClick={onOpenSettings}
-            aria-label="Settings and Updates"
-            title={`Settings & Updates (v${CURRENT_APP_VERSION})`}
+            aria-label={t.header.settingsAndUpdates}
+            title={`${t.header.settingsAndUpdates} (v${CURRENT_APP_VERSION})`}
             className="relative w-9 h-9 rounded-full flex items-center justify-center text-[#785a00] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
           >
             <Settings className="w-5 h-5 md:w-5 md:h-5" />
@@ -170,8 +182,8 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           id="profile-button"
           onClick={onOpenProfile}
-          aria-label="Profile and stats"
-          title="Profile & Study Stats"
+          aria-label={t.header.profileAndStats}
+          title={t.header.profileAndStats}
           className="w-9 h-9 rounded-full flex items-center justify-center text-[#785a00] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
         >
           <User className="w-5 h-5 md:w-6 md:h-6" />
