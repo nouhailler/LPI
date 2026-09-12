@@ -5,545 +5,104 @@ import {
   MatchingGame,
   GuidedLabScenario,
 } from '../types';
+import { lpic1Exam101Challenges } from './lpic1Exam101Challenges';
+import { lpic1Exam102Challenges } from './lpic1Exam102Challenges';
+import { lpic2Exam201Challenges } from './lpic2Exam201Challenges';
+import { lpic2Exam202Challenges } from './lpic2Exam202Challenges';
+import { lpic3Exam303SecurityChallenges } from './lpic3Exam303SecurityChallenges';
+import { lpic3EnterpriseCloudChallenges } from './lpic3EnterpriseCloudChallenges';
+import {
+  lpic1TroubleshootingChallenges,
+  lpic1Exam101Troubleshooting,
+  lpic1Exam102Troubleshooting
+} from './lpic1TroubleshootingChallenges';
+import {
+  lpic2TroubleshootingChallenges,
+  lpic2Exam201Troubleshooting,
+  lpic2Exam202Troubleshooting,
+  lpic2Troubleshoot201_1,
+  lpic2Troubleshoot201_2,
+  lpic2Troubleshoot202_1,
+  lpic2Troubleshoot202_2,
+} from './lpic2TroubleshootingChallenges';
+import {
+  lpic3TroubleshootingChallenges,
+  lpic3Troubleshoot300,
+  lpic3Troubleshoot303,
+  lpic3Troubleshoot305,
+  lpic3Troubleshoot306
+} from './lpic3TroubleshootingChallenges';
+import {
+  lpic1SequencingChallenges,
+  lpic1Sequencing101,
+  lpic1Sequencing102
+} from './lpic1SequencingChallenges';
 
 // =========================================================================
-// 1. MODULE « SAISIE EXACTE » (Fill-in-the-Blank)
+// 1. MODULE « SAISIE EXACTE » (100 Défis LPIC-3, 100 Défis LPIC-2, 100 Défis LPIC-1)
 // =========================================================================
+
+export const lpic1Challenges: FillInTheBlankChallenge[] = [
+  ...lpic1Exam101Challenges,
+  ...lpic1Exam102Challenges,
+];
+
+export const lpic2Challenges: FillInTheBlankChallenge[] = [
+  ...lpic2Exam201Challenges,
+  ...lpic2Exam202Challenges,
+];
+
+export const lpic3Challenges: FillInTheBlankChallenge[] = [
+  ...lpic3Exam303SecurityChallenges,
+  ...lpic3EnterpriseCloudChallenges,
+];
 
 export const fillInTheBlankChallenges: FillInTheBlankChallenge[] = [
-  {
-    id: 'fib-1',
-    certification: 'lpic-1',
-    topicNumber: 101,
-    objectiveId: '101.1',
-    category: 'Hardware & Architecture',
-    prompt: 'Quel fichier virtuel du noyau contient la liste détaillée et les caractéristiques des processeurs détectés sur le système ?',
-    promptFr: 'Quel fichier virtuel du noyau contient la liste détaillée et les caractéristiques des processeurs détectés sur le système ?',
-    scenario: 'Vous devez auditer les drapeaux CPU (flags SSE, VMX/SVM) sur un serveur sans installer d\'outils tiers.',
-    scenarioFr: 'Vous devez auditer les drapeaux CPU (flags SSE, VMX/SVM) sur un serveur sans installer d\'outils tiers.',
-    contextCode: '$ cat _______ | grep -m 1 "model name"',
-    expectedAnswers: ['/proc/cpuinfo', 'proc/cpuinfo'],
-    caseSensitive: false,
-    placeholder: '/proc/...',
-    hint: 'Il se trouve dans le pseudo-système de fichiers /proc.',
-    hintFr: 'Il se trouve dans le pseudo-système de fichiers /proc.',
-    explanation: 'Le fichier /proc/cpuinfo expose les informations fournies par le noyau sur l\'architecture processeur (modèle, fréquence, cœurs, flags).',
-    explanationFr: 'Le fichier /proc/cpuinfo expose les informations fournies par le noyau sur l\'architecture processeur (modèle, fréquence, cœurs, flags).'
-  },
-  {
-    id: 'fib-2',
-    certification: 'lpic-1',
-    topicNumber: 107,
-    objectiveId: '107.2',
-    category: 'Cron & Automation',
-    prompt: 'Quelle commande avec option permet d\'éditer la table crontab de l\'utilisateur courant en utilisant l\'éditeur par défaut défini par la variable $EDITOR ?',
-    promptFr: 'Quelle commande avec option permet d\'éditer la table crontab de l\'utilisateur courant en utilisant l\'éditeur par défaut défini par la variable $EDITOR ?',
-    scenario: 'Vous souhaitez planifier une sauvegarde automatique chaque nuit à 02h00 pour votre utilisateur.',
-    scenarioFr: 'Vous souhaitez planifier une sauvegarde automatique chaque nuit à 02h00 pour votre utilisateur.',
-    contextCode: '$ _______',
-    expectedAnswers: ['crontab -e', 'crontab  -e', '/usr/bin/crontab -e'],
-    caseSensitive: false,
-    placeholder: 'commande et option...',
-    hint: 'Option -e pour Edit.',
-    hintFr: 'Option -e pour Edit (attention, ne pas confondre avec -r pour remove).',
-    explanation: 'La commande "crontab -e" ouvre la table de l\'utilisateur dans l\'éditeur configuré. L\'option -l liste les tâches et -r les supprime.',
-    explanationFr: 'La commande "crontab -e" ouvre la table de l\'utilisateur dans l\'éditeur configuré. L\'option -l liste les tâches et -r les supprime.'
-  },
-  {
-    id: 'fib-3',
-    certification: 'lpic-1',
-    topicNumber: 107,
-    objectiveId: '107.1',
-    category: 'User Accounts',
-    prompt: 'Quel fichier système sécurisé sous Linux stocke les empreintes de mots de passe chiffrés ainsi que les politiques d\'expiration des comptes utilisateurs ?',
-    promptFr: 'Quel fichier système sécurisé sous Linux stocke les empreintes de mots de passe chiffrés ainsi que les politiques d\'expiration des comptes utilisateurs ?',
-    scenario: 'Ce fichier n\'est lisible que par l\'administrateur root (droits 640 ou 600) afin de protéger les hashes contre les attaques hors-ligne.',
-    scenarioFr: 'Ce fichier n\'est lisible que par l\'administrateur root (droits 640 ou 600) afin de protéger les hashes contre les attaques hors-ligne.',
-    contextCode: '-rw-r----- 1 root shadow 1420 Sep 08 09:00 _______',
-    expectedAnswers: ['/etc/shadow', 'etc/shadow'],
-    caseSensitive: false,
-    placeholder: '/etc/...',
-    hint: 'Ce fichier est traditionnellement associé au groupe shadow.',
-    hintFr: 'Ce fichier est traditionnellement associé au groupe shadow.',
-    explanation: 'Le fichier /etc/shadow contient les mots de passe hachés (ex: SHA-512 $6$), le sel (salt), le jour du dernier changement et la durée de validité.',
-    explanationFr: 'Le fichier /etc/shadow contient les mots de passe hachés (ex: SHA-512 $6$), le sel (salt), le jour du dernier changement et la durée de validité.'
-  },
-  {
-    id: 'fib-4',
-    certification: 'lpic-1',
-    topicNumber: 104,
-    objectiveId: '104.1',
-    category: 'Filesystems',
-    prompt: 'Quelle commande permet de créer un système de fichiers de type ext4 sur la partition /dev/sdb1 ?',
-    promptFr: 'Quelle commande permet de créer un système de fichiers de type ext4 sur la partition /dev/sdb1 ?',
-    scenario: 'Vous venez de partitionner un nouveau disque SSD et devez formater la première partition en ext4.',
-    scenarioFr: 'Vous venez de partitionner un nouveau disque SSD et devez formater la première partition en ext4.',
-    contextCode: '# _______ /dev/sdb1',
-    expectedAnswers: [
-      'mkfs.ext4 /dev/sdb1',
-      'mkfs -t ext4 /dev/sdb1',
-      '/sbin/mkfs.ext4 /dev/sdb1',
-      'mke2fs -t ext4 /dev/sdb1'
-    ],
-    caseSensitive: false,
-    placeholder: 'mkfs...',
-    hint: 'Soit la commande dédiée mkfs.ext4, soit mkfs avec le drapeau -t.',
-    hintFr: 'Soit la commande dédiée mkfs.ext4, soit mkfs avec le drapeau -t.',
-    explanation: 'mkfs.ext4 /dev/sdb1 (ou mkfs -t ext4 /dev/sdb1) initialise les superblocs, tables d\'inodes et journal ext4.',
-    explanationFr: 'mkfs.ext4 /dev/sdb1 (ou mkfs -t ext4 /dev/sdb1) initialise les superblocs, tables d\'inodes et journal ext4.'
-  },
-  {
-    id: 'fib-5',
-    certification: 'lpic-1',
-    topicNumber: 103,
-    objectiveId: '103.5',
-    category: 'Process Management',
-    prompt: 'Quelle commande permet d\'envoyer le signal SIGKILL (signal numéro 9) au processus ayant le PID 4521 ?',
-    promptFr: 'Quelle commande permet d\'envoyer le signal SIGKILL (signal numéro 9) au processus ayant le PID 4521 ?',
-    scenario: 'Un processus zombie ou bloqué refuse de s\'arrêter après un signal SIGTERM.',
-    scenarioFr: 'Un processus zombie ou bloqué refuse de s\'arrêter après un signal SIGTERM.',
-    contextCode: '$ _______ 4521',
-    expectedAnswers: [
-      'kill -9 4521',
-      'kill -s 9 4521',
-      'kill -SIGKILL 4521',
-      'kill -s SIGKILL 4521',
-      'kill -KILL 4521'
-    ],
-    caseSensitive: false,
-    placeholder: 'kill...',
-    hint: 'Utilisez kill avec le drapeau -9 ou -KILL.',
-    hintFr: 'Utilisez kill avec le drapeau -9 ou -KILL.',
-    explanation: 'La commande kill -9 <PID> (ou kill -SIGKILL <PID>) envoie le signal 9 qui ne peut être ni intercepté ni ignoré par le processus.',
-    explanationFr: 'La commande kill -9 <PID> (ou kill -SIGKILL <PID>) envoie le signal 9 qui ne peut être ni intercepté ni ignoré par le processus.'
-  },
-  {
-    id: 'fib-6',
-    certification: 'lpic-1',
-    topicNumber: 102,
-    objectiveId: '102.4',
-    category: 'Systemd & Boot',
-    prompt: 'Sous systemd, quelle commande permet de basculer immédiatement le système vers la cible multi-utilisateurs sans interface graphique (équivalent de l\'ancien runlevel 3) ?',
-    promptFr: 'Sous systemd, quelle commande permet de basculer immédiatement le système vers la cible multi-utilisateurs sans interface graphique (équivalent de l\'ancien runlevel 3) ?',
-    scenario: 'Vous devez isoler le serveur pour une maintenance réseau sans fermer les sessions CLI.',
-    scenarioFr: 'Vous devez isoler le serveur pour une maintenance réseau sans fermer les sessions CLI.',
-    contextCode: '# _______ multi-user.target',
-    expectedAnswers: [
-      'systemctl isolate multi-user.target',
-      'systemctl isolate multi-user'
-    ],
-    caseSensitive: false,
-    placeholder: 'systemctl isolate...',
-    hint: 'La sous-commande systemctl isolate permet de changer de cible active en arrêtant les services non inclus.',
-    hintFr: 'La sous-commande systemctl isolate permet de changer de cible active.',
-    explanation: 'systemctl isolate multi-user.target arrête les services graphiques et active tous les services de la cible multi-utilisateurs.',
-    explanationFr: 'systemctl isolate multi-user.target arrête les services graphiques et active tous les services de la cible multi-utilisateurs.'
-  },
-  {
-    id: 'fib-7',
-    certification: 'lpic-1',
-    topicNumber: 107,
-    objectiveId: '107.1',
-    category: 'Permissions & Sudo',
-    prompt: 'Quelle commande d\'administration DOIT impérativement être utilisée pour modifier le fichier /etc/sudoers afin de vérifier la syntaxe avant d\'enregistrer ?',
-    promptFr: 'Quelle commande d\'administration DOIT impérativement être utilisée pour modifier le fichier /etc/sudoers afin de vérifier la syntaxe avant d\'enregistrer ?',
-    scenario: 'Une erreur de syntaxe dans sudoers bloquerait tous les accès d\'élévation de privilèges pour tous les administrateurs.',
-    scenarioFr: 'Une erreur de syntaxe dans sudoers bloquerait tous les accès d\'élévation de privilèges pour tous les administrateurs.',
-    contextCode: '# _______',
-    expectedAnswers: ['visudo', '/usr/sbin/visudo', 'sudo visudo'],
-    caseSensitive: false,
-    placeholder: 'commande...',
-    hint: 'La commande verrouille le fichier et parse la syntaxe avant écriture.',
-    hintFr: 'Son nom est une contraction de "vi" et "sudo".',
-    explanation: 'visudo verrouille /etc/sudoers, ouvre l\'éditeur par défaut, et analyse la syntaxe avant de sauvegarder pour éviter toute corruption fatale.',
-    explanationFr: 'visudo verrouille /etc/sudoers, ouvre l\'éditeur par défaut, et analyse la syntaxe avant de sauvegarder pour éviter toute corruption fatale.'
-  },
-  {
-    id: 'fib-8',
-    certification: 'lpic-1',
-    topicNumber: 103,
-    objectiveId: '103.3',
-    category: 'Text Processing',
-    prompt: 'Quelle commande simple permet d\'afficher uniquement les lignes uniques d\'un flux de texte préalablement trié ?',
-    promptFr: 'Quelle commande simple permet d\'afficher uniquement les lignes uniques d\'un flux de texte préalablement trié ?',
-    scenario: 'Vous avez extrait une liste d\'adresses IP avec sort et vous souhaitez supprimer tous les doublons consécutifs.',
-    scenarioFr: 'Vous avez extrait une liste d\'adresses IP avec sort et vous souhaitez supprimer tous les doublons consécutifs.',
-    contextCode: '$ cat access.log | cut -d" " -f1 | sort | _______',
-    expectedAnswers: ['uniq', '/usr/bin/uniq'],
-    caseSensitive: false,
-    placeholder: 'commande...',
-    hint: 'Elle s\'utilise presque toujours en pipeline après sort.',
-    hintFr: 'Son nom est le raccourci de unique.',
-    explanation: 'La commande uniq élimine ou rapporte les lignes répétées adjacentes. C\'est pourquoi l\'entrée doit être triée avec sort au préalable.',
-    explanationFr: 'La commande uniq élimine ou rapporte les lignes répétées adjacentes. C\'est pourquoi l\'entrée doit être triée avec sort au préalable.'
-  },
-  {
-    id: 'fib-9',
-    certification: 'lpic-2',
-    topicNumber: 201,
-    objectiveId: '201.1',
-    category: 'Kernel & Modules',
-    prompt: 'Quelle commande intelligente permet de charger un module noyau (ex: e1000e) en résolvant et chargeant automatiquement toutes ses dépendances préalables ?',
-    promptFr: 'Quelle commande intelligente permet de charger un module noyau (ex: e1000e) en résolvant et chargeant automatiquement toutes ses dépendances préalables ?',
-    scenario: 'Contrairement à insmod, cet outil consulte modules.dep pour charger l\'ensemble de l\'arbre.',
-    scenarioFr: 'Contrairement à insmod, cet outil consulte modules.dep pour charger l\'arbre de dépendances.',
-    contextCode: '# _______ e1000e',
-    expectedAnswers: ['modprobe e1000e', 'modprobe', '/sbin/modprobe e1000e'],
-    caseSensitive: false,
-    placeholder: 'modprobe...',
-    hint: 'Il commence par "mod" et résout les dépendances.',
-    hintFr: 'Il commence par "mod" et consulte modules.dep.',
-    explanation: 'modprobe consulte modules.dep (créé par depmod) et charge automatiquement tous les modules parents nécessaires.',
-    explanationFr: 'modprobe consulte modules.dep (créé par depmod) et charge automatiquement tous les modules parents nécessaires.'
-  },
-  {
-    id: 'fib-10',
-    certification: 'lpic-1',
-    topicNumber: 104,
-    objectiveId: '104.3',
-    category: 'Mounts & Fstab',
-    prompt: 'Quelle option de la commande mount permet de remonter un système de fichiers déjà monté en modifiant ses paramètres (par exemple pour passer de lecture seule ro à lecture-écriture rw) ?',
-    promptFr: 'Quelle option de la commande mount permet de remonter un système de fichiers déjà monté en modifiant ses paramètres (par exemple pour passer de lecture seule ro à lecture-écriture rw) ?',
-    scenario: 'En mode de secours (single-user), la racine / est souvent montée en ro. Vous devez la passer en rw.',
-    scenarioFr: 'En mode de secours (single-user), la racine / est souvent montée en ro. Vous devez la passer en rw.',
-    contextCode: '# mount -o _______ /',
-    expectedAnswers: ['remount,rw', 'remount', 'remount,ro', '-o remount,rw'],
-    caseSensitive: false,
-    placeholder: 'remount...',
-    hint: 'Le mot-clé commence par "remount".',
-    hintFr: 'Le mot-clé commence par "remount".',
-    explanation: 'La commande "mount -o remount,rw /" indique au noyau de réappliquer les drapeaux de montage sans démonter la racine active.',
-    explanationFr: 'La commande "mount -o remount,rw /" indique au noyau de réappliquer les drapeaux de montage sans démonter la racine active.'
-  }
+  ...lpic3Challenges,
+  ...lpic2Challenges,
+  ...lpic1Challenges,
 ];
 
 // =========================================================================
-// 2. MODULE « DÉFIS DE DÉPANNAGE » (Troubleshooting & Find the Bug)
+// 2. MODULE « DÉFIS DE DÉPANNAGE » (100 LPIC-3 + 100 LPIC-2 + 100 LPIC-1)
 // =========================================================================
 
+/**
+ * Défis de Dépannage pour les certifications LPIC :
+ * - 100 Défis de Dépannage EXCLUSIFS pour la certification LPIC-3 (Examens 300, 303, 305, 306)
+ * - 100 Défis de Dépannage EXCLUSIFS pour la certification LPIC-2 (Examens 201 et 202)
+ * - 100 Défis de Dépannage EXCLUSIFS pour la certification LPIC-1 (Examens 101 et 102)
+ */
 export const troubleshootingChallenges: TroubleshootingChallenge[] = [
-  {
-    id: 'tb-1',
-    title: 'Anomalie de syntaxe dans /etc/fstab',
-    titleFr: 'Anomalie de syntaxe dans /etc/fstab',
-    certification: 'lpic-1',
-    topicNumber: 104,
-    objectiveId: '104.3',
-    category: 'Filesystems & Storage',
-    scenario: 'Après l\'ajout d\'un deuxième disque dur pour héberger les sauvegardes, le serveur refuse de terminer son démarrage normal et bascule en "emergency mode". Vous examinez le fichier /etc/fstab ci-dessous.',
-    scenarioFr: 'Après l\'ajout d\'un deuxième disque dur pour héberger les sauvegardes, le serveur refuse de terminer son démarrage normal et bascule en "emergency mode". Vous examinez le fichier /etc/fstab ci-dessous.',
-    codeSnippet: `# /etc/fstab: static file system information.
-UUID=4a92e105-01 / ext4 defaults 0 1
-UUID=9b11f32a-02 /boot ext4 defaults 0 2
-UUID=3c88a719-03 swap swap sw 0 0
-/dev/sdb1 /backup ext4 defaults`,
-    language: 'fstab',
-    bugDescription: 'La ligne /dev/sdb1 ne contient que 4 colonnes au lieu des 6 colonnes obligatoires requises par fstab (manquent dump et fsck pass).',
-    bugDescriptionFr: 'La ligne /dev/sdb1 ne contient que 4 colonnes au lieu des 6 colonnes obligatoires requises par fstab (manquent les valeurs dump et fsck pass).',
-    options: [
-      {
-        id: 'opt-1',
-        label: 'La ligne /dev/sdb1 ne comporte que 4 champs au lieu des 6 colonnes obligatoires (champs <dump> et <pass> manquants)',
-        labelFr: 'La ligne /dev/sdb1 ne comporte que 4 champs au lieu des 6 colonnes obligatoires (champs <dump> et <pass> manquants)',
-        isCorrect: true,
-        explanation: 'Dans /etc/fstab, chaque ligne non commentée doit obligatoirement compter 6 champs : <spec> <file> <vfstype> <mntops> <freq> <passno>.',
-        explanationFr: 'Dans /etc/fstab, chaque ligne non commentée doit obligatoirement compter 6 champs : <spec> <file> <vfstype> <mntops> <freq> <passno>.'
-      },
-      {
-        id: 'opt-2',
-        label: 'Il est interdit d\'utiliser un chemin de périphérique comme /dev/sdb1 dans fstab, seul l\'UUID est autorisé',
-        labelFr: 'Il est interdit d\'utiliser un chemin de périphérique comme /dev/sdb1 dans fstab, seul l\'UUID est autorisé',
-        isCorrect: false,
-        explanation: 'Bien que l\'UUID soit fortement recommandé pour la stabilité, la syntaxe avec /dev/sdX1 reste parfaitement valide syntaxiquement.',
-        explanationFr: 'Bien que l\'UUID soit fortement recommandé pour la stabilité, la syntaxe avec /dev/sdX1 reste parfaitement valide syntaxiquement.'
-      },
-      {
-        id: 'opt-3',
-        label: 'Le point de montage /backup doit obligatoirement se terminer par un slash (/backup/)',
-        labelFr: 'Le point de montage /backup doit obligatoirement se terminer par un slash (/backup/)',
-        isCorrect: false,
-        explanation: 'Les points de montage dans fstab ne doivent pas comporter de slash final.',
-        explanationFr: 'Les points de montage dans fstab ne doivent pas comporter de slash final.'
-      },
-      {
-        id: 'opt-4',
-        label: 'Le type ext4 n\'accepte pas l\'option de montage "defaults"',
-        labelFr: 'Le type ext4 n\'accepte pas l\'option de montage "defaults"',
-        isCorrect: false,
-        explanation: '"defaults" est l\'option standard universelle pour ext4 (rw, suid, dev, exec, auto, nouser, async).',
-        explanationFr: '"defaults" est l\'option standard universelle pour ext4 (rw, suid, dev, exec, auto, nouser, async).'
-      }
-    ],
-    correctedSnippet: `/dev/sdb1 /backup ext4 defaults 0 2`,
-    fixExplanation: 'Pour corriger, ajoutez les deux entiers finaux : "0 2" (0 pour désactiver le dump, et 2 pour que fsck vérifie cette partition après la partition racine qui a la priorité 1).',
-    fixExplanationFr: 'Pour corriger, ajoutez les deux entiers finaux : "0 2" (0 pour désactiver le dump, et 2 pour que fsck vérifie cette partition après la partition racine qui a la priorité 1).'
-  },
-  {
-    id: 'tb-2',
-    title: 'Erreur dans une tâche planifiée /etc/crontab',
-    titleFr: 'Erreur dans une tâche planifiée /etc/crontab',
-    certification: 'lpic-1',
-    topicNumber: 107,
-    objectiveId: '107.2',
-    category: 'Cron & Automation',
-    scenario: 'Un administrateur a configuré une tâche système dans /etc/crontab pour exécuter un script de nettoyage, mais le script ne s\'exécute jamais.',
-    scenarioFr: 'Un administrateur a configuré une tâche système dans /etc/crontab pour exécuter un script de nettoyage, mais le script ne s\'exécute jamais.',
-    codeSnippet: `# /etc/crontab
-SHELL=/bin/bash
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-
-# m h dom mon dow command
-30 02 * * 1 /usr/local/bin/cleanup.sh`,
-    language: 'cron',
-    bugDescription: 'Le champ utilisateur (user-name) a été omis dans /etc/crontab.',
-    bugDescriptionFr: 'Le champ utilisateur (user-name) a été omis dans /etc/crontab.',
-    options: [
-      {
-        id: 'opt-1',
-        label: 'Le champ "utilisateur" (ex: root) est manquant entre le champ jour de la semaine et la commande',
-        labelFr: 'Le champ "utilisateur" (ex: root) est manquant entre le champ jour de la semaine et la commande',
-        isCorrect: true,
-        explanation: 'Dans le /etc/crontab système (contrairement aux crontabs utilisateurs modifiées via crontab -e), le 6ème champ DOIT être le nom de l\'utilisateur exécutant la commande.',
-        explanationFr: 'Dans le /etc/crontab système (contrairement aux crontabs utilisateurs modifiées via crontab -e), le 6ème champ DOIT être le nom de l\'utilisateur exécutant la commande.'
-      },
-      {
-        id: 'opt-2',
-        label: 'Le format de l\'heure "02" est invalide, seul "2" sans zéro initial est accepté',
-        labelFr: 'Le format de l\'heure "02" est invalide, seul "2" sans zéro initial est accepté',
-        isCorrect: false,
-        explanation: 'Cron accepte aussi bien "2" que "02".',
-        explanationFr: 'Cron accepte aussi bien "2" que "02".'
-      },
-      {
-        id: 'opt-3',
-        label: 'Les scripts shell doivent obligatoirement être précédés de l\'interpréteur bash',
-        labelFr: 'Les scripts shell doivent obligatoirement être précédés de l\'interpréteur bash',
-        isCorrect: false,
-        explanation: 'Si le script possède les droits d\'exécution (chmod +x) et un shebang valide, il s\'exécute directement.',
-        explanationFr: 'Si le script possède les droits d\'exécution (chmod +x) et un shebang valide, il s\'exécute directement.'
-      }
-    ],
-    correctedSnippet: `30 02 * * 1 root /usr/local/bin/cleanup.sh`,
-    fixExplanation: 'Dans /etc/crontab, la syntaxe est "m h dom mon dow user command". Cron a pris "/usr/local/bin/cleanup.sh" pour le nom d\'utilisateur et a échoué.',
-    fixExplanationFr: 'Dans /etc/crontab, la syntaxe est "m h dom mon dow user command". Cron a pris "/usr/local/bin/cleanup.sh" pour le nom d\'utilisateur et a échoué.'
-  },
-  {
-    id: 'tb-3',
-    title: 'Échec de démarrage d\'un service Systemd custom',
-    titleFr: 'Échec de démarrage d\'un service Systemd custom',
-    certification: 'lpic-1',
-    topicNumber: 102,
-    objectiveId: '102.4',
-    category: 'Systemd Unit Files',
-    scenario: 'Un développeur a créé l\'unité /etc/systemd/system/app.service. Cependant, "systemctl start app.service" retourne immédiatement une erreur de syntaxe.',
-    scenarioFr: 'Un développeur a créé l\'unité /etc/systemd/system/app.service. Cependant, "systemctl start app.service" retourne immédiatement une erreur de syntaxe.',
-    codeSnippet: `[Unit]
-Description=My Background Web App
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=node index.js
-Restart=always
-
-[Install]
-WantedBy=multi-user.target`,
-    language: 'systemd',
-    bugDescription: 'La directive ExecStart requiert un chemin absolu vers l\'exécutable.',
-    bugDescriptionFr: 'La directive ExecStart requiert un chemin absolu vers l\'exécutable.',
-    options: [
-      {
-        id: 'opt-1',
-        label: 'La directive ExecStart requiert obligatoirement un chemin absolu pour le binaire (ex: /usr/bin/node /opt/app/index.js)',
-        labelFr: 'La directive ExecStart requiert obligatoirement un chemin absolu pour le binaire (ex: /usr/bin/node /opt/app/index.js)',
-        isCorrect: true,
-        explanation: 'Systemd n\'utilise pas la variable PATH de l\'utilisateur pour résoudre ExecStart : tout exécutable doit obligatoirement être spécifié par son chemin absolu.',
-        explanationFr: 'Systemd n\'utilise pas la variable PATH de l\'utilisateur pour résoudre ExecStart : tout exécutable doit obligatoirement être spécifié par son chemin absolu.'
-      },
-      {
-        id: 'opt-2',
-        label: 'La section [Install] doit être placée tout en haut du fichier avant [Unit]',
-        labelFr: 'La section [Install] doit être placée tout en haut du fichier avant [Unit]',
-        isCorrect: false,
-        explanation: 'L\'ordre des sections n\'a pas d\'impact sous Systemd.',
-        explanationFr: 'L\'ordre des sections n\'a pas d\'impact sous Systemd.'
-      },
-      {
-        id: 'opt-3',
-        label: 'Type=simple n\'est pas un type valide pour un service systemd',
-        labelFr: 'Type=simple n\'est pas un type valide pour un service systemd',
-        isCorrect: false,
-        explanation: 'Type=simple est la valeur par défaut standard sous systemd.',
-        explanationFr: 'Type=simple est la valeur par défaut standard sous systemd.'
-      }
-    ],
-    correctedSnippet: `ExecStart=/usr/bin/node /opt/app/index.js
-WorkingDirectory=/opt/app`,
-    fixExplanation: 'Systemd exige des chemins absolus dans ExecStart, et il est recommandé de spécifier WorkingDirectory pour que index.js trouve ses dépendances.',
-    fixExplanationFr: 'Systemd exige des chemins absolus dans ExecStart, et il est recommandé de spécifier WorkingDirectory pour que index.js trouve ses dépendances.'
-  },
-  {
-    id: 'tb-4',
-    title: 'Piège de syntaxe dans /etc/sudoers',
-    titleFr: 'Piège de syntaxe dans /etc/sudoers',
-    certification: 'lpic-1',
-    topicNumber: 107,
-    objectiveId: '107.1',
-    category: 'Security & Privileges',
-    scenario: 'L\'administrateur souhaite autoriser tous les membres du groupe "sysadmin" à exécuter n\'importe quelle commande en root sans mot de passe.',
-    scenarioFr: 'L\'administrateur souhaite autoriser tous les membres du groupe "sysadmin" à exécuter n\'importe quelle commande en root sans mot de passe.',
-    codeSnippet: `# /etc/sudoers
-Defaults env_reset
-root ALL=(ALL:ALL) ALL
-
-sysadmin ALL=(ALL:ALL) NOPASSWD: ALL`,
-    language: 'config',
-    bugDescription: 'Un groupe dans sudoers doit impérativement être précédé du caractère pourcentage (%)',
-    bugDescriptionFr: 'Un groupe dans sudoers doit impérativement être précédé du caractère pourcentage (%)',
-    options: [
-      {
-        id: 'opt-1',
-        label: 'Il manque le préfixe "%" devant "sysadmin" pour indiquer qu\'il s\'agit d\'un groupe et non d\'un utilisateur individuel',
-        labelFr: 'Il manque le préfixe "%" devant "sysadmin" pour indiquer qu\'il s\'agit d\'un groupe et non d\'un utilisateur individuel',
-        isCorrect: true,
-        explanation: 'Sans le préfixe "%", sudo cherche un utilisateur nommé sysadmin. Pour cibler les membres du groupe unix, la syntaxe est "%sysadmin".',
-        explanationFr: 'Sans le préfixe "%", sudo cherche un utilisateur nommé sysadmin. Pour cibler les membres du groupe unix, la syntaxe est "%sysadmin".'
-      },
-      {
-        id: 'opt-2',
-        label: 'Le mot-clé NOPASSWD doit être placé en tout début de ligne',
-        labelFr: 'Le mot-clé NOPASSWD doit être placé en tout début de ligne',
-        isCorrect: false,
-        explanation: 'NOPASSWD est un modificateur de commande et se place bien avant la liste des commandes.',
-        explanationFr: 'NOPASSWD est un modificateur de commande et se place bien avant la liste des commandes.'
-      },
-      {
-        id: 'opt-3',
-        label: 'ALL=(ALL:ALL) doit être remplacé par (root)',
-        labelFr: 'ALL=(ALL:ALL) doit être remplacé par (root)',
-        isCorrect: false,
-        explanation: '(ALL:ALL) est la syntaxe standard complète (User:Group).',
-        explanationFr: '(ALL:ALL) est la syntaxe standard complète (User:Group).'
-      }
-    ],
-    correctedSnippet: `%sysadmin ALL=(ALL:ALL) NOPASSWD: ALL`,
-    fixExplanation: 'En préfixant par "%", sudoers applique la directive à tout utilisateur dont le groupe primaire ou secondaire est sysadmin.',
-    fixExplanationFr: 'En préfixant par "%", sudoers applique la directive à tout utilisateur dont le groupe primaire ou secondaire est sysadmin.'
-  }
+  ...lpic3TroubleshootingChallenges,
+  ...lpic2TroubleshootingChallenges,
+  ...lpic1TroubleshootingChallenges
 ];
+
+export {
+  lpic1TroubleshootingChallenges,
+  lpic1Exam101Troubleshooting,
+  lpic1Exam102Troubleshooting,
+  lpic2TroubleshootingChallenges,
+  lpic2Exam201Troubleshooting,
+  lpic2Exam202Troubleshooting,
+  lpic2Troubleshoot201_1,
+  lpic2Troubleshoot201_2,
+  lpic2Troubleshoot202_1,
+  lpic2Troubleshoot202_2,
+  lpic3TroubleshootingChallenges,
+  lpic3Troubleshoot300,
+  lpic3Troubleshoot303,
+  lpic3Troubleshoot305,
+  lpic3Troubleshoot306
+};
 
 // =========================================================================
 // 3. MODULE « EXERCICES D'ORDONNANCEMENT » (Timeline & Boot Order)
 // =========================================================================
 
 export const sequencingChallenges: SequencingChallenge[] = [
-  {
-    id: 'seq-1',
-    title: 'Séquence complète de démarrage Linux (UEFI & Systemd)',
-    titleFr: 'Séquence complète de démarrage Linux (UEFI & Systemd)',
-    certification: 'lpic-1',
-    topicNumber: 101,
-    objectiveId: '101.2',
-    category: 'System Architecture',
-    description: 'Placez les étapes du démarrage d\'un système moderne UEFI dans l\'ordre chronologique exact, de l\'alimentation électrique jusqu\'au prompt de connexion.',
-    descriptionFr: 'Placez les étapes du démarrage d\'un système moderne UEFI dans l\'ordre chronologique exact, de l\'alimentation électrique jusqu\'au prompt de connexion.',
-    steps: [
-      {
-        id: 's1',
-        label: '1. Firmware UEFI / POST',
-        labelFr: '1. Firmware UEFI / POST',
-        detail: 'Initialisation du matériel et lecture de la partition système EFI (ESP /boot/efi)',
-        detailFr: 'Initialisation du matériel et lecture de la partition système EFI (ESP /boot/efi)'
-      },
-      {
-        id: 's2',
-        label: '2. Chargeur GRUB2',
-        labelFr: '2. Chargeur GRUB2',
-        detail: 'Affichage du menu de démarrage, chargement en RAM du vmlinuz et de l\'initramfs',
-        detailFr: 'Affichage du menu de démarrage, chargement en RAM du vmlinuz et de l\'initramfs'
-      },
-      {
-        id: 's3',
-        label: '3. Décompression & Exécution du Noyau (Kernel)',
-        labelFr: '3. Décompression & Exécution du Noyau (Kernel)',
-        detail: 'Détection du hardware, décompression en mémoire et montage de l\'initramfs temporaire',
-        detailFr: 'Détection du hardware, décompression en mémoire et montage de l\'initramfs temporaire'
-      },
-      {
-        id: 's4',
-        label: '4. Exécution de l\'Initramfs (initrd)',
-        labelFr: '4. Exécution de l\'Initramfs (initrd)',
-        detail: 'Chargement des modules disques/RAID/LVM et pivotement vers la véritable racine (pivot_root)',
-        detailFr: 'Chargement des modules disques/RAID/LVM et pivotement vers la véritable racine (pivot_root)'
-      },
-      {
-        id: 's5',
-        label: '5. Lancement de Systemd (PID 1)',
-        labelFr: '5. Lancement de Systemd (PID 1)',
-        detail: 'Exécution du premier processus utilisateur /sbin/init (lien vers systemd)',
-        detailFr: 'Exécution du premier processus utilisateur /sbin/init (lien vers systemd)'
-      },
-      {
-        id: 's6',
-        label: '6. Atteinte de default.target',
-        labelFr: '6. Atteinte de default.target',
-        detail: 'Démarrage en parallèle des services jusqu\'à multi-user.target ou graphical.target',
-        detailFr: 'Démarrage en parallèle des services jusqu\'à multi-user.target ou graphical.target'
-      }
-    ],
-    explanation: 'Le firmware UEFI charge le bootloader GRUB2 depuis la partition ESP. GRUB2 charge le noyau et l\'initramfs. L\'initramfs monte la vraie racine sur disque, puis lance le PID 1 (systemd) qui active default.target.',
-    explanationFr: 'Le firmware UEFI charge le bootloader GRUB2 depuis la partition ESP. GRUB2 charge le noyau et l\'initramfs. L\'initramfs monte la vraie racine sur disque, puis lance le PID 1 (systemd) qui active default.target.'
-  },
-  {
-    id: 'seq-2',
-    title: 'Ordre de chargement des fichiers de profil Bash (Login Shell)',
-    titleFr: 'Ordre de chargement des fichiers de profil Bash (Login Shell)',
-    certification: 'lpic-1',
-    topicNumber: 105,
-    objectiveId: '105.1',
-    category: 'Shells & Environment',
-    description: 'Lorsqu\'un utilisateur ouvre une session de connexion interactive (Login Shell via SSH ou console tty), dans quel ordre exact Bash recherche-t-il et exécute-t-il les fichiers de configuration ?',
-    descriptionFr: 'Lorsqu\'un utilisateur ouvre une session de connexion interactive (Login Shell via SSH ou console tty), dans quel ordre exact Bash recherche-t-il et exécute-t-il les fichiers de configuration ?',
-    steps: [
-      {
-        id: 's1',
-        label: '1. /etc/profile',
-        labelFr: '1. /etc/profile',
-        detail: 'Script global lu en premier pour tous les utilisateurs',
-        detailFr: 'Script global lu en premier pour tous les utilisateurs'
-      },
-      {
-        id: 's2',
-        label: '2. /etc/profile.d/*.sh',
-        labelFr: '2. /etc/profile.d/*.sh',
-        detail: 'Scripts modulaires appelés depuis /etc/profile',
-        detailFr: 'Scripts modulaires appelés depuis /etc/profile'
-      },
-      {
-        id: 's3',
-        label: '3. Premier trouvé parmi ~/.bash_profile, ~/.bash_login ou ~/.profile',
-        labelFr: '3. Premier trouvé parmi ~/.bash_profile, ~/.bash_login ou ~/.profile',
-        detail: 'Bash s\'arrête au premier des 3 fichiers existant dans le home directory',
-        detailFr: 'Bash s\'arrête au premier des 3 fichiers existant dans le home directory'
-      },
-      {
-        id: 's4',
-        label: '4. ~/.bashrc',
-        labelFr: '4. ~/.bashrc',
-        detail: 'Sourcé généralement par ~/.bash_profile pour les alias et fonctions interactifs',
-        detailFr: 'Sourcé généralement par ~/.bash_profile pour les alias et fonctions interactifs'
-      },
-      {
-        id: 's5',
-        label: '5. ~/.bash_logout',
-        labelFr: '5. ~/.bash_logout',
-        detail: 'Exécuté uniquement lors de la fermeture de la session (déconnexion)',
-        detailFr: 'Exécuté uniquement lors de la fermeture de la session (déconnexion)'
-      }
-    ],
-    explanation: 'Bash lit d\'abord /etc/profile (qui source /etc/profile.d/), puis cherche dans le répertoire personnel le PREMIER existant parmi ~/.bash_profile, ~/.bash_login et ~/.profile. ~/.bash_logout n\'est exécuté qu\'au logout.',
-    explanationFr: 'Bash lit d\'abord /etc/profile (qui source /etc/profile.d/), puis cherche dans le répertoire personnel le PREMIER existant parmi ~/.bash_profile, ~/.bash_login et ~/.profile. ~/.bash_logout n\'est exécuté qu\'au logout.'
-  },
+  ...lpic1SequencingChallenges,
   {
     id: 'seq-3',
     title: 'Création et montage d\'un volume logique LVM de A à Z',
@@ -595,6 +154,12 @@ export const sequencingChallenges: SequencingChallenge[] = [
     explanationFr: 'La hiérarchie LVM suit rigoureusement l\'ordre : Disque physique -> PV (pvcreate) -> VG (vgcreate) -> LV (lvcreate) -> Formatage (mkfs) -> Montage (mount).'
   }
 ];
+
+export {
+  lpic1SequencingChallenges,
+  lpic1Sequencing101,
+  lpic1Sequencing102
+};
 
 // =========================================================================
 // 4. MODULE « ATELIERS D'APPARIEMENT » (Matching Games)

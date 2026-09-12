@@ -175,7 +175,7 @@ export interface TroubleshootingChallenge {
   scenario: string;
   scenarioFr?: string;
   codeSnippet: string;
-  language?: 'bash' | 'config' | 'fstab' | 'cron' | 'systemd';
+  language?: 'bash' | 'config' | 'fstab' | 'cron' | 'systemd' | 'yaml' | 'json' | 'xml' | 'ldap' | string;
   bugDescription: string;
   bugDescriptionFr?: string;
   options: TroubleshootingOption[];

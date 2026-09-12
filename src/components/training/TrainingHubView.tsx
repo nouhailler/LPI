@@ -32,8 +32,8 @@ interface Props {
 }
 
 export const TrainingHubView: React.FC<Props> = ({ initialMode = 'fill_in_blank', onNavigateTab }) => {
-  const { currentLanguage } = useLanguage();
-  const isFr = currentLanguage === 'fr';
+  const { isFrench } = useLanguage();
+  const isFr = isFrench;
 
   const [currentMode, setCurrentMode] = useState<TrainingModeType>(initialMode);
   const [totalScore, setTotalScore] = useState(0);
@@ -55,28 +55,28 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'fill_in_blank'
       id: 'fill_in_blank',
       label: 'Fill-in-the-Blank',
       labelFr: 'Saisie exacte',
-      badge: `${fillInTheBlankChallenges.length} défis`,
+      badge: `${fillInTheBlankChallenges.length} défis (100 LPIC-3 + 100 LPIC-2 + 100 LPIC-1)`,
       icon: Terminal,
-      description: 'Direct command typing without multiple choice, with tolerant syntax checking.',
-      descriptionFr: 'Saisie libre de commandes et chemins sans QCM avec validation intelligente tolérante.',
+      description: '100 challenges exclusively for LPIC-3 (Security, Cloud, HA, AD) + 100 for LPIC-2 + 100 for LPIC-1. Direct command typing.',
+      descriptionFr: '100 défis exclusifs LPIC-3 (Sécurité, Cloud KVM, Clusters HA, Samba AD) + 100 LPIC-2 + 100 LPIC-1. Saisie directe.',
     },
     {
       id: 'troubleshooting',
       label: 'Troubleshooting',
       labelFr: 'Défis dépannage',
-      badge: `${troubleshootingChallenges.length} cas`,
+      badge: `${troubleshootingChallenges.length} défis (100 LPIC-3 + 100 LPIC-2 + 100 LPIC-1)`,
       icon: AlertTriangle,
-      description: 'Identify syntax flaws and errors in configuration files and scripts.',
-      descriptionFr: 'Identifier et corriger les erreurs de syntaxe dans fstab, crontab, systemd, etc.',
+      description: '100 troubleshooting challenges exclusively for LPIC-3 (Exams 300, 303, 305, 306) + 100 exclusively for LPIC-2 (Exams 201, 202) + 100 exclusively for LPIC-1 (Exams 101, 102). Diagnose and resolve real enterprise incidents.',
+      descriptionFr: '100 défis de dépannage EXCLUSIFS pour LPIC-3 (Examens 300, 303, 305, 306) + 100 EXCLUSIFS pour LPIC-2 (Examens 201 et 202) + 100 EXCLUSIFS pour LPIC-1. Résoudre des pannes réelles d\'infrastructure et d\'administration système.',
     },
     {
       id: 'sequencing',
       label: 'Sequencing',
       labelFr: 'Ordonnancement',
-      badge: `${sequencingChallenges.length} timelines`,
+      badge: `${sequencingChallenges.length} protocoles (40 LPIC-1)`,
       icon: ListOrdered,
-      description: 'Arrange boot steps, shell profile loads, and storage stages in order.',
-      descriptionFr: 'Ordonner la séquence de boot, le chargement des profils shell, etc.',
+      description: '40 sequencing challenges for LPIC-1 (Exams 101 & 102) with filters by exam and topic. Arrange boot steps, partition formatting, package workflows, shell profile loads, and systemd units.',
+      descriptionFr: '40 exercices d\'ordonnancement LPIC-1 (Examens 101 et 102) avec filtres par examen et topic. Boot, paquets, profils Bash, systemd, réseau et sécurité.',
     },
     {
       id: 'matching',
