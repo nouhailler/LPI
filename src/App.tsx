@@ -152,6 +152,27 @@ export default function App() {
         pathCompletionPct: Math.min(100, prev.pathCompletionPct + 2),
       };
     });
+
+    // Save session to exam history
+    try {
+      const scorePct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+      const historyRecord = {
+        id: 'session-' + Date.now(),
+        examId,
+        examCode: examId === 'exam-010' ? '010-160' : examId.replace('exam-', '') + '-500',
+        examName: examId.toUpperCase(),
+        date: new Date().toISOString(),
+        score: scorePct,
+        correctCount,
+        totalQuestions: total,
+        passed: scorePct >= 70,
+      };
+      const existingHistory = JSON.parse(localStorage.getItem('lpi_exam_history') || '[]');
+      const updatedHistory = [historyRecord, ...existingHistory].slice(0, 10);
+      localStorage.setItem('lpi_exam_history', JSON.stringify(updatedHistory));
+      // Trigger local storage event for reactive UI in Dashboard
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
   };
 
   const handleResetStats = () => {

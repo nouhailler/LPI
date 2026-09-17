@@ -85,6 +85,36 @@ export interface TranslationDictionary {
     weight: string;
     practicePrompt: string;
     startExam: string;
+    // Contextual Help & Tooltips
+    weightTooltip: string;
+    examMetricsTooltip: string;
+    targetProgressTooltip: string;
+    streakTooltip: string;
+    // Next Recommended Step Banner
+    nextStepTitle: string;
+    nextStepSubtitle: string;
+    nextStepAction: string;
+    nextStepEstimatedTime: string;
+    nextStepWeightBadge: string;
+    allObjectivesMastered: string;
+    allObjectivesMasteredDesc: string;
+    takeFinalExam: string;
+    // Recent Exam Performance Widget
+    recentHistoryTitle: string;
+    recentHistoryEmpty: string;
+    recentHistoryEmptyDesc: string;
+    startFirstExamBtn: string;
+    viewAllExamsBtn: string;
+    scoreLabel: string;
+    statusPassed: string;
+    statusFailed: string;
+    avgScore: string;
+    examsTakenCount: string;
+    // Guide Modal
+    guideBtn: string;
+    guideModalTitle: string;
+    guideModalSubtitle: string;
+    guideCloseBtn: string;
   };
   practice: {
     title: string;

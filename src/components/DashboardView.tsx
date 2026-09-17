@@ -1,8 +1,26 @@
-import React from 'react';
-import { Play, CheckCircle2, Flame, BookOpen, ChevronRight, Layers, Library, Zap } from 'lucide-react';
-import { ExamTier, TabType, UserStats } from '../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Play,
+  CheckCircle2,
+  Flame,
+  BookOpen,
+  ChevronRight,
+  Layers,
+  Library,
+  Zap,
+  HelpCircle,
+  Clock,
+  Award,
+  ArrowRight,
+  Calendar,
+  Sparkles,
+} from 'lucide-react';
+import { ExamTier, TabType, UserStats, ExamSessionHistory } from '../types';
 import { flashcardsData } from '../data/lpiData';
+import { lpicTopicsData } from '../data/lpicObjectivesData';
 import { useLanguage } from '../i18n/LanguageContext';
+import { InfoTooltip } from './InfoTooltip';
+import { LpiCertificationGuideModal } from './LpiCertificationGuideModal';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -22,9 +40,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenLearning,
 }) => {
   const { t, isFrench } = useLanguage();
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Read mastered objectives dynamically from localStorage
-  const [masteredObjectiveIds, setMasteredObjectiveIds] = React.useState<string[]>(() => {
+  const [masteredObjectiveIds, setMasteredObjectiveIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('lpic_mastered_objectives');
       if (saved) {
@@ -47,17 +66,76 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
   });
 
-  React.useEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'lpic_mastered_objectives' && e.newValue) {
-        try {
-          setMasteredObjectiveIds(JSON.parse(e.newValue));
-        } catch {}
+  // Read practice exam history from localStorage
+  const [examHistory, setExamHistory] = useState<ExamSessionHistory[]>(() => {
+    try {
+      const saved = localStorage.getItem('lpi_exam_history');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : [];
       }
+      return [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    const handleStorage = () => {
+      try {
+        const savedObjs = localStorage.getItem('lpic_mastered_objectives');
+        if (savedObjs) {
+          setMasteredObjectiveIds(JSON.parse(savedObjs));
+        }
+        const savedHistory = localStorage.getItem('lpi_exam_history');
+        if (savedHistory) {
+          setExamHistory(JSON.parse(savedHistory));
+        }
+      } catch {}
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
+
+  // Compute Next Recommended Step dynamically
+  // Target the highest-weight unmastered objective in LPIC-1 (101-110)
+  const nextRecommendedStep = useMemo(() => {
+    const lpic1Topics = lpicTopicsData.filter(
+      (topic) => topic.topicNumber && topic.topicNumber >= 101 && topic.topicNumber <= 110
+    );
+
+    let candidateObj: {
+      topicId: string;
+      topicNumber: number;
+      topicTitle: string;
+      objectiveId: string;
+      objectiveTitle: string;
+      weight: number;
+      examCode: string;
+      examId: string;
+    } | null = null;
+
+    for (const topic of lpic1Topics) {
+      for (const obj of topic.objectives) {
+        if (!masteredObjectiveIds.includes(obj.id)) {
+          if (!candidateObj || obj.weight > candidateObj.weight) {
+            candidateObj = {
+              topicId: topic.id,
+              topicNumber: topic.topicNumber,
+              topicTitle: topic.title,
+              objectiveId: obj.id,
+              objectiveTitle: obj.title,
+              weight: obj.weight,
+              examCode: topic.examId === 'exam-102' ? '102-500' : '101-500',
+              examId: topic.examId,
+            };
+          }
+        }
+      }
+    }
+
+    return candidateObj;
+  }, [masteredObjectiveIds]);
 
   const sysArchDone = masteredObjectiveIds.filter((id) => id.startsWith('101.')).length;
   const sysArchTotal = 3;
@@ -88,6 +166,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const lpic2CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 212).length;
   const lpic3CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 300 && c.topicNumber <= 399).length;
 
+  // Stats for recent exams
+  const avgExamScore = useMemo(() => {
+    if (examHistory.length === 0) return 0;
+    const sum = examHistory.reduce((acc, curr) => acc + curr.score, 0);
+    return Math.round(sum / examHistory.length);
+  }, [examHistory]);
+
   const quickTopics = [
     { id: 'topic-101', number: 101, title: 'System Architecture', exam: 'LPIC-1 (101)', weight: 8 },
     { id: 'topic-103', number: 103, title: 'GNU & Unix Commands', exam: 'LPIC-1 (101)', weight: 26 },
@@ -103,6 +188,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-10">
+      {/* Certification Guide Modal */}
+      <LpiCertificationGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        onStartExam={onStartExam}
+        onOpenLearning={() => {
+          if (onOpenLearning) onOpenLearning();
+          else onNavigate('learning');
+        }}
+      />
+
       {/* Welcome Section */}
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -115,6 +211,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Quick Guide Button */}
+          <button
+            onClick={() => setIsGuideOpen(true)}
+            className="bg-[#fff8f2] text-[#785a00] border border-[#ffc20e] px-3.5 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider hover:bg-[#ffc20e]/20 transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+          >
+            <HelpCircle className="w-4 h-4 text-[#785a00]" />
+            <span>{t.dashboard.guideBtn}</span>
+          </button>
+
           <button
             onClick={() => onNavigate('training')}
             className="bg-[#f8ecdb] text-[#785a00] border border-[#d3c5ab] px-3.5 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider hover:bg-[#ebdcc8] transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
@@ -146,17 +251,100 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </section>
 
+      {/* Recommended Next Step Banner (Action directe 1-clic) */}
+      <div className="bg-[#fff8f2] border border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">
+        <div className="flex items-start gap-4 z-10">
+          <div className="w-12 h-12 rounded-xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center font-bold shrink-0 shadow-xs">
+            <Sparkles className="w-6 h-6" />
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#ffc20e] text-[#6d5100]">
+                {t.dashboard.nextStepTitle}
+              </span>
+              {nextRecommendedStep && (
+                <span className="text-xs font-mono font-bold text-[#785a00] bg-[#ffffff] px-2 py-0.5 rounded border border-[#ffc20e]/60">
+                  {nextRecommendedStep.examCode} • Obj {nextRecommendedStep.objectiveId}
+                </span>
+              )}
+              {nextRecommendedStep && (
+                <span className="inline-flex items-center gap-1 text-xs text-[#817660] font-semibold bg-[#ffffff] px-2 py-0.5 rounded border border-[#d3c5ab]/60">
+                  <span>{t.dashboard.nextStepWeightBadge}: {nextRecommendedStep.weight}</span>
+                  <InfoTooltip
+                    title={t.dashboard.weight}
+                    content={t.dashboard.weightTooltip}
+                  />
+                </span>
+              )}
+            </div>
+
+            {nextRecommendedStep ? (
+              <>
+                <h3 className="text-base md:text-lg font-bold text-[#201b11] mt-1">
+                  {isFrench ? 'Thème' : 'Topic'} {nextRecommendedStep.topicNumber} : {nextRecommendedStep.topicTitle} — {nextRecommendedStep.objectiveTitle}
+                </h3>
+                <p className="text-xs md:text-sm text-[#4f4632]">
+                  {t.dashboard.nextStepSubtitle}
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-base md:text-lg font-bold text-[#201b11] mt-1">
+                  {t.dashboard.allObjectivesMastered}
+                </h3>
+                <p className="text-xs md:text-sm text-[#4f4632]">
+                  {t.dashboard.allObjectivesMasteredDesc}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 w-full md:w-auto shrink-0 z-10">
+          {nextRecommendedStep ? (
+            <button
+              onClick={() => {
+                if (onOpenLearning) {
+                  onOpenLearning(nextRecommendedStep.topicId);
+                } else {
+                  onNavigate('learning');
+                }
+              }}
+              className="w-full md:w-auto px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>{t.dashboard.nextStepAction}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={() => onStartExam('exam-101')}
+              className="w-full md:w-auto px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>{t.dashboard.takeFinalExam}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Left Column: Progress & Goals */}
         <div className="lg:col-span-1 flex flex-col gap-4 md:gap-6">
-          {/* Current Progress Card */}
+          {/* Current Progress Card with Tooltip */}
           <div className="bg-[#f8ecdb] rounded-xl p-5 md:p-6 border border-[#d3c5ab] shadow-xs flex flex-col gap-4">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs font-bold text-[#495e8a] uppercase tracking-wider">
-                  {t.dashboard.currentTarget}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-[#495e8a] uppercase tracking-wider">
+                    {t.dashboard.currentTarget}
+                  </span>
+                  <InfoTooltip
+                    title={t.dashboard.currentTarget}
+                    content={t.dashboard.targetProgressTooltip}
+                  />
+                </div>
                 <h3 className="text-xl font-bold text-[#201b11] mt-0.5">
                   {userStats.currentTarget}
                 </h3>
@@ -167,7 +355,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {/* System Architecture */}
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-xs font-bold text-[#4f4632]">
-                <span>{t.dashboard.systemArchitecture}</span>
+                <span className="flex items-center gap-1">
+                  <span>{t.dashboard.systemArchitecture}</span>
+                  <InfoTooltip
+                    title={t.dashboard.systemArchitecture}
+                    content={isFrench ? "Thème 101 LPIC-1 (Poids 8) : Matériel, amorçage, runlevels et cibles systemd." : "Topic 101 LPIC-1 (Weight 8): Hardware, boot process, runlevels and systemd targets."}
+                  />
+                </span>
                 <span>{systemArchProgress}%</span>
               </div>
               <div className="w-full bg-[#ece1d0] rounded-full h-2 overflow-hidden">
@@ -181,7 +375,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {/* Linux Installation */}
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-xs font-bold text-[#4f4632]">
-                <span>{t.dashboard.linuxInstallation}</span>
+                <span className="flex items-center gap-1">
+                  <span>{t.dashboard.linuxInstallation}</span>
+                  <InfoTooltip
+                    title={t.dashboard.linuxInstallation}
+                    content={isFrench ? "Thème 102 LPIC-1 (Poids 11) : Partitionnement, gestionnaires de paquets Debian/RPM et bibliothèques partagées." : "Topic 102 LPIC-1 (Weight 11): Partitioning, Debian/RPM package managers and shared libraries."}
+                  />
+                </span>
                 <span>{linuxInstProgress}%</span>
               </div>
               <div className="w-full bg-[#ece1d0] rounded-full h-2 overflow-hidden">
@@ -193,12 +393,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Daily Streak Card */}
+          {/* Daily Streak Card with Tooltip */}
           <div className="bg-[#d8e2ff] rounded-xl p-5 md:p-6 border border-[#b7ccfe] shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-[#314671] uppercase tracking-wider">
-                {t.dashboard.dailyStreak}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-[#314671] uppercase tracking-wider">
+                  {t.dashboard.dailyStreak}
+                </span>
+                <InfoTooltip
+                  title={t.dashboard.dailyStreak}
+                  content={t.dashboard.streakTooltip}
+                />
+              </div>
               <div className="flex items-center gap-2 mt-1">
                 <Flame className="w-6 h-6 text-[#E67E22] fill-[#E67E22]" />
                 <span className="text-xl font-bold text-[#001a42]">
@@ -216,15 +422,59 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Official Exam Metrics Box with Duration & Passing Score Reminder */}
+          <div className="bg-[#ffffff] rounded-xl p-5 border border-[#d3c5ab] shadow-xs flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#817660] uppercase tracking-wider flex items-center gap-1">
+                <span>{isFrench ? 'Métriques d\'examen officiel' : 'Official Exam Standards'}</span>
+                <InfoTooltip
+                  title={isFrench ? 'Règles LPI' : 'LPI Standards'}
+                  content={t.dashboard.examMetricsTooltip}
+                />
+              </span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#ebdcc8] text-[#785a00]">
+                LPI 2026
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-[#fdf9f4] p-2.5 rounded-lg border border-[#d3c5ab]/60">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">
+                  {isFrench ? 'Durée réelle' : 'Official Time'}
+                </span>
+                <span className="text-sm font-bold text-[#201b11]">90 min</span>
+                <span className="text-[10px] text-[#785a00] block mt-0.5">
+                  {isFrench ? 'App : 45 min test' : 'App: 45 min sprint'}
+                </span>
+              </div>
+
+              <div className="bg-[#fdf9f4] p-2.5 rounded-lg border border-[#d3c5ab]/60">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">
+                  {isFrench ? 'Score requis' : 'Passing Mark'}
+                </span>
+                <span className="text-sm font-bold text-[#28A745]">70 % (500/800)</span>
+                <span className="text-[10px] text-[#817660] block mt-0.5">
+                  60 {isFrench ? 'questions' : 'questions'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Certification Path Grid */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-bold text-[#201b11]">{t.dashboard.certPath}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-[#201b11]">{t.dashboard.certPath}</h3>
+              <InfoTooltip
+                title={t.dashboard.certPath}
+                content={isFrench ? "Parcours progressif en 4 paliers : Linux Essentials (initiation), LPIC-1 (administrateur), LPIC-2 (ingénieur) et spécialités LPIC-3." : "Progressive 4-tier journey: Linux Essentials (literacy), LPIC-1 (administrator), LPIC-2 (engineer), and LPIC-3 specialties."}
+              />
+            </div>
             <button
               onClick={() => onNavigate('path')}
-              className="text-xs font-bold text-[#785a00] hover:underline uppercase tracking-wider"
+              className="text-xs font-bold text-[#785a00] hover:underline uppercase tracking-wider cursor-pointer"
             >
               {t.dashboard.viewFullPath} →
             </button>
@@ -250,14 +500,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <div className="p-4 flex flex-col gap-1.5 flex-grow">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-lg text-[#201b11]">LPIC-1</h4>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${lpic1Pct > 0 ? 'bg-[#ffc20e]/25 text-[#6d5100]' : 'bg-[#ece1d0] text-[#817660]'}`}>
-                    {lpic1Pct > 0 ? `${lpic1Pct}%` : (isFrench ? '0% · Prêt' : '0% · Ready')}
+
+              <div className="p-4 flex flex-col flex-1 justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-[#785a00] uppercase tracking-wider">
+                    {isFrench ? 'Échelon Actif' : 'Active Tier'}
                   </span>
+                  <h4 className="font-bold text-[#201b11] text-base mt-0.5">
+                    LPIC-1: Administrator
+                  </h4>
+                  <p className="text-xs text-[#4f4632] mt-1 line-clamp-2">
+                    {isFrench
+                      ? 'Examens 101 & 102 : architecture système, paquetages, réseau et sécurité.'
+                      : 'Exams 101 & 102: system architecture, packages, networking, and security.'}
+                  </p>
                 </div>
-                <p className="text-sm text-[#4f4632]">System Administrator</p>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between text-xs font-bold text-[#4f4632]">
+                    <span>{isFrench ? 'Objectifs validés' : 'Mastered'}</span>
+                    <span>{lpic1Pct}%</span>
+                  </div>
+                  <div className="w-full bg-[#ece1d0] rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-[#ffc20e] h-full rounded-full transition-all duration-500"
+                      style={{ width: `${lpic1Pct}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -273,109 +543,220 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   src="/lpic-2.jpg"
                   onError={(e) => {
                     const target = e.currentTarget;
-                    if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4') {
-                      target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0TQaPgzl_r72VPInTrIDxVlwi3OFeOvhFVrVIsxKNn5HUG1aUqzYLI7HMSX47TH2atoBwmrLG6VLkA_H87wwDn6pcMUD1Jbfejl0hX3Hwb1acpqEdPY7O16Lvl98xBY3SZVEHExTDa4p8eJ1YFZJD-g6eFj12yhf5wE8Qje0UsXGQMMTmNxHonUdQKhQDJh1wFCUVRmZxLeVFzU11IEICXSil6_8fRWcqnTrt6aU3UzdST9bjort4';
+                    if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFqT9Pj_d3_m6F9W4_3j1fP_tQ0Vw_6l2r3s4t5u6v7w8x9y0z1a2b3c4d5e6f7g8h9i0j') {
+                      target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFqT9Pj_d3_m6F9W4_3j1fP_tQ0Vw_6l2r3s4t5u6v7w8x9y0z1a2b3c4d5e6f7g8h9i0j';
                     }
                   }}
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <div className="p-4 flex flex-col gap-1.5 flex-grow">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-lg text-[#201b11]">LPIC-2</h4>
-                  <span className="bg-[#ffc20e]/25 text-[#6d5100] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                    {lpic2CardsCount} Cards Ready
+
+              <div className="p-4 flex flex-col flex-1 justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-[#817660] uppercase tracking-wider">
+                    {isFrench ? 'Échelon Avancé' : 'Next Tier'}
                   </span>
+                  <h4 className="font-bold text-[#201b11] text-base mt-0.5">
+                    LPIC-2: Linux Engineer
+                  </h4>
+                  <p className="text-xs text-[#4f4632] mt-1 line-clamp-2">
+                    {isFrench
+                      ? 'Examens 201 & 202 : noyau, démarrage, serveurs réseau et sécurité approfondie.'
+                      : 'Exams 201 & 202: kernel, startup, network servers, and advanced security.'}
+                  </p>
                 </div>
-                <p className="text-sm text-[#4f4632]">Linux Engineer (Exams 201 & 202)</p>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between text-xs font-bold text-[#4f4632]">
+                    <span>{t.dashboard.cardsReady}</span>
+                    <span className="text-[#785a00] font-mono">{lpic2CardsCount}</span>
+                  </div>
+                  <div className="w-full bg-[#ece1d0] rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-[#ffc20e] h-full rounded-full" style={{ width: '0%' }} />
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* LPIC-3 Card */}
             <div
-              onClick={() => (onOpenLearning ? onOpenLearning('topic-301') : onNavigate('learning'))}
-              className="bg-[#ffffff] rounded-xl border border-[#d3c5ab] shadow-xs overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all hover:border-[#5c3566]"
+              onClick={() => onNavigate('path')}
+              className="bg-[#ffffff] rounded-xl border border-[#d3c5ab] shadow-xs overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all hover:border-[#ffc20e]"
             >
               <div className="h-32 bg-[#ece1d0] flex items-center justify-center p-4">
                 <img
                   alt="LPIC-3 Logo"
-                  className="h-full object-contain mix-blend-multiply transition-all"
+                  className="h-full object-contain mix-blend-multiply transition-transform group-hover:scale-105"
                   src="/lpic-3.jpg"
                   onError={(e) => {
                     const target = e.currentTarget;
-                    if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB') {
-                      target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmRaFxknGKrNHxwrRWV28s6imunV2CdXxsTNSHFNa4_E7DRDR4tFOJBcjHlNHEXwgqJAUCsflt6iM4Yqy67XtL-H8rw_dvAvIsLxicLfd1UTUvAMCqU6gbylTLUTvr-qM_fdpbwM53vuo33O_jxeb65pUr3AqsnTSj3r1SMGbmyTvoUtfHroz6Wk-p0PigZrF4SQPzshVg5FbxE62XKMivpJrD-5wZ1LaDpKYl5PUe7nQjvlQ1WJCB';
+                    if (target.src !== 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFqT9Pj_d3_m6F9W4_3j1fP_tQ0Vw_6l2r3s4t5u6v7w8x9y0z1a2b3c4d5e6f7g8h9i0j') {
+                      target.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFqT9Pj_d3_m6F9W4_3j1fP_tQ0Vw_6l2r3s4t5u6v7w8x9y0z1a2b3c4d5e6f7g8h9i0j';
                     }
                   }}
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <div className="p-4 flex flex-col gap-1.5 flex-grow">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-lg text-[#201b11]">LPIC-3</h4>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#5c3566] bg-[#5c3566]/10 px-2 py-0.5 rounded">
-                    {lpic3CardsCount > 0 ? `${lpic3CardsCount} Cards Ready` : 'Enterprise'}
+
+              <div className="p-4 flex flex-col flex-1 justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-[#817660] uppercase tracking-wider">
+                    {isFrench ? 'Échelon Expert' : 'Expert Tier'}
                   </span>
+                  <h4 className="font-bold text-[#201b11] text-base mt-0.5">
+                    LPIC-3: Enterprise
+                  </h4>
+                  <p className="text-xs text-[#4f4632] mt-1 line-clamp-2">
+                    {isFrench
+                      ? 'Spécialités 300 (Environnements mixtes), 303 (Sécurité), 305 (Virtualisation) & 306 (Haute dispo).'
+                      : 'Specialties 300 (Mixed Env), 303 (Security), 305 (Virtualization) & 306 (High Availability).'}
+                  </p>
                 </div>
-                <p className="text-sm text-[#4f4632]">300, 303, 305 & 306 Specialties</p>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between text-xs font-bold text-[#4f4632]">
+                    <span>{t.dashboard.specialties}</span>
+                    <span className="text-[#785a00] font-mono">4 {isFrench ? 'examens' : 'exams'}</span>
+                  </div>
+                  <div className="w-full bg-[#ece1d0] rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-[#ffc20e] h-full rounded-full" style={{ width: '0%' }} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Glossary & Command Index Quick Banner */}
-      <div className="bg-[#f8ecdb] border border-[#d3c5ab] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          <div className="p-3 bg-[#ffc20e] rounded-xl text-[#6d5100] shadow-xs shrink-0 mt-0.5">
-            <Library className="w-6 h-6" />
-          </div>
+      {/* Recent Practice Exam Performance Widget (Dernières performances d'entraînement) */}
+      <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d3c5ab]/60 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#ebdcc8] text-[#785a00]">
-                {isFrench ? 'Dictionnaire du programme' : 'Curriculum Dictionary'}
+              <span className="px-2 py-0.5 bg-[#ffc20e] text-[#6d5100] text-[10px] font-bold uppercase tracking-wider rounded">
+                {isFrench ? 'Historique' : 'History'}
               </span>
-              <span className="text-xs font-bold text-[#28A745]">LPIC-1 · LPIC-2 · LPIC-3</span>
+              <h3 className="text-lg md:text-xl font-bold text-[#201b11]">
+                {t.dashboard.recentHistoryTitle}
+              </h3>
+              <InfoTooltip
+                title={t.dashboard.recentHistoryTitle}
+                content={isFrench ? "Conserve les résultats de vos 10 derniers examens blancs passés dans le simulateur, avec calcul de moyenne." : "Stores scores from your last 10 practice simulations, tracking passing status and averages."}
+              />
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
-              {isFrench ? 'Glossaire Linux exhaustif & Index des commandes' : 'Comprehensive Linux Glossary & Command Index'}
-            </h3>
-            <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
-              {isFrench
-                ? 'Consultez n\'importe quelle commande Linux, fichier de configuration, paramètre noyau ou terme d\'architecture évalué lors des examens LPI avec syntaxe, options, exemples concrets et pièges d\'examen.'
-                : 'Look up any Linux command, configuration file, kernel parameter, or architecture term tested across all LPI certification exams with syntax, flags, practical examples, and exam gotchas.'}
+            <p className="text-xs md:text-sm text-[#4f4632] mt-0.5">
+              {examHistory.length > 0
+                ? `${examHistory.length} ${t.dashboard.examsTakenCount.toLowerCase()} • ${t.dashboard.avgScore} : ${avgExamScore} %`
+                : t.dashboard.recentHistoryEmptyDesc}
             </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigate('practice')}
+              className="px-3.5 py-2 rounded-lg border border-[#785a00] text-[#785a00] hover:bg-[#fff8f2] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              {t.dashboard.viewAllExamsBtn}
+            </button>
+            <button
+              onClick={() => onStartExam('exam-101')}
+              className="px-4 py-2 rounded-lg bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] text-xs font-bold uppercase tracking-wider transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>{t.dashboard.startExam}</span>
+            </button>
           </div>
         </div>
 
-        <button
-          onClick={() => onNavigate('glossary')}
-          className="px-5 py-3 rounded-xl bg-[#785a00] hover:bg-[#624900] text-[#ffffff] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer"
-        >
-          <span>{isFrench ? 'Ouvrir le glossaire & index' : 'Open Glossary & Index'}</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
+        {examHistory.length === 0 ? (
+          <div className="bg-[#fdf9f4] border border-dashed border-[#d3c5ab] rounded-xl p-6 text-center space-y-3">
+            <Award className="w-10 h-10 text-[#d3c5ab] mx-auto" />
+            <div>
+              <h4 className="font-bold text-sm text-[#201b11]">
+                {t.dashboard.recentHistoryEmpty}
+              </h4>
+              <p className="text-xs text-[#817660] max-w-md mx-auto mt-1">
+                {t.dashboard.recentHistoryEmptyDesc}
+              </p>
+            </div>
+            <button
+              onClick={() => onStartExam('exam-101')}
+              className="px-4 py-2 rounded-lg bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-2 shadow-xs cursor-pointer"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>{t.dashboard.startFirstExamBtn}</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {examHistory.slice(0, 6).map((item) => (
+              <div
+                key={item.id}
+                className="p-4 rounded-xl border border-[#d3c5ab] bg-[#fdf9f4] hover:bg-[#ffffff] hover:border-[#785a00] transition-all flex flex-col justify-between gap-3 shadow-2xs"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold text-[#817660] uppercase">
+                      {item.examCode}
+                    </span>
+                    <h4 className="font-bold text-sm text-[#201b11] mt-0.5">
+                      {item.examName}
+                    </h4>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${
+                      item.passed
+                        ? 'bg-[#28A745]/15 text-[#1b702e] border border-[#28A745]/30'
+                        : 'bg-[#dc3545]/15 text-[#a71d2a] border border-[#dc3545]/30'
+                    }`}
+                  >
+                    {item.passed ? t.dashboard.statusPassed : t.dashboard.statusFailed}
+                  </span>
+                </div>
+
+                <div className="flex items-end justify-between pt-2 border-t border-[#d3c5ab]/50 text-xs">
+                  <div>
+                    <span className="text-[10px] text-[#817660] block">
+                      {new Date(item.date).toLocaleDateString(isFrench ? 'fr-FR' : 'en-US', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                    <span className="text-xs text-[#4f4632] font-semibold">
+                      {item.correctCount} / {item.totalQuestions} {isFrench ? 'justes' : 'correct'}
+                    </span>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-base font-bold font-mono text-[#201b11]">
+                      {item.score}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* 1,800+ Interactive Flashcards Banner */}
-      <div className="bg-[#fdf3e4] border-2 border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          <div className="p-3 bg-[#785a00] rounded-xl text-white shadow-xs shrink-0 mt-0.5 font-mono font-bold text-lg flex items-center justify-center">
-            {totalCardsCount}+
+      {/* Comprehensive Flashcards Banner */}
+      <div className="bg-[#fff8f2] border border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center font-bold shrink-0 shadow-xs">
+            <Layers className="w-6 h-6" />
           </div>
+
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#ffc20e] text-[#6d5100]">
-                {totalCardsCount} {isFrench ? 'Cartes Mémoire Interactives' : 'Interactive Flashcards'}
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-[#ffc20e] text-[#6d5100] text-[10px] font-bold uppercase tracking-wider rounded">
+                {isFrench ? 'Système de répétition espacée' : 'Spaced Repetition Engine'}
               </span>
-              <span className="text-xs font-bold text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                LPIC-1: {lpic1CardsCount} {t.common.cards} (Topics 101–110)
-              </span>
-              <span className="text-xs font-bold text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded border border-[#d3c5ab]">
-                LPIC-2: {lpic2CardsCount} {t.common.cards} (Topics 200–210)
+              <span className="text-xs text-[#817660]">
+                {totalCardsCount} {isFrench ? 'cartes disponibles' : 'cards available'}
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1">
+            <h3 className="text-base md:text-lg font-bold text-[#201b11] mt-1">
               {isFrench
                 ? 'Maîtrisez les concepts d\'administration système & ingénierie Linux à travers 20 thèmes complets'
                 : 'Master System Admin & Linux Engineering Concepts Across 20 Comprehensive Topics'}
@@ -398,7 +779,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </button>
       </div>
 
-      {/* Featured Learning Section (Exam 101, 102, 201, 202, 300, 303, 305 & 306 Chapters) */}
+      {/* Featured Learning Section with Weight Tooltips */}
       <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d3c5ab]/60 pb-4">
           <div>
@@ -419,14 +800,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           <button
             onClick={() => (onOpenLearning ? onOpenLearning() : onNavigate('learning'))}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#785a00] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#785a00] hover:underline cursor-pointer"
           >
             <span>{isFrench ? 'Voir tous les thèmes & objectifs' : 'View All Topics & Objectives'}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Quick Topics Grid */}
+        {/* Quick Topics Grid with Weight Tooltips */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {quickTopics.map((topic) => (
             <div
@@ -439,8 +820,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <span className="text-[10px] font-bold px-2 py-0.5 bg-[#ebdcc8] text-[#785a00] rounded">
                     {topic.exam}
                   </span>
-                  <span className="text-[11px] font-semibold text-[#817660]">
-                    {isFrench ? 'Poids' : 'Weight'}: {topic.weight}
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#817660]">
+                    <span>{isFrench ? 'Poids' : 'Weight'}: {topic.weight}</span>
+                    <InfoTooltip
+                      title={`${isFrench ? 'Poids officiel LPI' : 'Official Weight'} (${topic.weight})`}
+                      content={t.dashboard.weightTooltip}
+                    />
                   </span>
                 </div>
                 <h4 className="font-bold text-sm text-[#201b11] group-hover:text-[#785a00] transition-colors">

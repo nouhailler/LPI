@@ -129,6 +129,18 @@ export interface UserStats {
   linuxInstallationProgress: number;
 }
 
+export interface ExamSessionHistory {
+  id: string;
+  examId: string;
+  examCode: string;
+  examName: string;
+  date: string;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  passed: boolean;
+}
+
 // ----------------------------------------------------
 // Specialized Interactive Training Modules
 // ----------------------------------------------------
