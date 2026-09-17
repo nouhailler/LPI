@@ -36,6 +36,7 @@ export default function App() {
   const [settingsInitialTab, setSettingsInitialTab] = useState<'updates' | 'profile' | 'preferences' | 'language'>('updates');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedLearningTopic, setSelectedLearningTopic] = useState<string | undefined>(undefined);
+  const [selectedExamId, setSelectedExamId] = useState<string>('exam-101');
 
   // Automatic Updates & Service Worker state
   const [hasUpdateAvailable, setHasUpdateAvailable] = useState(false);
@@ -92,7 +93,8 @@ export default function App() {
   };
 
   const handleStartExam = (examId: string) => {
-    setExamTimerSeconds(45 * 60 + 10);
+    setSelectedExamId(examId || 'exam-101');
+    setExamTimerSeconds(45 * 60);
     setIsTimerRunning(true);
     setCurrentTab('practice');
     setIsMenuOpen(false);
@@ -115,22 +117,62 @@ export default function App() {
     setIsMenuOpen(false);
   };
 
-  const handleCompletePracticeSession = (correctCount: number, total: number) => {
-    setUserStats((prev) => ({
-      ...prev,
-      questionsDoneToday: Math.min(prev.dailyGoal, prev.questionsDoneToday + total),
-      systemArchitectureProgress: Math.min(100, prev.systemArchitectureProgress + 5),
-    }));
+  // Check and clean any prototype remnant data on mount
+  useEffect(() => {
+    try {
+      const savedObjs = localStorage.getItem('lpic_mastered_objectives');
+      if (savedObjs) {
+        const parsed = JSON.parse(savedObjs);
+        if (
+          Array.isArray(parsed) &&
+          parsed.length === 3 &&
+          parsed.includes('101.1') &&
+          parsed.includes('101.2') &&
+          parsed.includes('200.1')
+        ) {
+          localStorage.setItem('lpic_mastered_objectives', JSON.stringify([]));
+        }
+      }
+    } catch {}
+  }, []);
+
+  const handleCompletePracticeSession = (correctCount: number, total: number, examId: string) => {
+    setUserStats((prev) => {
+      const isLpic101 = examId === 'exam-101';
+      const isLpic102 = examId === 'exam-102';
+      return {
+        ...prev,
+        questionsDoneToday: Math.min(prev.dailyGoal, prev.questionsDoneToday + total),
+        systemArchitectureProgress: isLpic101
+          ? Math.min(100, prev.systemArchitectureProgress + 10)
+          : prev.systemArchitectureProgress,
+        linuxInstallationProgress: isLpic102
+          ? Math.min(100, prev.linuxInstallationProgress + 10)
+          : prev.linuxInstallationProgress,
+        pathCompletionPct: Math.min(100, prev.pathCompletionPct + 2),
+      };
+    });
   };
 
   const handleResetStats = () => {
     setUserStats(initialUserStats);
     setExamTimerSeconds(45 * 60 + 10);
+    try {
+      localStorage.removeItem('lpi_user_stats');
+      localStorage.setItem('lpic_mastered_objectives', JSON.stringify([]));
+      localStorage.removeItem('lpi_essentials_status');
+    } catch {}
     setIsProfileOpen(false);
   };
 
+  const handleUpdateTarget = (newTarget: string) => {
+    setUserStats((prev) => ({
+      ...prev,
+      currentTarget: newTarget,
+    }));
+  };
+
   const currentTiers = isFrench ? frenchCertificationTiers : certificationTiers;
-  const currentQuestions = isFrench ? frenchPracticeQuestions : practiceQuestions;
 
   return (
     <div className="min-h-screen bg-[#fff8f2] text-[#201b11] font-sans flex flex-col selection:bg-[#ffc20e] selection:text-[#6d5100]">
@@ -205,15 +247,23 @@ export default function App() {
               onStartExam={handleStartExam}
               onNavigate={handleSelectTab}
               onOpenLearning={handleOpenLearningTopic}
+              onUpdateTarget={handleUpdateTarget}
             />
           )}
 
           {currentTab === 'practice' && (
             <PracticeExamView
-              questions={currentQuestions}
+              initialExamId={selectedExamId}
               onCompleteSession={handleCompletePracticeSession}
               onExit={() => handleSelectTab('dashboard')}
               onOpenExplanation={(q) => setActiveExplanation(q)}
+              onStartTimer={() => {
+                setExamTimerSeconds(45 * 60);
+                setIsTimerRunning(true);
+              }}
+              onStopTimer={() => {
+                setIsTimerRunning(false);
+              }}
             />
           )}
 

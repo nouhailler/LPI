@@ -129,13 +129,28 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
   const [userQuizAnswers, setUserQuizAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
-  // Mastered objectives stored in localStorage
+  // Mastered objectives stored in localStorage (clean prototype data if present)
   const [masteredObjectives, setMasteredObjectives] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('lpic_mastered_objectives');
-      return saved ? JSON.parse(saved) : ['101.1', '101.2', '200.1'];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          if (
+            parsed.length === 3 &&
+            parsed.includes('101.1') &&
+            parsed.includes('101.2') &&
+            parsed.includes('200.1')
+          ) {
+            localStorage.setItem('lpic_mastered_objectives', JSON.stringify([]));
+            return [];
+          }
+          return parsed;
+        }
+      }
+      return [];
     } catch {
-      return ['101.1', '101.2', '200.1'];
+      return [];
     }
   });
 

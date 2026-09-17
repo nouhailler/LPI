@@ -11,7 +11,8 @@ import {
   ListOrdered,
   Filter,
   Layers,
-  BookOpen
+  BookOpen,
+  GraduationCap
 } from 'lucide-react';
 import { SequencingChallenge, SequencingStep } from '../../types';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -31,25 +32,66 @@ function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
-type ExamFilter = 'all' | '101' | '102';
+type CertFilter = 'all' | 'lpic-1' | 'lpic-2' | 'lpic-3';
+type ExamFilter = 'all' | '101' | '102' | '201' | '202' | '300' | '303' | '305' | '306';
 
 const TOPIC_NAMES: Record<number, { fr: string; en: string }> = {
+  // LPIC-1 (Exam 101)
   101: { fr: 'Topic 101 — Architecture Système', en: 'Topic 101 — System Architecture' },
   102: { fr: 'Topic 102 — Installation Linux & Paquets', en: 'Topic 102 — Linux Installation & Packages' },
   103: { fr: 'Topic 103 — Commandes GNU & Unix', en: 'Topic 103 — GNU & Unix Commands' },
   104: { fr: 'Topic 104 — Périphériques & Fichiers FHS', en: 'Topic 104 — Devices & Filesystems' },
+  // LPIC-1 (Exam 102)
   105: { fr: 'Topic 105 — Shells, Scripting & Environnement', en: 'Topic 105 — Shells & Scripting' },
   106: { fr: 'Topic 106 — Interfaces Utilisateur & Graphique', en: 'Topic 106 — User Interfaces & Desktops' },
   107: { fr: 'Topic 107 — Tâches Administratives & Cron', en: 'Topic 107 — Administrative Tasks' },
   108: { fr: 'Topic 108 — Services Système Essentiels & Logs', en: 'Topic 108 — Essential System Services' },
   109: { fr: 'Topic 109 — Notions Fondamentales Réseau', en: 'Topic 109 — Networking Fundamentals' },
   110: { fr: 'Topic 110 — Sécurité de l\'Hôte & SSH', en: 'Topic 110 — Security & SSH' },
+  // LPIC-2 (Exam 201)
+  200: { fr: 'Topic 200 — Capacité Matérielle & Mesures', en: 'Topic 200 — Capacity Planning' },
+  201: { fr: 'Topic 201 — Noyau Linux (Kernel)', en: 'Topic 201 — Linux Kernel' },
+  202: { fr: 'Topic 202 — Démarrage Système & Systemd', en: 'Topic 202 — System Startup' },
+  203: { fr: 'Topic 203 — Systèmes de Fichiers & Disques', en: 'Topic 203 — Filesystem & Devices' },
+  204: { fr: 'Topic 204 — Stockage Avancé (RAID & LVM)', en: 'Topic 204 — Advanced Storage Administration' },
+  205: { fr: 'Topic 205 — Configuration Réseau & Routage', en: 'Topic 205 — Network Configuration' },
+  206: { fr: 'Topic 206 — Maintenance Système & Sauvegardes', en: 'Topic 206 — System Maintenance' },
+  // LPIC-2 (Exam 202)
+  207: { fr: 'Topic 207 — Serveur DNS & BIND 9', en: 'Topic 207 — Domain Name Server (BIND 9)' },
+  208: { fr: 'Topic 208 — Services Web Apache & Nginx', en: 'Topic 208 — Web Services' },
+  209: { fr: 'Topic 209 — Partage de Fichiers Samba & NFS', en: 'Topic 209 — File Sharing (Samba & NFS)' },
+  210: { fr: 'Topic 210 — Gestion Clients DHCP, PAM & LDAP', en: 'Topic 210 — Network Client Management' },
+  211: { fr: 'Topic 211 — Services Mail Postfix & Dovecot', en: 'Topic 211 — E-Mail Services' },
+  212: { fr: 'Topic 212 — Sécurité Système, VPN & Nftables', en: 'Topic 212 — System Security & VPN' },
+  // LPIC-3 300 (Mixed Environment)
+  301: { fr: 'Topic 301 — Configuration OpenLDAP', en: 'Topic 301 — OpenLDAP Configuration' },
+  302: { fr: 'Topic 302 — Authentification OpenLDAP & PPolicy', en: 'Topic 302 — OpenLDAP Authentication & PPolicy' },
+  303: { fr: 'Topic 303 — Intégration de Domaine & SSSD', en: 'Topic 303 — Domain Integration & SSSD' },
+  304: { fr: 'Topic 304 — Partages Samba & Idmap RFC2307', en: 'Topic 304 — Samba Shares & Idmap' },
+  305: { fr: 'Topic 305 — Kerberos & SPNEGO', en: 'Topic 305 — Kerberos & SPNEGO' },
+  306: { fr: 'Topic 306 — Samba AD DC & Relations de Confiance', en: 'Topic 306 — Samba AD DC & Forest Trusts' },
+  // LPIC-3 303 (Security)
+  321: { fr: 'Topic 321 — Cryptographie, PKI & Certificats', en: 'Topic 321 — Cryptography & PKI' },
+  322: { fr: 'Topic 322 — Contrôle d\'Accès (SELinux & AppArmor)', en: 'Topic 322 — Access Control (SELinux/AppArmor)' },
+  323: { fr: 'Topic 323 — Sécurité des Opérations (Auditd & Sysctl)', en: 'Topic 323 — Operations Security (Auditd/Sysctl)' },
+  324: { fr: 'Topic 324 — Sécurité Réseau (IPsec, WireGuard, IPS)', en: 'Topic 324 — Network Security (IPsec, WireGuard, IPS)' },
+  // LPIC-3 305 (Virtualization & Containerization)
+  351: { fr: 'Topic 351 — Virtualisation Complète (KVM, libvirt, QEMU)', en: 'Topic 351 — Full Virtualization (KVM/QEMU)' },
+  352: { fr: 'Topic 352 — Virtualisation par Conteneurs (Podman, LXC)', en: 'Topic 352 — Container Virtualization (Podman/LXC)' },
+  353: { fr: 'Topic 353 — Déploiement & Automatisation (Cloud-Init, Packer)', en: 'Topic 353 — VM & Container Deployment' },
+  354: { fr: 'Topic 354 — Orchestration Kubernetes (kubeadm, CNI, CSI)', en: 'Topic 354 — Container Orchestration (Kubernetes)' },
+  // LPIC-3 306 (High Availability & Storage Clusters)
+  361: { fr: 'Topic 361 — Gestion de Cluster HA (Pacemaker, Corosync, STONITH)', en: 'Topic 361 — HA Cluster Management' },
+  362: { fr: 'Topic 362 — Stockage HA & Répliqué (DRBD, GFS2)', en: 'Topic 362 — High Availability Cluster Storage' },
+  363: { fr: 'Topic 363 — Stockage Distribué HA (Ceph, GlusterFS)', en: 'Topic 363 — Distributed Storage (Ceph & GlusterFS)' },
+  364: { fr: 'Topic 364 — Clusters avec Équilibrage de Charge (HAProxy, Keepalived)', en: 'Topic 364 — Load Balanced Clusters' },
 };
 
 export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate }) => {
   const { isFrench } = useLanguage();
   const isFr = isFrench;
 
+  const [selectedCert, setSelectedCert] = useState<CertFilter>('all');
   const [selectedExam, setSelectedExam] = useState<ExamFilter>('all');
   const [selectedTopic, setSelectedTopic] = useState<number | 'all'>('all');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -58,14 +100,31 @@ export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate })
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
 
-  // Filter challenges by exam and topic
+  // Filter challenges by certification, exam, and topic
   const filteredChallenges = useMemo(() => {
     return challenges.filter((c) => {
+      // Certification filter
+      if (selectedCert === 'lpic-1' && c.certification !== 'lpic-1') return false;
+      if (selectedCert === 'lpic-2' && c.certification !== 'lpic-2') return false;
+      if (selectedCert === 'lpic-3' && c.certification !== 'lpic-3') return false;
+
       // Exam filter
       if (selectedExam === '101') {
         if (!(c.topicNumber >= 101 && c.topicNumber <= 104)) return false;
       } else if (selectedExam === '102') {
         if (!(c.topicNumber >= 105 && c.topicNumber <= 110)) return false;
+      } else if (selectedExam === '201') {
+        if (!(c.topicNumber >= 200 && c.topicNumber <= 206)) return false;
+      } else if (selectedExam === '202') {
+        if (!(c.topicNumber >= 207 && c.topicNumber <= 212)) return false;
+      } else if (selectedExam === '300') {
+        if (!(c.topicNumber >= 301 && c.topicNumber <= 306)) return false;
+      } else if (selectedExam === '303') {
+        if (!(c.topicNumber >= 321 && c.topicNumber <= 324)) return false;
+      } else if (selectedExam === '305') {
+        if (!(c.topicNumber >= 351 && c.topicNumber <= 354)) return false;
+      } else if (selectedExam === '306') {
+        if (!(c.topicNumber >= 361 && c.topicNumber <= 364)) return false;
       }
 
       // Topic filter
@@ -75,20 +134,76 @@ export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate })
 
       return true;
     });
-  }, [challenges, selectedExam, selectedTopic]);
+  }, [challenges, selectedCert, selectedExam, selectedTopic]);
 
-  // Available topics for current exam filter
+  // Available exams based on active cert
+  const availableExams = useMemo(() => {
+    if (selectedCert === 'lpic-1') {
+      return [
+        { id: 'all' as ExamFilter, labelFr: 'Tous Examens LPIC-1', labelEn: 'All LPIC-1 Exams' },
+        { id: '101' as ExamFilter, labelFr: 'Examen 101', labelEn: 'Exam 101' },
+        { id: '102' as ExamFilter, labelFr: 'Examen 102', labelEn: 'Exam 102' },
+      ];
+    }
+    if (selectedCert === 'lpic-2') {
+      return [
+        { id: 'all' as ExamFilter, labelFr: 'Tous Examens LPIC-2', labelEn: 'All LPIC-2 Exams' },
+        { id: '201' as ExamFilter, labelFr: 'Examen 201', labelEn: 'Exam 201' },
+        { id: '202' as ExamFilter, labelFr: 'Examen 202', labelEn: 'Exam 202' },
+      ];
+    }
+    if (selectedCert === 'lpic-3') {
+      return [
+        { id: 'all' as ExamFilter, labelFr: 'Toutes spécialités LPIC-3', labelEn: 'All LPIC-3 Specialties' },
+        { id: '300' as ExamFilter, labelFr: '300 (Mixed Env)', labelEn: '300 (Mixed Env)' },
+        { id: '303' as ExamFilter, labelFr: '303 (Security)', labelEn: '303 (Security)' },
+        { id: '305' as ExamFilter, labelFr: '305 (Virt & Cont)', labelEn: '305 (Virt & Cont)' },
+        { id: '306' as ExamFilter, labelFr: '306 (HA & Storage)', labelEn: '306 (HA & Storage)' },
+      ];
+    }
+    return [
+      { id: 'all' as ExamFilter, labelFr: 'Tous les examens', labelEn: 'All Exams' },
+      { id: '101' as ExamFilter, labelFr: '101 (LPIC-1)', labelEn: '101 (LPIC-1)' },
+      { id: '102' as ExamFilter, labelFr: '102 (LPIC-1)', labelEn: '102 (LPIC-1)' },
+      { id: '201' as ExamFilter, labelFr: '201 (LPIC-2)', labelEn: '201 (LPIC-2)' },
+      { id: '202' as ExamFilter, labelFr: '202 (LPIC-2)', labelEn: '202 (LPIC-2)' },
+      { id: '300' as ExamFilter, labelFr: '300 (LPIC-3)', labelEn: '300 (LPIC-3)' },
+      { id: '303' as ExamFilter, labelFr: '303 (LPIC-3)', labelEn: '303 (LPIC-3)' },
+      { id: '305' as ExamFilter, labelFr: '305 (LPIC-3)', labelEn: '305 (LPIC-3)' },
+      { id: '306' as ExamFilter, labelFr: '306 (LPIC-3)', labelEn: '306 (LPIC-3)' },
+    ];
+  }, [selectedCert]);
+
+  // Available topics for current filters
   const availableTopics = useMemo(() => {
     const topicSet = new Set<number>();
     challenges.forEach((c) => {
+      if (selectedCert === 'lpic-1' && c.certification !== 'lpic-1') return;
+      if (selectedCert === 'lpic-2' && c.certification !== 'lpic-2') return;
+      if (selectedCert === 'lpic-3' && c.certification !== 'lpic-3') return;
+
       if (selectedExam === '101' && (c.topicNumber < 101 || c.topicNumber > 104)) return;
       if (selectedExam === '102' && (c.topicNumber < 105 || c.topicNumber > 110)) return;
+      if (selectedExam === '201' && (c.topicNumber < 200 || c.topicNumber > 206)) return;
+      if (selectedExam === '202' && (c.topicNumber < 207 || c.topicNumber > 212)) return;
+      if (selectedExam === '300' && (c.topicNumber < 301 || c.topicNumber > 306)) return;
+      if (selectedExam === '303' && (c.topicNumber < 321 || c.topicNumber > 324)) return;
+      if (selectedExam === '305' && (c.topicNumber < 351 || c.topicNumber > 354)) return;
+      if (selectedExam === '306' && (c.topicNumber < 361 || c.topicNumber > 364)) return;
+
       topicSet.add(c.topicNumber);
     });
     return Array.from(topicSet).sort((a, b) => a - b);
-  }, [challenges, selectedExam]);
+  }, [challenges, selectedCert, selectedExam]);
 
-  // Handle filter changes
+  // Filter change handlers
+  const handleCertChange = (cert: CertFilter) => {
+    setSelectedCert(cert);
+    setSelectedExam('all');
+    setSelectedTopic('all');
+    setCurrentIndex(0);
+  };
+
   const handleExamChange = (exam: ExamFilter) => {
     setSelectedExam(exam);
     setSelectedTopic('all');
@@ -176,7 +291,66 @@ export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate })
     }
   };
 
-  // Stats
+  // Helper for exam badge display
+  const getExamBadge = (topicNumber: number) => {
+    if (topicNumber >= 101 && topicNumber <= 104) {
+      return {
+        label: 'LPIC-1 • EXAMEN 101',
+        style: 'bg-[#006064]/15 text-[#006064] border border-[#006064]/30'
+      };
+    }
+    if (topicNumber >= 105 && topicNumber <= 110) {
+      return {
+        label: 'LPIC-1 • EXAMEN 102',
+        style: 'bg-[#2e7d32]/15 text-[#2e7d32] border border-[#2e7d32]/30'
+      };
+    }
+    if (topicNumber >= 200 && topicNumber <= 206) {
+      return {
+        label: 'LPIC-2 • EXAMEN 201',
+        style: 'bg-[#b71c1c]/15 text-[#b71c1c] border border-[#b71c1c]/30'
+      };
+    }
+    if (topicNumber >= 207 && topicNumber <= 212) {
+      return {
+        label: 'LPIC-2 • EXAMEN 202',
+        style: 'bg-[#4a148c]/15 text-[#4a148c] border border-[#4a148c]/30'
+      };
+    }
+    if (topicNumber >= 301 && topicNumber <= 306) {
+      return {
+        label: 'LPIC-3 • EXAMEN 300 (MIXED)',
+        style: 'bg-[#1565c0]/15 text-[#1565c0] border border-[#1565c0]/30'
+      };
+    }
+    if (topicNumber >= 321 && topicNumber <= 324) {
+      return {
+        label: 'LPIC-3 • EXAMEN 303 (SECURITY)',
+        style: 'bg-[#c2185b]/15 text-[#c2185b] border border-[#c2185b]/30'
+      };
+    }
+    if (topicNumber >= 351 && topicNumber <= 354) {
+      return {
+        label: 'LPIC-3 • EXAMEN 305 (VIRT & CONT)',
+        style: 'bg-[#e65100]/15 text-[#e65100] border border-[#e65100]/30'
+      };
+    }
+    if (topicNumber >= 361 && topicNumber <= 364) {
+      return {
+        label: 'LPIC-3 • EXAMEN 306 (HA & STORAGE)',
+        style: 'bg-[#2e7d32]/15 text-[#2e7d32] border border-[#2e7d32]/30'
+      };
+    }
+    return {
+      label: 'LPIC',
+      style: 'bg-[#785a00]/15 text-[#785a00] border border-[#785a00]/30'
+    };
+  };
+
+  // Counts
+  const lpic1Count = challenges.filter((c) => c.certification === 'lpic-1').length;
+  const lpic2Count = challenges.filter((c) => c.certification === 'lpic-2').length;
+  const lpic3Count = challenges.filter((c) => c.certification === 'lpic-3').length;
   const completedInFilter = filteredChallenges.filter((c) => completedIds.has(c.id)).length;
 
   return (
@@ -190,10 +364,12 @@ export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate })
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-[#201b11]">
-                {isFr ? 'Exercices d\'ordonnancement LPIC-1 (40 Procédures)' : 'LPIC-1 Sequencing (40 Procedures)'}
+                {isFr
+                  ? `Exercices d'ordonnancement (${challenges.length} Procédures : 40 LPIC-1 + 40 LPIC-2 + 40 LPIC-3)`
+                  : `Sequencing Exercises (${challenges.length} Procedures: 40 LPIC-1 + 40 LPIC-2 + 40 LPIC-3)`}
               </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#006064]/10 text-[#006064] border border-[#006064]/20">
-                100% LPIC-1
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#785a00]/10 text-[#785a00] border border-[#785a00]/20">
+                LPIC-1, LPIC-2 & LPIC-3
               </span>
             </div>
             <p className="text-xs text-[#817660]">
@@ -217,47 +393,58 @@ export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate })
         </div>
       </div>
 
-      {/* Filter Toolbar: Exam Selection & Topic Selection */}
+      {/* Filter Toolbar: Certification, Exam & Topic Selection */}
       <div className="bg-white p-4 rounded-xl border border-[#d3c5ab]/80 shadow-xs space-y-3">
-        {/* Exam Segmented Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Certification Selector (LPIC-1 / LPIC-2 / LPIC-3 / All) */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#f0e6d6]">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-bold text-[#4f4632] flex items-center gap-1 mr-1">
-              <Layers className="w-3.5 h-3.5 text-[#785a00]" />
-              {isFr ? 'Examen :' : 'Exam:'}
+              <GraduationCap className="w-4 h-4 text-[#785a00]" />
+              {isFr ? 'Certification :' : 'Certification:'}
             </span>
             <button
               type="button"
-              onClick={() => handleExamChange('all')}
+              onClick={() => handleCertChange('all')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedExam === 'all'
-                  ? 'bg-[#785a00] text-white shadow-xs'
+                selectedCert === 'all'
+                  ? 'bg-[#201b11] text-white shadow-xs'
                   : 'bg-stone-100 text-[#60553e] hover:bg-stone-200'
               }`}
             >
-              {isFr ? 'Tous les examens LPIC-1 (40)' : 'All LPIC-1 (40)'}
+              {isFr ? `Toutes (${challenges.length})` : `All (${challenges.length})`}
             </button>
             <button
               type="button"
-              onClick={() => handleExamChange('101')}
+              onClick={() => handleCertChange('lpic-1')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedExam === '101'
+                selectedCert === 'lpic-1'
                   ? 'bg-[#006064] text-white shadow-xs'
                   : 'bg-[#e0f7fa] text-[#006064] hover:bg-[#b2ebf2]'
               }`}
             >
-              {isFr ? 'Examen 101 (20)' : 'Exam 101 (20)'}
+              LPIC-1 ({lpic1Count})
             </button>
             <button
               type="button"
-              onClick={() => handleExamChange('102')}
+              onClick={() => handleCertChange('lpic-2')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedExam === '102'
-                  ? 'bg-[#2e7d32] text-white shadow-xs'
-                  : 'bg-[#e8f5e9] text-[#2e7d32] hover:bg-[#c8e6c9]'
+                selectedCert === 'lpic-2'
+                  ? 'bg-[#b71c1c] text-white shadow-xs'
+                  : 'bg-[#ffebee] text-[#b71c1c] hover:bg-[#ffcdd2]'
               }`}
             >
-              {isFr ? 'Examen 102 (20)' : 'Exam 102 (20)'}
+              LPIC-2 ({lpic2Count})
+            </button>
+            <button
+              type="button"
+              onClick={() => handleCertChange('lpic-3')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                selectedCert === 'lpic-3'
+                  ? 'bg-[#1565c0] text-white shadow-xs'
+                  : 'bg-[#e3f2fd] text-[#1565c0] hover:bg-[#bbdefb]'
+              }`}
+            >
+              LPIC-3 ({lpic3Count})
             </button>
           </div>
 
@@ -267,15 +454,67 @@ export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate })
             <select
               value={currentIndex}
               onChange={(e) => setCurrentIndex(Number(e.target.value))}
-              className="text-xs bg-[#fdfaf5] border border-[#d3c5ab] rounded-lg px-2.5 py-1.5 font-medium text-[#201b11] focus:ring-1 focus:ring-[#785a00] max-w-[240px] truncate cursor-pointer"
+              className="text-xs bg-[#fdfaf5] border border-[#d3c5ab] rounded-lg px-2.5 py-1.5 font-medium text-[#201b11] focus:ring-1 focus:ring-[#785a00] max-w-[260px] truncate cursor-pointer"
             >
               {filteredChallenges.map((item, idx) => (
                 <option key={item.id} value={idx}>
-                  {idx + 1}. {isFr && item.titleFr ? item.titleFr : item.title}
+                  {idx + 1}. [{item.certification.toUpperCase()} {item.objectiveId}] {isFr && item.titleFr ? item.titleFr : item.title}
                 </option>
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Exam Filter Buttons */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs font-bold text-[#4f4632] flex items-center gap-1 mr-1">
+            <Layers className="w-3.5 h-3.5 text-[#785a00]" />
+            {isFr ? 'Examen :' : 'Exam:'}
+          </span>
+          {availableExams.map((ex) => {
+            let count = 0;
+            if (ex.id === 'all') {
+              count = challenges.filter((c) => {
+                if (selectedCert === 'lpic-1') return c.certification === 'lpic-1';
+                if (selectedCert === 'lpic-2') return c.certification === 'lpic-2';
+                if (selectedCert === 'lpic-3') return c.certification === 'lpic-3';
+                return true;
+              }).length;
+            } else if (ex.id === '101') {
+              count = challenges.filter((c) => c.topicNumber >= 101 && c.topicNumber <= 104).length;
+            } else if (ex.id === '102') {
+              count = challenges.filter((c) => c.topicNumber >= 105 && c.topicNumber <= 110).length;
+            } else if (ex.id === '201') {
+              count = challenges.filter((c) => c.topicNumber >= 200 && c.topicNumber <= 206).length;
+            } else if (ex.id === '202') {
+              count = challenges.filter((c) => c.topicNumber >= 207 && c.topicNumber <= 212).length;
+            } else if (ex.id === '300') {
+              count = challenges.filter((c) => c.topicNumber >= 301 && c.topicNumber <= 306).length;
+            } else if (ex.id === '303') {
+              count = challenges.filter((c) => c.topicNumber >= 321 && c.topicNumber <= 324).length;
+            } else if (ex.id === '305') {
+              count = challenges.filter((c) => c.topicNumber >= 351 && c.topicNumber <= 354).length;
+            } else if (ex.id === '306') {
+              count = challenges.filter((c) => c.topicNumber >= 361 && c.topicNumber <= 364).length;
+            }
+
+            const label = isFr ? ex.labelFr : ex.labelEn;
+
+            return (
+              <button
+                key={ex.id}
+                type="button"
+                onClick={() => handleExamChange(ex.id)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  selectedExam === ex.id
+                    ? 'bg-[#785a00] text-white shadow-xs'
+                    : 'bg-stone-100 text-[#60553e] hover:bg-stone-200'
+                }`}
+              >
+                {label} ({count})
+              </button>
+            );
+          })}
         </div>
 
         {/* Topic Filter Pills */}
@@ -334,12 +573,10 @@ export const SequencingModule: React.FC<Props> = ({ challenges, onScoreUpdate })
             <div className="flex items-center gap-2">
               <span
                 className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                  current.topicNumber <= 104
-                    ? 'bg-[#006064]/15 text-[#006064] border border-[#006064]/30'
-                    : 'bg-[#2e7d32]/15 text-[#2e7d32] border border-[#2e7d32]/30'
+                  getExamBadge(current.topicNumber).style
                 }`}
               >
-                {current.topicNumber <= 104 ? 'LPIC-1 • EXAMEN 101' : 'LPIC-1 • EXAMEN 102'}
+                {getExamBadge(current.topicNumber).label}
               </span>
               <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#ebdcc8] text-[#785a00]">
                 Obj {current.objectiveId}

@@ -60,34 +60,40 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         {/* Badges / Accomplishments */}
         <div className="space-y-2">
           <span className="text-xs font-bold text-[#817660] uppercase tracking-wider block">
-            Certifications Achieved
+            Certifications
           </span>
-          <div className="flex items-center justify-between p-3 bg-[#ffffff] rounded-xl border border-[#d3c5ab]">
-            <div className="flex items-center gap-2.5">
-              <ShieldCheck className="w-5 h-5 text-[#28A745]" />
-              <div>
-                <div className="text-xs font-bold text-[#201b11]">Linux Essentials</div>
-                <div className="text-[10px] text-[#4f4632]">Certificate 010-160 Verified</div>
+          {localStorage.getItem('lpi_essentials_status') === 'passed' ? (
+            <div className="flex items-center justify-between p-3 bg-[#ffffff] rounded-xl border border-[#d3c5ab]">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="w-5 h-5 text-[#28A745]" />
+                <div>
+                  <div className="text-xs font-bold text-[#201b11]">Linux Essentials</div>
+                  <div className="text-[10px] text-[#4f4632]">Certificate 010-160 Verified</div>
+                </div>
               </div>
+              <span className="text-[10px] font-bold text-[#28A745] bg-[#28A745]/15 px-2 py-0.5 rounded">
+                Verified
+              </span>
             </div>
-            <span className="text-[10px] font-bold text-[#28A745] bg-[#28A745]/15 px-2 py-0.5 rounded">
-              Verified
-            </span>
-          </div>
+          ) : (
+            <div className="p-3 bg-[#ffffff] rounded-xl border border-[#d3c5ab] text-center text-xs text-[#817660]">
+              Aucune certification validée pour le moment.
+            </div>
+          )}
         </div>
 
         {/* Action button */}
         <div className="flex flex-col gap-2 pt-2 border-t border-[#d3c5ab]">
           <button
             onClick={() => {
-              if (confirm('Reset mock study progress?')) {
+              if (confirm('Réinitialiser toute la progression à zéro ?')) {
                 onResetStats();
               }
             }}
             className="w-full py-2.5 border border-[#ba1a1a]/30 text-[#ba1a1a] hover:bg-[#ffdad6] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Reset Practice Progress
+            Réinitialiser la progression
           </button>
           <button
             onClick={onClose}

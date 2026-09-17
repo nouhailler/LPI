@@ -22,6 +22,67 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenLearning,
 }) => {
   const { t, isFrench } = useLanguage();
+
+  // Read mastered objectives dynamically from localStorage
+  const [masteredObjectiveIds, setMasteredObjectiveIds] = React.useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('lpic_mastered_objectives');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          if (
+            parsed.length === 3 &&
+            parsed.includes('101.1') &&
+            parsed.includes('101.2') &&
+            parsed.includes('200.1')
+          ) {
+            return [];
+          }
+          return parsed;
+        }
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  });
+
+  React.useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'lpic_mastered_objectives' && e.newValue) {
+        try {
+          setMasteredObjectiveIds(JSON.parse(e.newValue));
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const sysArchDone = masteredObjectiveIds.filter((id) => id.startsWith('101.')).length;
+  const sysArchTotal = 3;
+  const systemArchProgress = Math.round((sysArchDone / sysArchTotal) * 100);
+
+  const linuxInstDone = masteredObjectiveIds.filter((id) => id.startsWith('102.')).length;
+  const linuxInstTotal = 5;
+  const linuxInstProgress = Math.round((linuxInstDone / linuxInstTotal) * 100);
+
+  const lpic1TotalObjs = 60;
+  const lpic1DoneCount = masteredObjectiveIds.filter(
+    (id) =>
+      id.startsWith('101.') ||
+      id.startsWith('102.') ||
+      id.startsWith('103.') ||
+      id.startsWith('104.') ||
+      id.startsWith('105.') ||
+      id.startsWith('106.') ||
+      id.startsWith('107.') ||
+      id.startsWith('108.') ||
+      id.startsWith('109.') ||
+      id.startsWith('110.')
+  ).length;
+  const lpic1Pct = Math.round((lpic1DoneCount / lpic1TotalObjs) * 100);
+
   const totalCardsCount = flashcardsData.length;
   const lpic1CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 101 && c.topicNumber <= 110).length;
   const lpic2CardsCount = flashcardsData.filter((c) => c.topicNumber && c.topicNumber >= 200 && c.topicNumber <= 212).length;
@@ -107,12 +168,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-xs font-bold text-[#4f4632]">
                 <span>{t.dashboard.systemArchitecture}</span>
-                <span>{userStats.systemArchitectureProgress}%</span>
+                <span>{systemArchProgress}%</span>
               </div>
               <div className="w-full bg-[#ece1d0] rounded-full h-2 overflow-hidden">
                 <div
                   className="bg-[#ffc20e] h-full rounded-full transition-all duration-500"
-                  style={{ width: `${userStats.systemArchitectureProgress}%` }}
+                  style={{ width: `${systemArchProgress}%` }}
                 />
               </div>
             </div>
@@ -121,12 +182,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-xs font-bold text-[#4f4632]">
                 <span>{t.dashboard.linuxInstallation}</span>
-                <span>{userStats.linuxInstallationProgress}%</span>
+                <span>{linuxInstProgress}%</span>
               </div>
               <div className="w-full bg-[#ece1d0] rounded-full h-2 overflow-hidden">
                 <div
                   className="bg-[#ffc20e] h-full rounded-full transition-all duration-500"
-                  style={{ width: `${userStats.linuxInstallationProgress}%` }}
+                  style={{ width: `${linuxInstProgress}%` }}
                 />
               </div>
             </div>
@@ -192,8 +253,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div className="p-4 flex flex-col gap-1.5 flex-grow">
                 <div className="flex justify-between items-center">
                   <h4 className="font-bold text-lg text-[#201b11]">LPIC-1</h4>
-                  <span className="bg-[#ffc20e]/25 text-[#6d5100] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                    {t.common.inProgress}
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${lpic1Pct > 0 ? 'bg-[#ffc20e]/25 text-[#6d5100]' : 'bg-[#ece1d0] text-[#817660]'}`}>
+                    {lpic1Pct > 0 ? `${lpic1Pct}%` : (isFrench ? '0% · Prêt' : '0% · Ready')}
                   </span>
                 </div>
                 <p className="text-sm text-[#4f4632]">System Administrator</p>
