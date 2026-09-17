@@ -16,6 +16,14 @@
     <strong>An interactive, modern study suite designed to help Linux engineers and system administrators master the Linux Professional Institute (LPI) certification curriculum.</strong>
   </p>
 
+  <br />
+
+  <p align="center">
+    <img src="public/dashboard-screenshot.jpg" alt="LPI Certification Prep Application Screenshot" width="900" style="border-radius: 16px; border: 1px solid #d3c5ab; box-shadow: 0 16px 40px rgba(0,0,0,0.18);" />
+  </p>
+
+  <br />
+
   [Explore Objectives](#-learning-objectives-curriculum) • [Practice Exams](#-practice-exam-engine) • [Linux Glossary](#-glossary--command-index) • [Install App](#-install-on-desktop--mobile-pwa) • [Quickstart](#-getting-started)
 
 </div>
@@ -25,15 +33,19 @@
 ## 📋 Table of Contents
 
 - [🌟 Overview](#-overview)
+- [🖥️ Application Preview](#️-application-preview)
 - [✨ Key Features](#-key-features)
   - [1. 📚 Learning Objectives & Study Modules](#1--learning-objectives--study-modules)
   - [2. 🍔 Categorized Navigation Drawer & Feature Index](#2--categorized-navigation-drawer--feature-index)
   - [3. ⚙️ Automatic Updates & Settings Menu](#3-️-automatic-updates--settings-menu)
   - [4. 📖 Linux Glossary & Command Index](#4--linux-glossary--command-index)
-  - [5. 📝 Timed Practice Exam Engine](#5--timed-practice-exam-engine)
-  - [6. 🗂️ Interactive Flashcards Deck](#6-️-interactive-flashcards-deck)
-  - [7. 🗺️ Career Roadmap & Certification Path](#7-️-career-roadmap--certification-path)
-  - [8. 📈 Progress Tracker & Analytics](#8--progress-tracker--analytics)
+  - [5. 📝 Timed Practice Exam Engine & Simulation](#5--timed-practice-exam-engine--simulation)
+  - [6. 🗂️ Spaced-Repetition Interactive Flashcards (2,000+ Cards)](#6-️-spaced-repetition-interactive-flashcards-2000-cards)
+  - [7. ⚡ Hands-on Interactive Training Hub (Labs & Scenarios)](#7-️-hands-on-interactive-training-hub-labs--scenarios)
+  - [8. 📊 Intelligent Dashboard, LPI Guide & Exam Standards](#8--intelligent-dashboard-lpi-guide--exam-standards)
+  - [9. 🗺️ Career Roadmap & Certification Path](#9-️-career-roadmap--certification-path)
+  - [10. 📈 Progress Tracker & Exam Analytics](#10--progress-tracker--exam-analytics)
+  - [11. 🌐 Full Bilingual Experience (Français / English)](#11--full-bilingual-experience-français--english)
 - [📱 Install on Desktop & Mobile (PWA)](#-install-on-desktop--mobile-pwa)
 - [🎯 Covered LPI Certification Exams](#-covered-lpi-certification-exams)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
@@ -49,6 +61,17 @@
 ## 🌟 Overview
 
 **LPI Certification Prep** is an all-in-one exam preparation suite for Linux professionals. Whether you are aiming for your first sysadmin credential with **LPIC-1**, elevating your server infrastructure skills with **LPIC-2**, or specializing in **LPIC-3 Enterprise** security, virtualization, mixed environments, and high-availability clusters, this platform provides structured study content, realistic simulated exams, deep command references, and interactive flashcards.
+
+---
+
+## 🖥️ Application Preview
+
+<div align="center">
+  <img src="public/dashboard-screenshot.jpg" alt="Interface du Tableau de bord LPI Certification Prep" width="100%" style="border-radius: 14px; border: 1px solid #d3c5ab; box-shadow: 0 12px 32px rgba(0,0,0,0.15);" />
+  <p align="center">
+    <em>Tableau de bord interactif : Suivi des objectifs LPIC-1/2/3, série d'entraînement, métriques d'examen officiel et accès direct aux modules de révision.</em>
+  </p>
+</div>
 
 ---
 
@@ -79,45 +102,63 @@
 - **Recall Mode**: Test your memory flashcard-style directly in the glossary.
 - Local bookmarking for quick review.
 
-### 5. 📝 Timed Practice Exam Engine
-- Realistic multiple-choice and single-choice exam simulation.
-- Configurable question banks for **Exam 101**, **Exam 102**, **Exam 201**, **Exam 202**, and **LPIC-3 Specialties**.
-- Flag questions for review, jump to unattempted items, and submit with real-time pass/fail score calculations.
-- Comprehensive answer reviews with in-depth technical explanations for every option.
+### 5. 📝 Timed Practice Exam Engine & Simulation
+- **Multi-Tier Certification Exams**: Select and simulate official exam sessions for **LPIC-1 (Exams 101 & 102)**, **LPIC-2 (Exams 201 & 202)**, and **LPIC-3 Specialties (300 Mixed Environment, 303 Security, 305 Virtualization, 306 High Availability)**.
+- **Dedicated Exam Briefing / Intro Screen**: Detailed preparation instructions, passing score reminder (70% / 500 out of 800), question count, and test rules before launching.
+- **Dynamic Navigation & Question Controls**: Seamless **Previous Question** and **Next Question** buttons, question review flag toggle, and interactive questions grid showing answered, flagged, and unattempted items.
+- **Sprint Mode Timer**: 45-minute sprint simulation (matching official 90-minute real-world exam pace in accelerated format) with live pause and resume controls.
+- **Instant Scoring & Technical Explanations**: Immediate scoring upon completion with pass/fail badges, review breakdown by question, and in-depth technical explanation modals analyzing each distractor and correct answer.
 
-### 6. 🗂️ 200 Interactive Flashcards (Topic 101 & Topic 102)
-- **100 Dedicated Cards for Topic 101 (System Architecture)**: Exhaustive recall deck spanning all three sub-objectives:
-  - **101.1 Hardware Settings (35 Cards)**: `lsmod`, `modprobe`, `insmod`, `rmmod`, `modinfo`, `depmod`, `/etc/modprobe.d/`, `lspci`, `lsusb`, `lscpu`, `lshw`, `dmidecode`, `udevadm` (info, monitor, trigger), `/etc/udev/rules.d/`, `/proc/cpuinfo`, `/proc/meminfo`, `/proc/interrupts`, `/proc/ioports`, `/proc/dma`, `/sys/`, `/dev/`, `sysctl`, `mknod`, D-Bus, and coldplug/hotplug.
-  - **101.2 Boot the System (35 Cards)**: BIOS vs UEFI, MBR vs GPT, ESP partition, `efibootmgr`, 7-stage boot process, `initramfs`/`initrd`, `vmlinuz`, `dracut`, `/boot/grub/grub.cfg`, `/etc/default/grub`, `/etc/grub.d/`, `grub-install`, GRUB interactive shell (`set root`, `linux`, `initrd`, `boot`), legacy partition numbering vs GRUB 2, `/proc/cmdline`, `init=/bin/bash`, `systemd.unit=`, `dmesg`, `journalctl -b`, `systemd-boot`, `update-grub`, and `systemd-analyze`.
-  - **101.3 Runlevels, Boot Targets & Shutdown (30 Cards)**: SysV runlevels (0-6), `/etc/inittab`, `telinit`, `init`, `runlevel`, `/etc/rc.d/` S/K scripts, systemd target units (`poweroff.target`, `rescue.target`, `multi-user.target`, `graphical.target`, `reboot.target`, `emergency.target`), `systemctl get-default`, `systemctl set-default`, `systemctl isolate`, `shutdown`, `wall`, `reboot`, `halt`, `poweroff`, `/etc/nologin`, `systemctl daemon-reload`, `systemctl mask/unmask`, Magic SysRq keys, and `ctrl-alt-del.target`.
-
-- **100 Dedicated Cards for Topic 102 (Linux Installation and Package Management)**: Complete coverage across all six sub-objectives:
-  - **102.1 Design Hard Disk Layout & LVM (18 Cards)**: MBR partition limits (4 primary vs 3+1 extended), swap sizing rules, `/boot`, `/var`, `/home` partitioning strategies, EFI System Partition (FAT32, `/boot/efi`), LVM architecture (PV, VG, LV), `pvcreate`, `pvdisplay`, `vgcreate`, `vgextend`, `lvcreate`, `lvextend`, LVM snapshot volumes, `/etc/fstab` structure (6 fields), UUID/LABEL identification, and `blkid`.
-  - **102.2 Install a Boot Manager (18 Cards)**: GRUB Legacy vs GRUB 2 architecture, `/boot/grub/grub.cfg`, `/etc/default/grub` configuration (`GRUB_DEFAULT`, `GRUB_TIMEOUT`, `GRUB_CMDLINE_LINUX`), `/etc/grub.d/` scripts (`00_header`, `10_linux`, `40_custom`), `grub-mkconfig` / `update-grub`, `grub-install`, GRUB 2 disk naming syntax `(hd0,gpt2)`, GRUB interactive commands (`set root`, `linux`, `initrd`, `boot`), `efibootmgr` command & NVRAM boot entries, GRUB 2 password hashing (`grub-mkpasswd-pbkdf2`), and chainloading.
-  - **102.3 Manage Shared Libraries (14 Cards)**: Shared library naming conventions (SONAME, real name, linker name), `ldd` command, Dynamic Linker/Loader (`/lib/ld-linux.so.2` & `/lib64/ld-linux-x86-64.so.2`), `/etc/ld.so.conf` & `/etc/ld.so.conf.d/`, `ldconfig` binary and cache generation (`/etc/ld.so.cache`), `ldconfig -p` cache inspection, `LD_LIBRARY_PATH` and `LD_PRELOAD` environment variables, and static vs dynamic linking tradeoffs.
-  - **102.4 Debian Package Management (20 Cards)**: `dpkg -i`, `dpkg -r` vs `dpkg -P` (purge configuration), `dpkg -l`, `dpkg -s`, `dpkg -L` (list files installed by package), `dpkg -S` (find which package owns a file), `dpkg -c` (inspect `.deb` archive contents), `dpkg-reconfigure`, `/var/lib/dpkg/status`, `apt-get` / `apt` (`update`, `upgrade`, `dist-upgrade` / `full-upgrade`, `install`, `remove`, `purge`, `autoremove`, `clean`, `autoclean`), `apt-cache search` / `show`, `apt-file search`, `/etc/apt/sources.list` & `/etc/apt/sources.list.d/`, repository line format (type, URI, suite, components), and `/etc/apt/preferences` (package pinning).
-  - **102.5 RPM and YUM/DNF Package Management (20 Cards)**: `rpm -ivh`, `rpm -Uvh` vs `rpm -Fvh` (freshen), `rpm -e` (erase), `rpm -qa`, `rpm -qi`, `rpm -ql`, `rpm -qf` (query file ownership), `rpm -q --scripts`, `rpm -q --changelog`, `rpm -q --requires`, `rpm -qp` (query uninstalled `.rpm` package), `rpm -V` (verify package integrity and file digest codes like `5`, `S`, `M`, `D`), `rpm2cpio` archive extraction, `yum` / `dnf` commands (`install`, `update`, `erase`/`remove`, `reinstall`, `search`, `info`, `provides`/`whatprovides`, `history`), `/etc/yum.repos.d/` (`.repo` file fields: `[id]`, `name`, `baseurl`, `enabled`, `gpgcheck`), and `zypper` (openSUSE package manager: `in`, `rm`, `up`, `se`, `lr`, `ar`).
-  - **102.6 Linux as a Virtualization Guest (10 Cards)**: Hypervisor Type 1 (bare-metal) vs Type 2 (hosted), KVM `/dev/kvm`, VirtIO paravirtualized device drivers, Guest Agent utilities (`qemu-guest-agent`, `open-vm-tools`), `cloud-init` automated multi-distribution instance provisioning, cloud-init YAML user-data formats, `/var/lib/cloud/` and `/var/log/cloud-init.log`, machine identity regeneration (`machine-id`, SSH host keys via `ssh-keygen -A`), `/etc/localtime` timezone synchronization with hypervisor, and D-Bus hypervisor integration.
-
+### 6. 🗂️ Spaced-Repetition Interactive Flashcards (2,000+ Cards)
+- **Comprehensive Coverage Across All Tiers**:
+  - **LPIC-1 Curriculum**: 100 dedicated cards per topic across all 10 topics:
+    - **Topic 101**: System Architecture (Hardware, Boot Process, Runlevels & systemd)
+    - **Topic 102**: Linux Installation & Package Management (Disks, LVM, GRUB2, Libraries, Debian/APT, RPM/YUM, Cloud & Virtualization)
+    - **Topic 103**: GNU and Unix Commands (Streams, Pipes, Text Processing, File Management, Regex)
+    - **Topic 104**: Devices, Linux Filesystems, Filesystem Hierarchy Standard (FHS)
+    - **Topic 105**: Shells, Shell Scripting and Data Management (Bash, Environment, SQL)
+    - **Topic 106**: User Interfaces and Desktops (X11, Wayland, Accessibility)
+    - **Topic 107**: Administrative Tasks (Users, Groups, Scheduling cron/systemd-timers, Localization)
+    - **Topic 108**: Essential System Services (System Time, Logging rsyslog/journald, Mail Transfer)
+    - **Topic 109**: Networking Fundamentals (IPv4/IPv6, Routing, DNS, Ports, Configuration)
+    - **Topic 110**: Security (Host Hardening, Permissions, SSH, GPG)
+  - **LPIC-2 Curriculum**: Exhaustive decks spanning Topics 200 through 212 (Capacity Planning, Linux Kernel, System Startup, Advanced Storage LVM/RAID, Networking, BIND9 DNS, Apache/Nginx Web Services, Samba/NFS File Sharing, DHCP/PAM/LDAP Client Management, Postfix/Dovecot E-Mail, and System Security/Firewalls).
+  - **LPIC-3 Enterprise Specialties**: Dedicated card sets covering Samba AD DC & LDAP (300), Advanced Cryptography & Hardening (303), Virtualization & Containers (305), and High Availability Clusters (306).
 - **Interactive Deck Controls & Features**:
-  - Top deck switcher tabs: **Topic 102 Deck (100 Cards)**, **Topic 101 Deck (100 Cards)**, and **All LPIC-1 (200 Cards)**.
-  - Sub-objective filter pills (**Disks & LVM**, **GRUB & Boot**, **Libraries**, **Debian/APT**, **RPM/YUM**, **Cloud & Virt**).
+  - Sub-objective filter pills to narrow down exact focus areas.
   - 3D perspective flip card animations with tactile feedback.
   - Search filter across all commands, definitions, examples, and exam tips.
-  - Card Index visual modal to quickly jump to any of the 200 cards.
+  - Card Index visual modal to quickly jump to any card in the deck.
   - Keyboard shortcuts (`Space`/`Enter` to flip, `Left`/`Right` arrow or `R`/`L` keys for review/mastery, `S` for shuffle, `B` to star/bookmark).
   - Speech synthesis (TTS) pronunciation audio for commands and definitions.
   - One-click copy for command syntax examples.
-  - High-yield **Exam Tip** callouts highlighting key gotchas.
+  - High-yield **Exam Tip** callouts highlighting gotchas and edge cases.
   - Local persistence for Mastered, Needs Review, and Starred status across browser sessions.
 
-### 7. 🗺️ Career Roadmap & Certification Path
+### 7. ⚡ Hands-on Interactive Training Hub (Labs & Scenarios)
+- **Guided Mini-Labs**: Step-by-step interactive CLI challenges guiding students through partition setup, systemd unit configuration, user administration, and network troubleshooting with real-time command syntax validation.
+- **Troubleshooting Scenarios**: Diagnostic break-fix cases simulating realistic server emergencies (boot failures, broken GRUB configurations, permission locks, degraded RAID arrays, crashed daemons) with progressive hints and verified resolution steps.
+- **Command Sequencing Drills**: Arrange commands into the exact chronological order required to execute multi-step sysadmin procedures safely.
+- **Matching Pairs Game**: Rapid-fire visual matching linking commands to syntax flags, configuration files to services, network ports to protocols, and utilities to LPI topics.
+- **Fill-in-the-Blank Challenges**: Test exact CLI command syntax, options, and configuration directives.
+
+### 8. 📊 Intelligent Dashboard, LPI Guide & Exam Standards
+- **Dynamic "Next Recommended Step"**: Real-time evaluation of study progress that automatically identifies the highest-weight unmastered objective and offers a 1-click shortcut into the curriculum.
+- **LPI Certification Methodology Guide (`LpiCertificationGuideModal`)**: Direct-access guide outlining the 4 pillars of preparation (weight prioritization, active recall, hands-on terminal practice, exam simulation) and how to avoid common traps (case sensitivity, absolute paths, multi-select questions).
+- **Context-Aware Tooltips (`InfoTooltip`)**: Discreet tooltips explaining LPI weights (1 weight point ≈ 1 exam question), official 90-minute testing vs 45-minute sprint mode, and passing standards (70% / 500 out of 800).
+- **Recent Practice Exam Performance Widget**: Preserves recent test runs with scores, dates, correct answer counts, pass/fail status, and average percentage.
+
+### 9. 🗺️ Career Roadmap & Certification Path
 - Visual step-by-step career path from **Linux Essentials** $\rightarrow$ **LPIC-1** $\rightarrow$ **LPIC-2** $\rightarrow$ **LPIC-3 Specialties**.
 - Prerequisites, exam codes, question counts, passing scores, and recommended hands-on experience requirements.
 
-### 8. 📈 Progress Tracker & Analytics
+### 10. 📈 Progress Tracker & Analytics
 - Track study streaks, completed questions, practice exam attempts, and category proficiencies.
 - Persistent local storage: no account or sign-up needed, your study progress stays securely in your browser.
+
+### 11. 🌐 Full Bilingual Experience (Français / English)
+- Instant language toggle (`FR` / `EN`) in the top navigation bar.
+- Fully localized interface labels, curriculum objectives, practice questions, technical explanations, exam rules, and methodologies.
 
 ---
 
@@ -216,25 +257,48 @@ The optimized static files will be generated in the `dist/` directory ready for 
 lpi-certification-prep/
 ├── public/
 │   ├── app-logo.jpg           # Application vector icon & PWA icon
+│   ├── dashboard-screenshot.jpg # Application interface preview screenshot
 │   ├── icon.jpg               # Favicon asset
 │   ├── apple-touch-icon.jpg   # iOS Home screen touch icon
 │   └── manifest.json          # Web App Manifest for Desktop/Mobile install
 ├── src/
 │   ├── assets/                # App artwork and generated icons
 │   ├── components/
-│   │   ├── CertificationPathView.tsx   # Visual LPI career roadmap
-│   │   ├── DashboardView.tsx           # Main hub with study metrics & jump links
+│   │   ├── training/                   # Interactive hands-on training hub
+│   │   │   ├── TrainingHubView.tsx     # Training dashboard & module switcher
+│   │   │   ├── GuidedMiniLabsModule.tsx # Step-by-step CLI missions with syntax check
+│   │   │   ├── TroubleshootingModule.tsx # Break-fix diagnosis & root-cause challenges
+│   │   │   ├── SequencingModule.tsx    # Chronological command order drills
+│   │   │   ├── MatchingModule.tsx      # Command, file & port matching game
+│   │   │   └── FillInTheBlankModule.tsx # Exact command flag & directive syntax drills
+│   │   ├── CertificationPathView.tsx   # Visual LPI career roadmap (Essentials to LPIC-3)
+│   │   ├── DashboardView.tsx           # Main hub with dynamic next steps & performance
 │   │   ├── ExplanationModal.tsx        # In-depth technical question review modal
-│   │   ├── FlashcardsView.tsx          # Spaced-repetition flashcard deck
+│   │   ├── FlashcardsView.tsx          # 2,000+ cards spaced-repetition deck with audio TTS
 │   │   ├── GlossaryView.tsx            # Searchable Linux Glossary & Command Index
-│   │   ├── Header.tsx                  # Global header with stats & quick actions
-│   │   ├── LearningObjectivesView.tsx  # Detailed curriculum & topic modules
+│   │   ├── HamburgerMenu.tsx           # Categorized drawer menu with real-time search
+│   │   ├── Header.tsx                  # Global header with stats, streak & lang switcher
+│   │   ├── InfoTooltip.tsx             # Context-sensitive tooltips for LPI exam standards
+│   │   ├── LanguageSelector.tsx        # Bilingual language toggle (FR / EN)
+│   │   ├── LearningObjectivesView.tsx  # Detailed curriculum & topic modules (101 to 306)
+│   │   ├── LpiCertificationGuideModal.tsx # Official LPI methodology & preparation guide
 │   │   ├── Navigation.tsx              # Responsive sidebar & mobile bottom navigation
-│   │   ├── PracticeExamView.tsx        # Timed test engine with question scoring
-│   │   └── ProfileModal.tsx            # User study stats, streaks & reset controls
+│   │   ├── PracticeExamView.tsx        # Timed test engine with intro screen & questions grid
+│   │   ├── ProfileModal.tsx            # User study stats, streaks & reset controls
+│   │   ├── SettingsModal.tsx           # Service worker updates, cache purge & preferences
+│   │   └── UpdateNotificationBanner.tsx # Live banner notifying of newly deployed versions
 │   ├── data/
 │   │   ├── glossaryData.ts             # 1000+ commands, config files & gotchas
-│   │   └── lpiData.ts                  # Exam questions, flashcards, and objectives
+│   │   ├── lpiData.ts                  # Exam questions, flashcards, and objectives
+│   │   ├── practiceExamsData.ts        # Comprehensive question banks (LPIC-1, 2, 3)
+│   │   ├── trainingData.ts             # Labs, troubleshooting & sequencing challenges
+│   │   └── topic*Flashcards.ts         # Exhaustive topic-by-topic flashcard decks
+│   ├── i18n/
+│   │   ├── LanguageContext.tsx         # Global language state and provider
+│   │   ├── translations.ts             # UI strings in French and English
+│   │   └── frenchData.ts               # Localized curriculum & exam questions
+│   ├── utils/
+│   │   └── updateService.ts            # PWA service worker lifecycle & version checks
 │   ├── App.tsx                         # Root router and state management
 │   ├── main.tsx                        # React application DOM root
 │   ├── index.css                       # Tailwind design token definitions
