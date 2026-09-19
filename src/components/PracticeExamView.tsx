@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Lightbulb,
   ArrowRight,
@@ -15,6 +15,10 @@ import {
   AlertTriangle,
   FileText,
   Compass,
+  ShieldAlert,
+  Zap,
+  Check,
+  Send,
 } from 'lucide-react';
 import { PracticeQuestion } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -24,6 +28,12 @@ import {
   PracticeExamInfo,
 } from '../data/practiceExamsData';
 import { recordQuestionInteraction } from '../utils/weaknessEngine';
+import {
+  shuffleExamQuestions,
+  computeExamSessionAnalytics,
+  ExamSessionAnalytics,
+} from '../utils/examAnalytics';
+import { ExamPostAnalysis } from './practice/ExamPostAnalysis';
 
 interface PracticeExamViewProps {
   initialExamId?: string;
@@ -49,12 +59,35 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
   const [activeExamId, setActiveExamId] = useState<string>(initialExamId);
   const [selectedTierFilter, setSelectedTierFilter] = useState<'all' | 'essentials' | 'lpic-1' | 'lpic-2' | 'lpic-3'>('all');
 
-  // Exam state
+  // Exam mode: 'realistic' (official simulator - default) vs 'practice' (learning mode with explanations)
+  const [examMode, setExamMode] = useState<'realistic' | 'practice'>('realistic');
+
+  // Active questions in session (shuffled if realistic)
+  const [activeQuestions, setActiveQuestions] = useState<PracticeQuestion[]>([]);
+
+  // Exam runtime state
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
+
+  // Strict countdown timer state
+  const [timeLeftSeconds, setTimeLeftSeconds] = useState<number>(45 * 60);
+  const [isExamActive, setIsExamActive] = useState(false);
+  const [examStartTime, setExamStartTime] = useState<number>(0);
+  const [totalTimeElapsedSeconds, setTotalTimeElapsedSeconds] = useState<number>(0);
+
+  // Time tracking per individual question
+  const [questionTimes, setQuestionTimes] = useState<Record<number, number>>({});
+  const questionEnterTimeRef = useRef<number>(Date.now());
+
+  // Modals
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [showTimeExpiredModal, setShowTimeExpiredModal] = useState(false);
+
+  // Computed analytics when session is finished
+  const [sessionAnalytics, setSessionAnalytics] = useState<ExamSessionAnalytics | null>(null);
 
   // Sync initialExamId if parent updates it
   useEffect(() => {
@@ -71,36 +104,98 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
     );
   }, [activeExamId]);
 
-  // Fetch questions for active exam & language
-  const questions = useMemo<PracticeQuestion[]>(() => {
-    return getExamQuestions(activeExamId, isFrench);
-  }, [activeExamId, isFrench]);
-
-  const currentQuestion = questions[currentIndex] || questions[0];
-  const progressPercent = questions.length > 0 ? Math.round(((currentIndex + 1) / questions.length) * 100) : 0;
-  const answeredCount = Object.keys(userAnswers).length;
-
   // Filtered exams list for lobby selector
   const filteredExams = useMemo(() => {
     if (selectedTierFilter === 'all') return practiceExamsRegistry;
     return practiceExamsRegistry.filter((e) => e.tier === selectedTierFilter);
   }, [selectedTierFilter]);
 
+  const currentQuestion = activeQuestions[currentIndex] || activeQuestions[0] || null;
+  const progressPercent =
+    activeQuestions.length > 0 ? Math.round(((currentIndex + 1) / activeQuestions.length) * 100) : 0;
+  const answeredCount = Object.keys(userAnswers).length;
+  const unansweredCount = Math.max(0, activeQuestions.length - answeredCount);
+  const flaggedCount = Object.values(flaggedQuestions).filter(Boolean).length;
+
+  // Helper: Commit elapsed time for current question
+  const commitCurrentQuestionTime = () => {
+    if (!currentQuestion) return;
+    const now = Date.now();
+    const elapsed = Math.max(1, Math.round((now - questionEnterTimeRef.current) / 1000));
+    setQuestionTimes((prev) => ({
+      ...prev,
+      [currentQuestion.id]: (prev[currentQuestion.id] || 0) + elapsed,
+    }));
+    questionEnterTimeRef.current = now;
+  };
+
+  // Strict Countdown Timer Effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (screenMode === 'exam' && isExamActive && timeLeftSeconds > 0) {
+      interval = setInterval(() => {
+        setTimeLeftSeconds((prev) => {
+          if (prev <= 1) {
+            // Time expired! Auto submit
+            clearInterval(interval!);
+            handleTimeExpired();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [screenMode, isExamActive, timeLeftSeconds]);
+
+  // Handle time expiration
+  const handleTimeExpired = () => {
+    commitCurrentQuestionTime();
+    setIsExamActive(false);
+    setShowTimeExpiredModal(true);
+  };
+
   // Start exam from lobby
   const handleStartExam = (examId?: string) => {
+    const targetExamId = examId || activeExamId;
     if (examId) {
       setActiveExamId(examId);
     }
+
+    const rawQuestions = getExamQuestions(targetExamId, isFrench);
+    // In realistic mode, questions are shuffled
+    const questionsToUse =
+      examMode === 'realistic' ? shuffleExamQuestions(rawQuestions, false) : rawQuestions;
+
+    const examInfo =
+      practiceExamsRegistry.find((e) => e.id === targetExamId) || currentExamInfo;
+    const durationSeconds = examInfo.durationMinutes * 60;
+
+    setActiveQuestions(questionsToUse);
     setCurrentIndex(0);
     setSelectedOption(null);
     setUserAnswers({});
     setFlaggedQuestions({});
+    setQuestionTimes({});
+    setTimeLeftSeconds(durationSeconds);
+    setExamStartTime(Date.now());
+    setTotalTimeElapsedSeconds(0);
+    setIsExamActive(true);
+    questionEnterTimeRef.current = Date.now();
+    setSessionAnalytics(null);
+    setShowTimeExpiredModal(false);
+    setShowFinishConfirm(false);
+    setShowExitConfirm(false);
+
     setScreenMode('exam');
     if (onStartTimer) onStartTimer();
   };
 
   // Select an answer option
   const handleSelectOption = (idx: number) => {
+    if (!currentQuestion) return;
     setSelectedOption(idx);
     setUserAnswers((prev) => ({
       ...prev,
@@ -110,10 +205,12 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
 
   // Navigate to specific question index
   const handleJumpToQuestion = (targetIndex: number) => {
-    if (targetIndex < 0 || targetIndex >= questions.length) return;
+    if (targetIndex < 0 || targetIndex >= activeQuestions.length) return;
+    commitCurrentQuestionTime();
     setCurrentIndex(targetIndex);
-    const targetQId = questions[targetIndex].id;
+    const targetQId = activeQuestions[targetIndex].id;
     setSelectedOption(userAnswers[targetQId] !== undefined ? userAnswers[targetQId] : null);
+    questionEnterTimeRef.current = Date.now();
   };
 
   // Previous question
@@ -123,46 +220,70 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
     }
   };
 
-  // Next question or Finish
+  // Next question or trigger Finish modal
   const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
+    if (currentIndex < activeQuestions.length - 1) {
       handleJumpToQuestion(currentIndex + 1);
     } else {
-      // Complete exam
-      setScreenMode('results');
-      if (onStopTimer) onStopTimer();
-
-      let correct = 0;
-      questions.forEach((q) => {
-        const isAnswered = userAnswers[q.id] !== undefined;
-        const isCorrect = userAnswers[q.id] === q.correctIndex;
-        if (isCorrect) {
-          correct++;
-        }
-        try {
-          recordQuestionInteraction({
-            questionId: q.id,
-            questionText: q.question,
-            category: q.category,
-            isCorrect,
-            timeSpentSeconds: 45,
-            wasFlagged: !!flaggedQuestions[q.id],
-            wasSkipped: !isAnswered,
-            correctAnswer: q.options[q.correctIndex],
-            explanation: q.explanation
-          });
-        } catch {}
-      });
-      onCompleteSession(correct, questions.length, activeExamId);
+      // At last question, ask confirmation to submit
+      setShowFinishConfirm(true);
     }
   };
 
   // Toggle flag on current question
   const handleToggleFlag = () => {
+    if (!currentQuestion) return;
     setFlaggedQuestions((prev) => ({
       ...prev,
       [currentQuestion.id]: !prev[currentQuestion.id],
     }));
+  };
+
+  // Finalize and Submit Exam
+  const handleSubmitExam = () => {
+    commitCurrentQuestionTime();
+    setIsExamActive(false);
+    if (onStopTimer) onStopTimer();
+
+    const totalElapsed = Math.round((Date.now() - examStartTime) / 1000);
+    setTotalTimeElapsedSeconds(totalElapsed);
+
+    // Compute complete post-exam analytics
+    const analytics = computeExamSessionAnalytics({
+      examId: activeExamId,
+      questions: activeQuestions,
+      userAnswers,
+      flaggedQuestions,
+      questionTimes,
+      totalTimeElapsedSeconds: totalElapsed,
+      isFrench,
+    });
+
+    setSessionAnalytics(analytics);
+
+    // Record interactions for weakness engine
+    activeQuestions.forEach((q) => {
+      const isAnswered = userAnswers[q.id] !== undefined;
+      const isCorrect = isAnswered && userAnswers[q.id] === q.correctIndex;
+      try {
+        recordQuestionInteraction({
+          questionId: q.id,
+          questionText: q.question,
+          category: q.category,
+          isCorrect,
+          timeSpentSeconds: questionTimes[q.id] || 45,
+          wasFlagged: !!flaggedQuestions[q.id],
+          wasSkipped: !isAnswered,
+          correctAnswer: q.options[q.correctIndex],
+          explanation: q.explanation,
+        });
+      } catch {}
+    });
+
+    onCompleteSession(analytics.correctCount, activeQuestions.length, activeExamId);
+    setShowFinishConfirm(false);
+    setShowTimeExpiredModal(false);
+    setScreenMode('results');
   };
 
   // Retake current exam
@@ -172,15 +293,30 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
 
   // Back to lobby
   const handleReturnToLobby = () => {
+    commitCurrentQuestionTime();
+    setIsExamActive(false);
     setShowExitConfirm(false);
+    setShowFinishConfirm(false);
+    setShowTimeExpiredModal(false);
     setScreenMode('lobby');
     if (onStopTimer) onStopTimer();
   };
+
+  const formatTimerClock = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const isTimerLow = timeLeftSeconds <= 300; // < 5 minutes
+  const isTimerCritical = timeLeftSeconds <= 60; // < 1 minute
 
   // ==========================================
   // RENDER 1: LOBBY / EXAM WELCOME SCREEN
   // ==========================================
   if (screenMode === 'lobby') {
+    const sampleQuestions = getExamQuestions(activeExamId, isFrench);
+
     return (
       <div className="max-w-5xl mx-auto w-full py-2 md:py-6 flex flex-col gap-6 pb-20">
         {/* Header Title */}
@@ -188,10 +324,10 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#ffc20e]/20 text-[#785a00] border border-[#785a00]/30">
-                {isFrench ? 'Simulateur LPI' : 'LPI Simulator'}
+                {isFrench ? 'Simulateur LPI Officiel' : 'Official LPI Simulator'}
               </span>
               <span className="text-xs text-[#817660]">
-                {isFrench ? 'Conditions réelles d\'examen' : 'Official exam conditions'}
+                {isFrench ? 'Conditions réelles d\'examen' : 'Realistic exam conditions'}
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-[#201b11] tracking-tight">
@@ -204,17 +340,135 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
 
           <button
             onClick={onExit}
-            className="px-4 py-2 border border-[#d3c5ab] text-[#4f4632] hover:text-[#201b11] hover:bg-[#f8ecdb] rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+            className="px-4 py-2 border border-[#d3c5ab] text-[#4f4632] hover:text-[#201b11] hover:bg-[#f8ecdb] rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             {isFrench ? 'Tableau de bord' : 'Dashboard'}
           </button>
+        </div>
+
+        {/* Mode Selector Cards: Realistic Mode vs Practice Mode */}
+        <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-5 md:p-6 shadow-xs flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-base text-[#201b11]">
+                {isFrench ? 'Mode de passage de l\'examen blanc' : 'Practice Exam Mode'}
+              </h3>
+              <p className="text-xs text-[#817660]">
+                {isFrench
+                  ? 'Sélectionnez le niveau d\'exigence de votre session'
+                  : 'Choose the strictness level of your exam session'}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 1. Mode Examen Réaliste (Default) */}
+            <div
+              onClick={() => setExamMode('realistic')}
+              className={`p-5 rounded-xl border-2 cursor-pointer transition-all flex flex-col gap-3 relative ${
+                examMode === 'realistic'
+                  ? 'border-[#785a00] bg-[#fff8f2] shadow-sm ring-1 ring-[#785a00]'
+                  : 'border-[#d3c5ab] hover:border-[#817660] bg-[#ffffff]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-lg bg-[#785a00] text-white flex items-center justify-center">
+                    <ShieldAlert className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#201b11]">
+                      {isFrench ? 'Mode Examen Réaliste' : 'Realistic Exam Mode'}
+                    </h4>
+                    <span className="text-[10px] font-bold text-[#785a00] uppercase tracking-wider">
+                      {isFrench ? 'Recommandé · Simulation officielle' : 'Recommended · Official Simulation'}
+                    </span>
+                  </div>
+                </div>
+                {examMode === 'realistic' && (
+                  <span className="w-5 h-5 rounded-full bg-[#785a00] text-white flex items-center justify-center text-xs">
+                    <Check className="w-3 h-3" />
+                  </span>
+                )}
+              </div>
+
+              <ul className="text-xs text-[#4f4632] space-y-1.5 mt-1">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#28A745] shrink-0" />
+                  <span>{isFrench ? 'Chronomètre strict avec soumission automatique à 00:00' : 'Strict countdown timer with auto-submit'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#28A745] shrink-0" />
+                  <span>{isFrench ? 'Questions et énoncés mélangés aléatoirement' : 'Randomly shuffled questions'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#28A745] shrink-0" />
+                  <span>{isFrench ? 'Pondération officielle des domaines LPI' : 'Official LPI domain weighting'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#28A745] shrink-0" />
+                  <span>{isFrench ? 'Aucune explication ni correction pendant l\'épreuve' : 'No explanations during testing'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#28A745] shrink-0" />
+                  <span>{isFrench ? 'Analyse post-examen complète et diagnostic des risques' : 'Detailed post-exam analysis & risk diagnosis'}</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* 2. Mode Entraînement Guidé */}
+            <div
+              onClick={() => setExamMode('practice')}
+              className={`p-5 rounded-xl border-2 cursor-pointer transition-all flex flex-col gap-3 relative ${
+                examMode === 'practice'
+                  ? 'border-[#0061a4] bg-[#f0f7fc] shadow-sm ring-1 ring-[#0061a4]'
+                  : 'border-[#d3c5ab] hover:border-[#817660] bg-[#ffffff]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-lg bg-[#0061a4] text-white flex items-center justify-center">
+                    <Lightbulb className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#201b11]">
+                      {isFrench ? 'Mode Entraînement Guidé' : 'Guided Practice Mode'}
+                    </h4>
+                    <span className="text-[10px] font-bold text-[#0061a4] uppercase tracking-wider">
+                      {isFrench ? 'Apprentissage pas à pas' : 'Step-by-step learning'}
+                    </span>
+                  </div>
+                </div>
+                {examMode === 'practice' && (
+                  <span className="w-5 h-5 rounded-full bg-[#0061a4] text-white flex items-center justify-center text-xs">
+                    <Check className="w-3 h-3" />
+                  </span>
+                )}
+              </div>
+
+              <ul className="text-xs text-[#4f4632] space-y-1.5 mt-1">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#0061a4] shrink-0" />
+                  <span>{isFrench ? 'Accès aux explications et commandes à tout moment' : 'Instant explanations and command hints'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#0061a4] shrink-0" />
+                  <span>{isFrench ? 'Sans pression temporelle stricte' : 'Self-paced exploration without strict cutoff'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#0061a4] shrink-0" />
+                  <span>{isFrench ? 'Idéal pour découvrir les notions avant l\'examen blanc' : 'Ideal for learning before full simulations'}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         {/* Tier Filter Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           <button
             onClick={() => setSelectedTierFilter('all')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedTierFilter === 'all'
                 ? 'bg-[#785a00] text-[#ffffff] shadow-xs'
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
@@ -224,7 +478,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
           </button>
           <button
             onClick={() => setSelectedTierFilter('lpic-1')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedTierFilter === 'lpic-1'
                 ? 'bg-[#785a00] text-[#ffffff] shadow-xs'
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
@@ -234,7 +488,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
           </button>
           <button
             onClick={() => setSelectedTierFilter('lpic-2')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedTierFilter === 'lpic-2'
                 ? 'bg-[#0061a4] text-[#ffffff] shadow-xs'
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
@@ -244,7 +498,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
           </button>
           <button
             onClick={() => setSelectedTierFilter('lpic-3')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedTierFilter === 'lpic-3'
                 ? 'bg-[#0284c7] text-[#ffffff] shadow-xs'
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
@@ -254,7 +508,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
           </button>
           <button
             onClick={() => setSelectedTierFilter('essentials')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedTierFilter === 'essentials'
                 ? 'bg-[#0061a4] text-[#ffffff] shadow-xs'
                 : 'bg-[#ffffff] text-[#4f4632] hover:bg-[#f8ecdb] border border-[#d3c5ab]'
@@ -373,10 +627,10 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
                 <div className="bg-[#fef2e1] border border-[#d3c5ab]/80 rounded-xl p-3 text-center">
                   <FileText className="w-4 h-4 text-[#0061a4] mx-auto mb-1" />
                   <span className="text-[10px] uppercase font-bold text-[#817660] block">
-                    {isFrench ? 'Session test' : 'Test session'}
+                    {isFrench ? 'Questions session' : 'Questions pool'}
                   </span>
                   <span className="font-bold text-sm text-[#201b11]">
-                    {questions.length} {isFrench ? 'questions' : 'questions'}
+                    {sampleQuestions.length} Q
                   </span>
                 </div>
 
@@ -414,15 +668,28 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
               </div>
 
               {/* Exam Instructions & Call to action */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <div className="flex flex-col gap-3 pt-2">
                 <button
                   id="start-exam-button"
                   onClick={() => handleStartExam(activeExamId)}
-                  className="flex-1 py-3.5 px-6 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-sm uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                  className="w-full py-4 px-6 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-sm uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                 >
-                  <span>{t.practice.startExam}</span>
+                  <span>
+                    {examMode === 'realistic'
+                      ? isFrench ? 'Lancer l\'Examen en Conditions Réelles' : 'Start Realistic Practice Exam'
+                      : t.practice.startExam}
+                  </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
+                <p className="text-center text-xs text-[#817660]">
+                  {examMode === 'realistic'
+                    ? isFrench
+                      ? '⏱️ Chronomètre strict · 🔀 Questions mélangées · 🚫 Aucune explication pendant l\'épreuve'
+                      : '⏱️ Strict timer · 🔀 Shuffled questions · 🚫 No explanations during testing'
+                    : isFrench
+                    ? '💡 Mode entraînement avec accès aux explications pas à pas'
+                    : '💡 Guided learning with step-by-step explanations'}
+                </p>
               </div>
             </div>
           </div>
@@ -432,211 +699,78 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
   }
 
   // ==========================================
-  // RENDER 2: RESULTS SCREEN
+  // RENDER 2: RESULTS SCREEN (POST-EXAM ANALYSIS)
   // ==========================================
-  if (screenMode === 'results') {
-    let correctCount = 0;
-    questions.forEach((q) => {
-      if (userAnswers[q.id] === q.correctIndex) {
-        correctCount++;
-      }
-    });
-    const scorePct = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
-    const passed = scorePct >= currentExamInfo.passScorePct;
-
+  if (screenMode === 'results' && sessionAnalytics) {
     return (
-      <div className="max-w-3xl mx-auto w-full py-4 md:py-6 flex flex-col gap-6 pb-20">
-        <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-6 md:p-8 text-center shadow-xs flex flex-col items-center">
-          <div
-            className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
-              passed ? 'bg-[#28A745]/15 text-[#28A745]' : 'bg-[#ffc20e]/20 text-[#785a00]'
-            }`}
-          >
-            <Award className="w-8 h-8" />
-          </div>
-
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#817660]">
-              {isFrench ? currentExamInfo.titleFr : currentExamInfo.title}
-            </span>
-            <span className="text-xs font-mono text-[#785a00] font-semibold">
-              ({currentExamInfo.code})
-            </span>
-          </div>
-
-          <h2 className="text-2xl md:text-3xl font-bold text-[#201b11] mt-1 mb-2">
-            {passed ? t.practice.passedTitle : t.practice.failedTitle}
-          </h2>
-          <p className="text-sm text-[#4f4632] max-w-md mb-6">
-            {passed ? t.practice.passedDesc : t.practice.failedDesc}
-          </p>
-
-          {/* Score Badge */}
-          <div className="flex gap-4 md:gap-6 justify-center mb-6">
-            <div className="bg-[#fef2e1] border border-[#d3c5ab] rounded-xl px-6 py-3">
-              <span className="text-xs text-[#817660] font-bold block">{t.practice.score}</span>
-              <span className="text-3xl font-bold text-[#201b11]">{scorePct}%</span>
-            </div>
-            <div className="bg-[#fef2e1] border border-[#d3c5ab] rounded-xl px-6 py-3">
-              <span className="text-xs text-[#817660] font-bold block">{t.practice.correct}</span>
-              <span className="text-3xl font-bold text-[#28A745]">
-                {correctCount} / {questions.length}
-              </span>
-            </div>
-            <div className="bg-[#fef2e1] border border-[#d3c5ab] rounded-xl px-6 py-3">
-              <span className="text-xs text-[#817660] font-bold block">{t.practice.passingScore}</span>
-              <span className="text-3xl font-bold text-[#785a00]">{currentExamInfo.passScorePct}%</span>
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-            <button
-              onClick={handleRetake}
-              className="flex-1 py-3 px-4 rounded-lg bg-[#f8ecdb] hover:bg-[#f2e7d6] text-[#201b11] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-[#d3c5ab]"
-            >
-              <RotateCcw className="w-4 h-4" />
-              {t.practice.retake}
-            </button>
-            <button
-              onClick={handleReturnToLobby}
-              className="flex-1 py-3 px-4 rounded-lg bg-[#ffffff] hover:bg-[#f8ecdb] text-[#785a00] font-bold text-xs uppercase tracking-wider transition-colors border border-[#785a00]"
-            >
-              {t.practice.changeExam}
-            </button>
-            <button
-              onClick={onExit}
-              className="flex-1 py-3 px-4 rounded-lg bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider transition-colors shadow-xs"
-            >
-              {t.practice.backToDashboard}
-            </button>
-          </div>
-        </div>
-
-        {/* Review Question Breakdown */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-lg text-[#201b11]">{t.practice.review}</h3>
-            <span className="text-xs text-[#817660]">
-              {questions.length} {isFrench ? 'questions évaluées' : 'questions evaluated'}
-            </span>
-          </div>
-
-          {questions.map((q, i) => {
-            const isCorrect = userAnswers[q.id] === q.correctIndex;
-            const userChoice = userAnswers[q.id] !== undefined ? q.options[userAnswers[q.id]] : null;
-            const wasFlagged = flaggedQuestions[q.id];
-
-            return (
-              <div
-                key={q.id}
-                className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-4 md:p-5 flex flex-col gap-3 shadow-xs"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-start gap-2.5">
-                    {isCorrect ? (
-                      <CheckCircle2 className="w-5 h-5 text-[#28A745] shrink-0 mt-0.5" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-[#ba1a1a] shrink-0 mt-0.5" />
-                    )}
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[11px] font-bold text-[#817660] uppercase tracking-wider">
-                        {q.category} {wasFlagged && '· 🚩'}
-                      </span>
-                      <span className="font-bold text-sm md:text-base text-[#201b11]">
-                        Q{i + 1}. {q.question}
-                      </span>
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[10px] font-bold uppercase px-2.5 py-0.5 rounded shrink-0 ${
-                      isCorrect
-                        ? 'bg-[#28A745]/15 text-[#28A745]'
-                        : 'bg-[#ffdad6] text-[#ba1a1a]'
-                    }`}
-                  >
-                    {isCorrect ? t.practice.correctBadge : t.practice.incorrectBadge}
-                  </span>
-                </div>
-
-                {/* User answer vs correct answer */}
-                <div className="text-xs text-[#4f4632] bg-[#fff8f2] p-3.5 rounded-lg border border-[#d3c5ab]/60 flex flex-col gap-2">
-                  {!isCorrect && userChoice && (
-                    <div>
-                      <span className="font-bold text-[#ba1a1a] block mb-0.5">
-                        {isFrench ? 'Votre réponse :' : 'Your answer:'}
-                      </span>
-                      <code className="font-mono text-xs text-[#ba1a1a] bg-[#ffdad6]/60 px-2 py-0.5 rounded inline-block">
-                        {userChoice}
-                      </code>
-                    </div>
-                  )}
-
-                  <div>
-                    <span className="font-bold text-[#28A745] block mb-0.5">
-                      {t.practice.correctAnswer} :
-                    </span>
-                    <code className="font-mono text-xs text-[#201b11] font-bold bg-[#f8ecdb] px-2 py-0.5 rounded inline-block border border-[#d3c5ab]/60">
-                      {q.options[q.correctIndex]}
-                    </code>
-                  </div>
-
-                  <p className="mt-1 text-[#4f4632] leading-relaxed">{q.explanation}</p>
-
-                  {q.commandSnippet && (
-                    <div className="mt-1 bg-[#201b11] text-[#f8ecdb] font-mono text-[11px] p-2 rounded overflow-x-auto">
-                      {q.commandSnippet}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <ExamPostAnalysis
+        analytics={sessionAnalytics}
+        questions={activeQuestions}
+        userAnswers={userAnswers}
+        flaggedQuestions={flaggedQuestions}
+        questionTimes={questionTimes}
+        onRetakeExam={handleRetake}
+        onChangeExam={handleReturnToLobby}
+        onExitToDashboard={onExit}
+        onOpenExplanationModal={onOpenExplanation}
+      />
     );
   }
 
   // ==========================================
   // RENDER 3: ACTIVE EXAM IN PROGRESS
   // ==========================================
+  if (!currentQuestion) return null;
   const isFlagged = flaggedQuestions[currentQuestion.id] || false;
 
   return (
-    <div className="max-w-3xl mx-auto w-full flex flex-col gap-5 pb-20">
-      {/* Top Controls: Switch Exam & Flag for review */}
-      <div className="flex items-center justify-between gap-2">
+    <div className="max-w-3xl mx-auto w-full flex flex-col gap-5 pb-24 text-[#201b11]">
+      {/* Top Controls: Leave Exam, Timer Badge & Flag for review */}
+      <div className="flex items-center justify-between gap-2 bg-[#ffffff] border border-[#d3c5ab] rounded-xl px-4 py-2.5 shadow-xs">
         <button
-          onClick={() => {
-            if (answeredCount > 0) {
-              setShowExitConfirm(true);
-            } else {
-              handleReturnToLobby();
-            }
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#817660] hover:text-[#201b11] hover:bg-[#f8ecdb] rounded-lg border border-[#d3c5ab] transition-colors"
+          onClick={() => setShowExitConfirm(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#817660] hover:text-[#ba1a1a] hover:bg-[#ffdad6]/40 rounded-lg border border-[#d3c5ab] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>{t.practice.changeExamBtn}</span>
+          <span>{isFrench ? 'Abandonner' : 'Exit Exam'}</span>
         </button>
 
+        {/* Strict Countdown Timer Badge */}
+        <div
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-mono text-xs md:text-sm font-bold border transition-all ${
+            isTimerCritical
+              ? 'bg-[#ba1a1a] text-white border-[#ba1a1a] animate-pulse'
+              : isTimerLow
+              ? 'bg-[#ffdad6] text-[#ba1a1a] border-[#ba1a1a]/40'
+              : 'bg-[#f8ecdb] text-[#785a00] border-[#d3c5ab]'
+          }`}
+          title={isFrench ? 'Temps restant avant soumission automatique' : 'Time remaining before auto-submit'}
+        >
+          <Clock className={`w-4 h-4 ${isTimerCritical ? 'text-white' : isTimerLow ? 'text-[#ba1a1a]' : 'text-[#785a00]'}`} />
+          <span>{formatTimerClock(timeLeftSeconds)}</span>
+        </div>
+
         <div className="flex items-center gap-2">
-          <span
-            className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider text-white"
-            style={{ backgroundColor: currentExamInfo.accentColor }}
-          >
-            {currentExamInfo.code}
-          </span>
+          {/* Flag button */}
           <button
             onClick={handleToggleFlag}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
               isFlagged
                 ? 'bg-[#ffc20e] text-[#6d5100] border-[#785a00]'
                 : 'bg-[#ffffff] text-[#817660] border-[#d3c5ab] hover:bg-[#f8ecdb]'
             }`}
           >
             <Flag className={`w-3.5 h-3.5 ${isFlagged ? 'fill-[#6d5100]' : ''}`} />
-            <span>{isFlagged ? t.practice.flagged : t.practice.flagForReview}</span>
+            <span className="hidden sm:inline">{isFlagged ? t.practice.flagged : t.practice.flagForReview}</span>
+          </button>
+
+          {/* Quick Submit Button */}
+          <button
+            onClick={() => setShowFinishConfirm(true)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#785a00] text-white hover:bg-[#634a00] transition-colors cursor-pointer shadow-xs"
+          >
+            <Send className="w-3 h-3" />
+            <span className="hidden sm:inline">{isFrench ? 'Terminer' : 'Finish'}</span>
           </button>
         </div>
       </div>
@@ -648,7 +782,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
             {currentQuestion.category}
           </span>
           <span className="text-xs md:text-sm font-bold text-[#785a00] shrink-0">
-            {t.practice.question} {currentIndex + 1} {t.practice.of} {questions.length}
+            {t.practice.question} {currentIndex + 1} {t.practice.of} {activeQuestions.length}
           </span>
         </div>
         <div className="w-full h-2 bg-[#ece1d0] rounded-full overflow-hidden">
@@ -660,15 +794,23 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
       </div>
 
       {/* Direct Question Navigation Grid (1 to N) */}
-      <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-3 shadow-xs flex flex-col gap-2">
+      <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-3.5 shadow-xs flex flex-col gap-2.5">
         <div className="flex items-center justify-between text-[11px] font-semibold text-[#817660]">
-          <span>{t.practice.questionNavigator}</span>
-          <span>
-            {answeredCount}/{questions.length} {isFrench ? 'répondues' : 'answered'}
-          </span>
+          <span className="font-bold uppercase tracking-wider">{t.practice.questionNavigator}</span>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#28A745]" />
+              {answeredCount}/{activeQuestions.length} {isFrench ? 'répondues' : 'answered'}
+            </span>
+            {flaggedCount > 0 && (
+              <span className="flex items-center gap-1 text-[#785a00]">
+                <span>🚩</span> {flaggedCount}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {questions.map((q, idx) => {
+        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+          {activeQuestions.map((q, idx) => {
             const isCurrent = idx === currentIndex;
             const isAnswered = userAnswers[q.id] !== undefined;
             const hasFlag = flaggedQuestions[q.id];
@@ -697,13 +839,25 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
       </div>
 
       {/* Main Question Card */}
-      <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-5 md:p-6 shadow-xs flex flex-col gap-5">
+      <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-5 md:p-7 shadow-xs flex flex-col gap-5">
         <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono font-bold text-[#817660]">
+              Q{currentIndex + 1} / {activeQuestions.length}
+            </span>
+            {examMode === 'realistic' && (
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#f8ecdb] text-[#785a00]">
+                {isFrench ? 'Mode Réaliste' : 'Realistic Mode'}
+              </span>
+            )}
+          </div>
+
           <h2 className="font-sans text-xl md:text-2xl font-bold text-[#201b11] leading-snug">
             {currentQuestion.question}
           </h2>
+
           {currentQuestion.scenario && (
-            <div className="p-3 bg-[#fef2e1] border border-[#d3c5ab]/70 rounded-lg">
+            <div className="p-3.5 bg-[#fef2e1] border border-[#d3c5ab]/70 rounded-lg">
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#817660] block mb-0.5">
                 {isFrench ? 'Scénario pratique' : 'Practical Scenario'}
               </span>
@@ -723,7 +877,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
               <label
                 key={idx}
                 onClick={() => handleSelectOption(idx)}
-                className={`relative flex items-center p-3.5 md:p-4 cursor-pointer border rounded-lg transition-all duration-150 group ${
+                className={`relative flex items-center p-3.5 md:p-4 cursor-pointer border rounded-xl transition-all duration-150 group ${
                   isSelected
                     ? 'border-[#785a00] bg-[#f8ecdb]/60 shadow-xs ring-1 ring-[#785a00]'
                     : 'border-[#d3c5ab] hover:bg-[#fef2e1] bg-[#ffffff]'
@@ -752,8 +906,8 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
                   />
                 </div>
 
-                {/* Monospace option pill */}
-                <span className="font-mono text-xs md:text-sm text-[#201b11] bg-[#f8ecdb] px-2.5 py-1 rounded border border-[#d3c5ab]/60">
+                {/* Option text */}
+                <span className="font-mono text-xs md:text-sm text-[#201b11] bg-[#f8ecdb] px-2.5 py-1 rounded border border-[#d3c5ab]/60 leading-relaxed">
                   {option}
                 </span>
               </label>
@@ -763,7 +917,7 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
       </div>
 
       {/* Action Navigation Buttons */}
-      <div className="flex justify-between items-center mt-2 gap-3">
+      <div className="flex justify-between items-center mt-1 gap-3">
         <div className="flex items-center gap-2">
           {/* Previous Question Button */}
           <button
@@ -779,32 +933,33 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
             <span>{t.practice.previous}</span>
           </button>
 
-          {/* Explanation Button */}
-          <button
-            onClick={() => onOpenExplanation(currentQuestion)}
-            className="flex items-center gap-2 px-3.5 py-2.5 border border-[#495e8a] text-[#495e8a] rounded-lg font-bold text-xs md:text-sm hover:bg-[#495e8a] hover:text-[#ffffff] transition-colors cursor-pointer"
-          >
-            <Lightbulb className="w-4 h-4" />
-            <span>{t.practice.explain}</span>
-          </button>
+          {/* Explanation Button (ONLY available in practice mode, STRICTLY hidden in realistic exam) */}
+          {examMode === 'practice' && (
+            <button
+              onClick={() => onOpenExplanation(currentQuestion)}
+              className="flex items-center gap-2 px-3.5 py-2.5 border border-[#495e8a] text-[#495e8a] rounded-lg font-bold text-xs md:text-sm hover:bg-[#495e8a] hover:text-[#ffffff] transition-colors cursor-pointer"
+            >
+              <Lightbulb className="w-4 h-4" />
+              <span>{t.practice.explain}</span>
+            </button>
+          )}
         </div>
 
         {/* Next Question / Finish Exam Button */}
         <button
           onClick={handleNext}
-          disabled={selectedOption === null}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider transition-all shadow-xs ${
-            selectedOption !== null
-              ? 'bg-[#ffc20e] text-[#6d5100] hover:bg-[#f9bd00] cursor-pointer active:scale-95'
-              : 'bg-[#d3c5ab]/50 text-[#817660] cursor-not-allowed'
-          }`}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-xs md:text-sm uppercase tracking-wider bg-[#ffc20e] text-[#6d5100] hover:bg-[#f9bd00] transition-all shadow-xs cursor-pointer active:scale-95"
         >
-          <span>{currentIndex === questions.length - 1 ? t.practice.finish : t.practice.next}</span>
+          <span>
+            {currentIndex === activeQuestions.length - 1
+              ? isFrench ? 'Terminer l\'examen' : 'Finish Exam'
+              : t.practice.next}
+          </span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Exit Confirmation Modal */}
+      {/* MODAL 1: Exit Confirmation Modal */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl max-w-md w-full p-6 shadow-xl flex flex-col gap-4">
@@ -813,28 +968,134 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
                 <AlertTriangle className="w-5 h-5 text-[#ba1a1a]" />
               </div>
               <h3 className="font-bold text-lg text-[#201b11]">
-                {t.practice.confirmExit}
+                {isFrench ? 'Abandonner l\'examen blanc ?' : 'Abandon ongoing exam?'}
               </h3>
             </div>
 
-            <p className="text-sm text-[#4f4632]">
-              {t.practice.confirmExitDesc}
+            <p className="text-sm text-[#4f4632] leading-relaxed">
+              {isFrench
+                ? 'Votre progression sur cette session sera interrompue. Souhaitez-vous vraiment retourner à l\'accueil des examens ?'
+                : 'Your ongoing answers will not be recorded in full. Are you sure you want to exit to the exam lobby?'}
             </p>
 
             <div className="flex justify-end gap-3 mt-2">
               <button
                 onClick={() => setShowExitConfirm(false)}
-                className="px-4 py-2 border border-[#d3c5ab] rounded-lg text-xs font-bold uppercase tracking-wider text-[#4f4632] hover:bg-[#f8ecdb]"
+                className="px-4 py-2 border border-[#d3c5ab] rounded-lg text-xs font-bold uppercase tracking-wider text-[#4f4632] hover:bg-[#f8ecdb] cursor-pointer"
               >
-                {t.practice.cancel}
+                {isFrench ? 'Continuer l\'examen' : 'Keep Taking Exam'}
               </button>
               <button
                 onClick={handleReturnToLobby}
-                className="px-4 py-2 bg-[#ba1a1a] text-[#ffffff] rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#93000a]"
+                className="px-4 py-2 bg-[#ba1a1a] text-[#ffffff] rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#93000a] cursor-pointer"
               >
-                {t.practice.confirm}
+                {isFrench ? 'Confirmer l\'abandon' : 'Confirm Exit'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Finish Exam Confirmation Modal (with summary) */}
+      {showFinishConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-2xl max-w-md w-full p-6 shadow-xl flex flex-col gap-5">
+            <div className="flex items-center gap-3 text-[#785a00]">
+              <div className="w-10 h-10 rounded-xl bg-[#ffc20e]/25 flex items-center justify-center shrink-0">
+                <Target className="w-5 h-5 text-[#785a00]" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-[#201b11]">
+                  {isFrench ? 'Valider et soumettre l\'examen ?' : 'Submit and Grade Exam?'}
+                </h3>
+                <span className="text-xs text-[#817660]">
+                  {isFrench ? 'Récapitulatif de votre session' : 'Session summary before final submission'}
+                </span>
+              </div>
+            </div>
+
+            {/* Summary statistics */}
+            <div className="grid grid-cols-3 gap-2 bg-[#fef2e1] p-3 rounded-xl border border-[#d3c5ab]">
+              <div className="text-center">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">
+                  {isFrench ? 'Répondues' : 'Answered'}
+                </span>
+                <span className="font-mono font-bold text-base text-[#28A745]">
+                  {answeredCount} / {activeQuestions.length}
+                </span>
+              </div>
+              <div className="text-center">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">
+                  {isFrench ? 'Sans réponse' : 'Blank'}
+                </span>
+                <span className={`font-mono font-bold text-base ${unansweredCount > 0 ? 'text-[#ba1a1a]' : 'text-[#817660]'}`}>
+                  {unansweredCount}
+                </span>
+              </div>
+              <div className="text-center">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">
+                  {isFrench ? 'Marquées 🚩' : 'Flagged 🚩'}
+                </span>
+                <span className="font-mono font-bold text-base text-[#785a00]">
+                  {flaggedCount}
+                </span>
+              </div>
+            </div>
+
+            {unansweredCount > 0 && (
+              <div className="p-3 bg-[#fff5f5] border border-[#ba1a1a]/30 rounded-lg text-xs text-[#ba1a1a] flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>
+                  {isFrench
+                    ? 'Rappel LPI : Il n\'y a pas de point négatif ! Répondez par élimination même en cas d\'incertitude.'
+                    : 'LPI Tip: There are no negative marks! Pick your best guess instead of leaving blanks.'}
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-1">
+              <button
+                onClick={() => setShowFinishConfirm(false)}
+                className="px-4 py-2.5 border border-[#d3c5ab] rounded-xl text-xs font-bold uppercase tracking-wider text-[#4f4632] hover:bg-[#f8ecdb] cursor-pointer"
+              >
+                {isFrench ? 'Reprendre l\'épreuve' : 'Review More'}
+              </button>
+              <button
+                onClick={handleSubmitExam}
+                className="px-5 py-2.5 bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer active:scale-95"
+              >
+                {isFrench ? 'Confirmer la soumission' : 'Grade My Exam'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: Time Expired Auto-Submit Modal */}
+      {showTimeExpiredModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-[#ffffff] border-2 border-[#ba1a1a] rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4 text-center items-center">
+            <div className="w-14 h-14 rounded-full bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center">
+              <Clock className="w-7 h-7" />
+            </div>
+
+            <div>
+              <h3 className="font-bold text-xl text-[#201b11]">
+                {isFrench ? 'Temps écoulé !' : 'Time is Up!'}
+              </h3>
+              <p className="text-xs text-[#817660] mt-1">
+                {isFrench
+                  ? 'Le chronomètre officiel a atteint 00:00. Vos réponses sont enregistrées et l\'analyse post-examen va être générée.'
+                  : 'The official timer reached 00:00. Your answers are submitted and your analysis report is ready.'}
+              </p>
+            </div>
+
+            <button
+              onClick={handleSubmitExam}
+              className="w-full py-3.5 px-6 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer"
+            >
+              {isFrench ? 'Découvrir mon Analyse Post-Examen' : 'View Post-Exam Analysis'}
+            </button>
           </div>
         </div>
       )}

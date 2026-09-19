@@ -26,6 +26,10 @@ import {
 import { getAllGlossaryEntries } from '../data/glossaryData';
 import { GlossaryEntry, GlossaryItemType, TabType } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
+import { KnowledgeGraphModal } from './knowledgeGraph/KnowledgeGraphModal';
+import { KnowledgeGraphExplorer } from './knowledgeGraph/KnowledgeGraphExplorer';
+import { CommandPedagogySection } from './CommandPedagogySection';
+import { getCommandPedagogy } from '../data/commandPedagogyData';
 
 interface GlossaryViewProps {
   onNavigate: (tab: TabType) => void;
@@ -53,6 +57,12 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
   const [showBookmarksOnly, setShowBookmarksOnly] = useState<boolean>(false);
   const [studyQuizMode, setStudyQuizMode] = useState<boolean>(false);
   const [revealedCards, setRevealedCards] = useState<Record<string, boolean>>({});
+
+  // View Mode: 'cards' (Standard glossary cards grid) | 'graph' (Interactive Linux Knowledge Graph)
+  const [viewMode, setViewMode] = useState<'cards' | 'graph'>('cards');
+
+  // Active Knowledge Graph Term for modal inspection
+  const [graphTerm, setGraphTerm] = useState<string | null>(null);
 
   // Active Inspect Modal
   const [inspectEntry, setInspectEntry] = useState<GlossaryEntry | null>(null);
@@ -110,6 +120,18 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
   const handleTierChange = (tier: TierFilter) => {
     setSelectedTier(tier);
     setSelectedExam('all');
+  };
+
+  const handleNavigateToTerm = (targetTerm: string) => {
+    const found = allEntries.find(
+      (e) => e.term.toLowerCase() === targetTerm.toLowerCase() || e.id.toLowerCase() === targetTerm.toLowerCase()
+    );
+    if (found) {
+      setInspectEntry(found);
+    } else {
+      setSearchQuery(targetTerm);
+      setInspectEntry(null);
+    }
   };
 
   // Extract unique categories
@@ -261,34 +283,65 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              onClick={() => setStudyQuizMode(!studyQuizMode)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 border transition-all cursor-pointer shadow-xs ${
-                studyQuizMode
-                  ? 'bg-[#785a00] text-[#ffffff] border-[#785a00]'
-                  : 'bg-[#f8ecdb] text-[#785a00] border-[#d3c5ab] hover:bg-[#ebdcc8]'
-              }`}
-            >
-              <Lightbulb className="w-4 h-4" />
-              <span>
-                {studyQuizMode
-                  ? (isFrench ? 'Quitter le mode mémorisation' : 'Exit Recall Mode')
-                  : (isFrench ? 'Mode Cartes Mémoire' : 'Recall Flashcard Mode')}
-              </span>
-            </button>
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {/* View Switcher: Glossary Cards vs Interactive Knowledge Graph */}
+            <div className="flex items-center gap-1 p-1 bg-[#ffffff] border border-[#d3c5ab] rounded-xl shadow-xs">
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  viewMode === 'cards'
+                    ? 'bg-[#785a00] text-white shadow-xs'
+                    : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>{isFrench ? 'Fiches du Glossaire' : 'Glossary Cards'}</span>
+              </button>
 
-            <button
-              onClick={() => setShowBookmarksOnly(!showBookmarksOnly)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 border transition-all cursor-pointer shadow-xs ${
-                showBookmarksOnly
-                  ? 'bg-[#ffc20e] text-[#6d5100] border-[#ffc20e]'
-                  : 'bg-[#f8ecdb] text-[#4f4632] border-[#d3c5ab] hover:bg-[#ebdcc8]'
-              }`}
-            >
-              <Bookmark className={`w-4 h-4 ${showBookmarksOnly ? 'fill-current' : ''}`} />
-              <span>{isFrench ? `Favoris (${stats.bookmarked})` : `Saved (${stats.bookmarked})`}</span>
-            </button>
+              <button
+                onClick={() => setViewMode('graph')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  viewMode === 'graph'
+                    ? 'bg-[#785a00] text-white shadow-xs'
+                    : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+                }`}
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>{isFrench ? 'Knowledge Graph Linux' : 'Knowledge Graph'}</span>
+              </button>
+            </div>
+
+            {viewMode === 'cards' && (
+              <>
+                <button
+                  onClick={() => setStudyQuizMode(!studyQuizMode)}
+                  className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 border transition-all cursor-pointer shadow-xs ${
+                    studyQuizMode
+                      ? 'bg-[#785a00] text-[#ffffff] border-[#785a00]'
+                      : 'bg-[#f8ecdb] text-[#785a00] border-[#d3c5ab] hover:bg-[#ebdcc8]'
+                  }`}
+                >
+                  <Lightbulb className="w-4 h-4" />
+                  <span>
+                    {studyQuizMode
+                      ? (isFrench ? 'Quitter rappel' : 'Exit Recall')
+                      : (isFrench ? 'Mode Rappel' : 'Recall Mode')}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setShowBookmarksOnly(!showBookmarksOnly)}
+                  className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 border transition-all cursor-pointer shadow-xs ${
+                    showBookmarksOnly
+                      ? 'bg-[#ffc20e] text-[#6d5100] border-[#ffc20e]'
+                      : 'bg-[#f8ecdb] text-[#4f4632] border-[#d3c5ab] hover:bg-[#ebdcc8]'
+                  }`}
+                >
+                  <Bookmark className={`w-4 h-4 ${showBookmarksOnly ? 'fill-current' : ''}`} />
+                  <span>{isFrench ? `Favoris (${stats.bookmarked})` : `Saved (${stats.bookmarked})`}</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -343,7 +396,22 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
         </div>
       </section>
 
-      {/* Main Filter & Search Control Center */}
+      {/* VIEW MODE 1: INTERACTIVE KNOWLEDGE GRAPH */}
+      {viewMode === 'graph' ? (
+        <KnowledgeGraphExplorer
+          isFrench={isFrench}
+          onOpenGlossaryInspect={(term) => {
+            setViewMode('cards');
+            setSearchQuery(term);
+            const found = allEntries.find((e) => e.term.toLowerCase() === term.toLowerCase());
+            if (found) setInspectEntry(found);
+          }}
+          onOpenObjective={(objId) => onOpenLearningTopic?.(objId)}
+          onNavigateToTab={onNavigate}
+        />
+      ) : (
+        <>
+          {/* Main Filter & Search Control Center */}
       <section className="bg-[#f8ecdb] p-4 md:p-5 rounded-2xl border border-[#d3c5ab] shadow-xs flex flex-col gap-4">
         {/* Search Bar & Clear Filter */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch">
@@ -821,6 +889,20 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                       </div>
                     )}
 
+                    {/* Mini Breakdown Preview if available */}
+                    {entry.pedagogy?.why?.breakdown && (
+                      <div className="bg-[#201b11] text-white rounded-xl p-2 font-mono text-[10px] border border-[#3b3222] flex items-center justify-between gap-1 overflow-x-auto shadow-2xs">
+                        <span className="text-[#ffc20e] font-bold shrink-0">{entry.exampleSnippet || entry.term} :</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {entry.pedagogy.why.breakdown.map((b, bIdx) => (
+                            <span key={bIdx} className="bg-[#2d2518] px-1.5 py-0.5 rounded border border-[#4a3f2b]">
+                              <strong className="text-[#ffc20e]">{b.digit}</strong> → <span className="text-emerald-400 font-bold">{b.permissions}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Flags / Key Parameters Preview (If Curated) */}
                     {entry.flagsOrParameters && entry.flagsOrParameters.length > 0 && (
                       <div className="space-y-1.5 pt-1">
@@ -867,6 +949,32 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 </span>
 
                 <div className="flex items-center gap-1 shrink-0">
+                  {(entry.type === 'command' || entry.pedagogy) && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setInspectEntry(entry);
+                      }}
+                      title={isFrench ? 'Pourquoi cette commande ? Décomposition, quand l\'utiliser, pièges & lab' : 'Why this command? Breakdown, when to use, traps & lab'}
+                      className="px-2 py-1 rounded-lg bg-[#fff8ea] hover:bg-[#ffc20e] text-[#785a00] hover:text-[#201b11] text-xs font-bold transition-all border border-[#ffc20e]/60 flex items-center gap-1 cursor-pointer shadow-2xs"
+                    >
+                      <Sparkles className="w-3 h-3 text-[#ffc20e] fill-[#ffc20e] group-hover:text-[#201b11]" />
+                      <span>{isFrench ? 'Pourquoi ?' : 'Why?'}</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGraphTerm(entry.term);
+                    }}
+                    title={isFrench ? 'Voir les concepts liés dans le Knowledge Graph' : 'View related concepts in Knowledge Graph'}
+                    className="px-2 py-1 rounded-lg bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] text-xs font-bold transition-colors border border-[#d3c5ab] flex items-center gap-1 cursor-pointer"
+                  >
+                    <Share2 className="w-3 h-3 text-[#785a00]" />
+                    <span className="hidden sm:inline">{isFrench ? 'Concepts liés' : 'Related'}</span>
+                  </button>
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -894,6 +1002,8 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
           );
         })}
       </div>
+      </>
+      )}
 
       {/* Deep Dive Inspect Modal */}
       {inspectEntry && (
@@ -1050,6 +1160,27 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                 </div>
               )}
 
+              {/* « Pourquoi cette commande ? » Complete Knowledge Network & Pedagogy */}
+              {(inspectEntry.pedagogy || inspectEntry.type === 'command' || inspectEntry.type === 'function_or_directive') && (
+                <CommandPedagogySection
+                  entry={inspectEntry}
+                  pedagogy={inspectEntry.pedagogy || getCommandPedagogy(inspectEntry, isFrench)}
+                  onNavigateToTerm={handleNavigateToTerm}
+                  onOpenExamQuestion={() => {
+                    setInspectEntry(null);
+                    onNavigate('practice');
+                  }}
+                  onOpenLab={(labId) => {
+                    setInspectEntry(null);
+                    onNavigate('training');
+                  }}
+                  onNavigateTab={(tab) => {
+                    setInspectEntry(null);
+                    onNavigate(tab);
+                  }}
+                />
+              )}
+
               {/* Exam Tip Card */}
               {inspectEntry.examTips && (
                 <div className="bg-[#fffbeb] border border-[#fef08a] rounded-2xl p-4 flex items-start gap-3 text-xs md:text-sm text-[#854d0e]">
@@ -1066,9 +1197,18 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
               {/* Related Terms Cross Links */}
               {inspectEntry.relatedTerms && inspectEntry.relatedTerms.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#817660] mb-2">
-                    {isFrench ? 'Concepts & Termes Associés' : 'Related Concepts & Terms'}
-                  </h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#817660]">
+                      {isFrench ? 'Concepts & Termes Associés' : 'Related Concepts & Terms'}
+                    </h4>
+                    <button
+                      onClick={() => setGraphTerm(inspectEntry.term)}
+                      className="text-xs text-[#785a00] font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>{isFrench ? 'Explorer le Knowledge Graph' : 'Explore Knowledge Graph'}</span>
+                    </button>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {inspectEntry.relatedTerms.map((rt, idx) => (
                       <button
@@ -1088,18 +1228,28 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-[#fef9f4] border-t border-[#ebdcc8] flex justify-between items-center gap-3">
-              <button
-                onClick={() => handleJumpToObjective(inspectEntry)}
-                className="px-4 py-2.5 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] text-xs md:text-sm font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-              >
-                <BookOpen className="w-4 h-4" />
-                <span>
-                  {isFrench
-                    ? `Ouvrir le module Objectif ${inspectEntry.objectiveId}`
-                    : `Open Objective ${inspectEntry.objectiveId} Module`}
-                </span>
-              </button>
+            <div className="p-4 bg-[#fef9f4] border-t border-[#ebdcc8] flex flex-wrap justify-between items-center gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => setGraphTerm(inspectEntry.term)}
+                  className="px-3.5 py-2.5 rounded-xl bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] text-xs md:text-sm font-bold transition-colors border border-[#d3c5ab] flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Share2 className="w-4 h-4 text-[#785a00]" />
+                  <span>{isFrench ? 'Voir les concepts liés' : 'View related concepts'}</span>
+                </button>
+
+                <button
+                  onClick={() => handleJumpToObjective(inspectEntry)}
+                  className="px-4 py-2.5 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] text-xs md:text-sm font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>
+                    {isFrench
+                      ? `Objectif ${inspectEntry.objectiveId}`
+                      : `Objective ${inspectEntry.objectiveId}`}
+                  </span>
+                </button>
+              </div>
 
               <button
                 onClick={() => setInspectEntry(null)}
@@ -1110,6 +1260,26 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Knowledge Graph Modal ("Voir les concepts liés") */}
+      {graphTerm && (
+        <KnowledgeGraphModal
+          initialTerm={graphTerm}
+          isFrench={isFrench}
+          onClose={() => setGraphTerm(null)}
+          onOpenGlossaryInspect={(term) => {
+            setGraphTerm(null);
+            setViewMode('cards');
+            setSearchQuery(term);
+            const found = allEntries.find((e) => e.term.toLowerCase() === term.toLowerCase());
+            if (found) setInspectEntry(found);
+          }}
+          onOpenObjective={(objId) => {
+            setGraphTerm(null);
+            onOpenLearningTopic?.(objId);
+          }}
+        />
       )}
     </div>
   );

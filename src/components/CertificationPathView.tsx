@@ -13,10 +13,13 @@ import {
   RotateCcw,
   Sparkles,
   Layers,
+  Compass,
 } from 'lucide-react';
 import { ExamTier, TabType, UserStats } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { allLpicTopicsData } from '../data/lpicObjectivesData';
+import { getLearningMapNodes } from './learningMap/learningMapData';
+import { LearningMapTree } from './learningMap/LearningMapTree';
 
 interface CertificationPathViewProps {
   userStats: UserStats;
@@ -25,6 +28,7 @@ interface CertificationPathViewProps {
   onNavigate: (tab: TabType) => void;
   onOpenLearning?: (topicId?: string) => void;
   onUpdateTarget?: (target: string) => void;
+  onOpenFlashcardsTopic?: (topicId: string) => void;
 }
 
 export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
@@ -34,8 +38,12 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
   onNavigate,
   onOpenLearning,
   onUpdateTarget,
+  onOpenFlashcardsTopic,
 }) => {
   const { t, isFrench } = useLanguage();
+
+  // View mode: 'map' (Learning Map interactive tree - default) | 'detailed' (Curriculum tiers list)
+  const [viewMode, setViewMode] = useState<'map' | 'detailed'>('map');
 
   // Mastered objectives read from localStorage (clean prototype data if present)
   const [masteredObjectiveIds, setMasteredObjectiveIds] = useState<string[]>(() => {
@@ -114,6 +122,18 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
     }
   };
 
+  const handleToggleObjectiveMastery = (objId: string) => {
+    setMasteredObjectiveIds((prev) => {
+      const next = prev.includes(objId)
+        ? prev.filter((id) => id !== objId)
+        : [...prev, objId];
+      try {
+        localStorage.setItem('lpic_mastered_objectives', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
   const handleSelectTarget = (targetName: string) => {
     setActiveTarget(targetName);
     try {
@@ -174,6 +194,11 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
       return { pct: avg, isComplete: avg >= 100, label: 'LPIC-1' };
     }
   }, [activeTarget, examStats]);
+
+  // Compute Learning Map nodes with live objectives and readiness
+  const learningMapNodes = useMemo(() => {
+    return getLearningMapNodes(masteredObjectiveIds, essentialsPassed);
+  }, [masteredObjectiveIds, essentialsPassed]);
 
   // Available target choices
   const targetOptions = [
@@ -271,7 +296,68 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
         </div>
       </div>
 
-      {/* Official LPI Rules Infobox */}
+      {/* View Switcher: Interactive Learning Map vs Detailed Curriculum */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-2 md:p-2.5 shadow-xs">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => setViewMode('map')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewMode === 'map'
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Compass className="w-4 h-4" />
+            <span>{isFrench ? 'Learning Map (Arborescence Interactive)' : 'Interactive Learning Map'}</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode('detailed')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewMode === 'detailed'
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>{isFrench ? 'Vue Paliers & Règles LPI' : 'Tiers & LPI Rules'}</span>
+          </button>
+        </div>
+
+        <span className="text-xs text-[#817660] hidden md:inline px-2">
+          {viewMode === 'map'
+            ? isFrench
+              ? '💡 Cliquez sur un nœud pour inspecter progression, questions, flashcards, labs et readiness'
+              : '💡 Click any node to inspect progress, questions, flashcards, labs & readiness'
+            : isFrench
+            ? 'Règles officielles et prérequis de la filière LPI'
+            : 'Official LPI progression rules'}
+        </span>
+      </div>
+
+      {/* VIEW 1: INTERACTIVE LEARNING MAP */}
+      {viewMode === 'map' ? (
+        <LearningMapTree
+          nodes={learningMapNodes}
+          activeTarget={activeTarget}
+          isFrench={isFrench}
+          onSetTarget={handleSelectTarget}
+          onStartExam={onStartExam}
+          onOpenFlashcards={(topicKey) => {
+            if (onOpenFlashcardsTopic) {
+              onOpenFlashcardsTopic(topicKey);
+            } else {
+              onNavigate('flashcards');
+            }
+          }}
+          onOpenLabs={() => onNavigate('training')}
+          onOpenObjectives={onOpenLearning}
+          masteredObjectiveIds={masteredObjectiveIds}
+          onToggleObjectiveMastery={handleToggleObjectiveMastery}
+        />
+      ) : (
+        <>
+          {/* Official LPI Rules Infobox */}
       <div className="bg-[#f0f4fa] border border-[#bcd2ea] rounded-xl p-4 md:p-5 text-xs md:text-sm text-[#1e3a5f]">
         <div className="flex items-center gap-2 mb-2 font-bold text-[#004f87]">
           <Info className="w-4 h-4 shrink-0" />
@@ -1021,6 +1107,8 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
         </div>
 
       </div>
+      </>
+      )}
     </div>
   );
 };

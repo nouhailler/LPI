@@ -308,23 +308,26 @@ export default function App() {
                 onNavigate={handleSelectTab}
                 onOpenLearning={handleOpenLearningTopic}
                 onUpdateTarget={handleUpdateTarget}
+                onOpenFlashcardsTopic={handleOpenFlashcards}
               />
             )}
 
             {currentTab === 'practice' && (
-              <PracticeExamView
-                initialExamId={selectedExamId}
-                onCompleteSession={handleCompletePracticeSession}
-                onExit={() => handleSelectTab('dashboard')}
-                onOpenExplanation={(q) => setActiveExplanation(q)}
-                onStartTimer={() => {
-                  setExamTimerSeconds(45 * 60);
-                  setIsTimerRunning(true);
-                }}
-                onStopTimer={() => {
-                  setIsTimerRunning(false);
-                }}
-              />
+              <ErrorBoundary fallbackTitle={isFrench ? "Erreur dans le simulateur d'examen" : "Exam Simulator Error"}>
+                <PracticeExamView
+                  initialExamId={selectedExamId}
+                  onCompleteSession={handleCompletePracticeSession}
+                  onExit={() => handleSelectTab('dashboard')}
+                  onOpenExplanation={(q) => setActiveExplanation(q)}
+                  onStartTimer={() => {
+                    setExamTimerSeconds(45 * 60);
+                    setIsTimerRunning(true);
+                  }}
+                  onStopTimer={() => {
+                    setIsTimerRunning(false);
+                  }}
+                />
+              </ErrorBoundary>
             )}
 
             {currentTab === 'flashcards' && (

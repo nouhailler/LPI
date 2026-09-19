@@ -7,6 +7,78 @@ export interface GlossaryFlagOrParam {
   description: string;
 }
 
+export interface OctalBreakdownItem {
+  digit: string | number;
+  target: string;
+  targetFr?: string;
+  permissions: string;
+  explanation?: string;
+  explanationFr?: string;
+}
+
+export interface CommandCommonError {
+  error: string;
+  errorFr?: string;
+  explanation: string;
+  explanationFr?: string;
+  correction?: string;
+}
+
+export interface SimilarCommandItem {
+  command: string;
+  distinction: string;
+  distinctionFr?: string;
+}
+
+export interface AssociatedExamQuestion {
+  questionId: number | string;
+  title: string;
+  titleFr?: string;
+  preview: string;
+  previewFr?: string;
+  objectiveId?: string;
+  examId?: string;
+  fullQuestion?: {
+    question: string;
+    questionFr?: string;
+    options: string[];
+    optionsFr?: string[];
+    correctIndex: number;
+    explanation: string;
+    explanationFr?: string;
+  };
+}
+
+export interface AssociatedLabItem {
+  labId: string;
+  title: string;
+  titleFr?: string;
+  goal: string;
+  goalFr?: string;
+  difficulty?: string;
+  estimatedMinutes?: number;
+  scenarioId?: string;
+}
+
+export interface CommandPedagogy {
+  commandExample?: string; // e.g. "chmod 640 fichier"
+  whyTitle?: string;
+  whyTitleFr?: string;
+  why: {
+    summary?: string;
+    summaryFr?: string;
+    breakdown?: OctalBreakdownItem[];
+    details?: string[];
+    detailsFr?: string[];
+  };
+  whenToUse: string;
+  whenToUseFr?: string;
+  commonErrors: CommandCommonError[];
+  similarCommands: SimilarCommandItem[];
+  associatedExamQuestion?: AssociatedExamQuestion;
+  associatedLab?: AssociatedLabItem;
+}
+
 export interface GlossaryEntry {
   id: string;
   term: string;
@@ -24,6 +96,7 @@ export interface GlossaryEntry {
   exampleExplanation?: string;
   examTips?: string;
   relatedTerms?: string[];
+  pedagogy?: CommandPedagogy;
 }
 
 export interface LPICCommandSnippet {

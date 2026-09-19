@@ -1,5 +1,6 @@
 import { GlossaryEntry, LPICTopic } from '../types';
 import { allLpicTopicsData } from './lpicObjectivesData';
+import { curatedCommandPedagogy } from './commandPedagogyData';
 
 export const curatedGlossaryEntries: GlossaryEntry[] = [
   // ==========================================
@@ -30,6 +31,7 @@ export const curatedGlossaryEntries: GlossaryEntry[] = [
     exampleExplanation: 'Reruns unit generators after modifying unit configuration files and restarts the nginx web server.',
     examTips: 'Remember that `daemon-reload` does NOT restart services—it only updates systemd internal unit representations. `mask` links unit files to `/dev/null`.',
     relatedTerms: ['journalctl', 'systemd-analyze', 'rescue.target', 'multi-user.target', '/etc/systemd/system/'],
+    pedagogy: curatedCommandPedagogy.systemctl,
   },
   {
     id: 'gloss-journalctl',
@@ -56,6 +58,7 @@ export const curatedGlossaryEntries: GlossaryEntry[] = [
     exampleExplanation: 'Inspects all error to emergency priority logs produced by the OpenSSH server during the current boot session.',
     examTips: 'Journal logs are stored in `/run/log/journal/` (volatile) unless `/var/log/journal/` directory exists (persistent across reboots).',
     relatedTerms: ['systemctl', 'dmesg', 'rsyslogd', '/var/log/journal/'],
+    pedagogy: curatedCommandPedagogy.journalctl,
   },
   {
     id: 'gloss-modprobe',
@@ -261,10 +264,11 @@ export const curatedGlossaryEntries: GlossaryEntry[] = [
       { flag: '2000 (SGID / g+s)', description: 'Executes with effective GID or forces new files in directory to inherit parent group.' },
       { flag: '1000 (Sticky / +t)', description: 'Restricts file deletion in directory (e.g. /tmp) to file owner or root.' },
     ],
-    exampleSnippet: 'chmod 2775 /var/shared_projects && chmod +t /tmp',
-    exampleExplanation: 'Sets SGID on collaborative directory so newly created files inherit the group, and sets sticky bit on /tmp.',
+    exampleSnippet: 'chmod 640 fichier',
+    exampleExplanation: 'Applique des permissions sécurisées : lecture/écriture pour le propriétaire (6), lecture pour le groupe (4), aucun accès pour les autres (0).',
     examTips: 'Know octal values: Read=4, Write=2, Execute=1. Special bits: SUID=4, SGID=2, Sticky=1. 4755 = rwsr-xr-x.',
     relatedTerms: ['chown', 'chgrp', 'umask', 'getfacl', 'setfacl'],
+    pedagogy: curatedCommandPedagogy.chmod,
   },
   {
     id: 'gloss-umask',
@@ -288,6 +292,7 @@ export const curatedGlossaryEntries: GlossaryEntry[] = [
     exampleExplanation: 'Configures session umask so created files have permissions 640 (666-026=640) and directories have 750 (777-027=750).',
     examTips: 'Files never receive execute permissions from umask base calculation. `umask 022` with base 666 yields 644.',
     relatedTerms: ['chmod', 'chown', '/etc/profile', '~/.bashrc'],
+    pedagogy: curatedCommandPedagogy.umask,
   },
   {
     id: 'gloss-crontab',
