@@ -29,6 +29,7 @@ interface Props {
   onOpenExamQuestion?: (questionId: string | number) => void;
   onOpenLab?: (labId: string) => void;
   onNavigateTab?: (tab: any) => void;
+  onExplainDifferently?: (term: string) => void;
 }
 
 export const CommandPedagogySection: React.FC<Props> = ({
@@ -38,6 +39,7 @@ export const CommandPedagogySection: React.FC<Props> = ({
   onOpenExamQuestion,
   onOpenLab,
   onNavigateTab,
+  onExplainDifferently,
 }) => {
   const { isFrench } = useLanguage();
   const isFr = isFrench;
@@ -76,17 +78,32 @@ export const CommandPedagogySection: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Command Badge with 1-click copy */}
-        <div className="flex items-center gap-2 bg-[#201b11] text-[#ffc20e] px-3.5 py-2 rounded-xl font-mono text-xs border border-[#3d3424] self-start sm:self-auto shadow-xs">
-          <Terminal className="w-3.5 h-3.5 text-[#ffc20e] shrink-0" />
-          <span className="font-bold truncate max-w-[220px]">{commandToCopy}</span>
-          <button
-            onClick={handleCopy}
-            title={isFr ? 'Copier la commande' : 'Copy command'}
-            className="text-[#d3c5ab] hover:text-white transition-colors cursor-pointer ml-1 p-1 hover:bg-white/10 rounded"
-          >
-            {copiedCmd ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-          </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Explain Differently Button */}
+          {onExplainDifferently && (
+            <button
+              id={`pedagogy-explain-differently-${entry.id}`}
+              onClick={() => onExplainDifferently(entry.term)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              title={isFr ? 'Expliquer avec 5 angles différents' : 'Explain with 5 different angles'}
+            >
+              <Lightbulb className="w-3.5 h-3.5 fill-current" />
+              <span>{isFr ? 'Explique-moi autrement' : 'Explain differently'}</span>
+            </button>
+          )}
+
+          {/* Command Badge with 1-click copy */}
+          <div className="flex items-center gap-2 bg-[#201b11] text-[#ffc20e] px-3.5 py-2 rounded-xl font-mono text-xs border border-[#3d3424] self-start sm:self-auto shadow-xs">
+            <Terminal className="w-3.5 h-3.5 text-[#ffc20e] shrink-0" />
+            <span className="font-bold truncate max-w-[220px]">{commandToCopy}</span>
+            <button
+              onClick={handleCopy}
+              title={isFr ? 'Copier la commande' : 'Copy command'}
+              className="text-[#d3c5ab] hover:text-white transition-colors cursor-pointer ml-1 p-1 hover:bg-white/10 rounded"
+            >
+              {copiedCmd ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </div>
       </div>
 

@@ -14,6 +14,7 @@ import { ExplanationModal } from './components/ExplanationModal';
 import { ProfileModal } from './components/ProfileModal';
 import { SettingsModal } from './components/SettingsModal';
 import { DiagnosticExamModal } from './components/DiagnosticExamModal';
+import { OnboardingModal } from './components/OnboardingModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
 import { PracticeQuestion, TabType, UserStats } from './types';
@@ -40,10 +41,12 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedLearningTopic, setSelectedLearningTopic] = useState<string | undefined>(undefined);
   const [selectedExamId, setSelectedExamId] = useState<string>('exam-101');
+  const [dataResetKey, setDataResetKey] = useState(0);
 
-  // Diagnostic Exam Modal state
+  // Diagnostic & Onboarding Modal state
   const [isDiagnosticOpen, setIsDiagnosticOpen] = useState(false);
   const [diagnosticMode, setDiagnosticMode] = useState<'intro' | 'test' | 'results'>('intro');
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [selectedFlashcardsTopic, setSelectedFlashcardsTopic] = useState<any>('srs-daily');
 
   const handleOpenFlashcards = (topic: any = 'srs-daily') => {
@@ -56,18 +59,27 @@ export default function App() {
   const [latestVersionInfo, setLatestVersionInfo] = useState<VersionInfo | null>(null);
   const [showUpdateBanner, setShowUpdateBanner] = useState(false);
 
-  // First launch diagnostic check
+  // First launch onboarding check (or after full reset)
   useEffect(() => {
     try {
-      const hasSeen = localStorage.getItem('lpi_diagnostic_seen');
-      const existingResult = getStoredDiagnosticResult();
-      if (!existingResult && !hasSeen) {
+      const hasCompletedOnboarding = localStorage.getItem('lpi_onboarding_completed');
+      if (!hasCompletedOnboarding) {
         const timer = setTimeout(() => {
-          setIsDiagnosticOpen(true);
-          setDiagnosticMode('intro');
-          localStorage.setItem('lpi_diagnostic_seen', 'true');
-        }, 800);
+          setIsOnboardingOpen(true);
+        }, 500);
         return () => clearTimeout(timer);
+      } else {
+        // If onboarding already done, check if initial diagnostic test was seen
+        const hasSeen = localStorage.getItem('lpi_diagnostic_seen');
+        const existingResult = getStoredDiagnosticResult();
+        if (!existingResult && !hasSeen) {
+          const timer = setTimeout(() => {
+            setIsDiagnosticOpen(true);
+            setDiagnosticMode('intro');
+            localStorage.setItem('lpi_diagnostic_seen', 'true');
+          }, 800);
+          return () => clearTimeout(timer);
+        }
       }
     } catch {}
   }, []);
@@ -211,7 +223,25 @@ export default function App() {
       localStorage.removeItem('lpi_user_stats');
       localStorage.setItem('lpic_mastered_objectives', JSON.stringify([]));
       localStorage.removeItem('lpi_essentials_status');
-    } catch {}
+      localStorage.removeItem('lpi_current_target');
+      localStorage.removeItem('lpi_exam_history');
+      localStorage.removeItem('lpic1_mastered_cards');
+      localStorage.removeItem('lpic1_review_cards');
+      localStorage.removeItem('lpic1_starred_cards');
+      localStorage.removeItem('lpic_srs_records');
+      localStorage.removeItem('lpic_weakness_report');
+      localStorage.removeItem('lpic_completed_labs');
+      localStorage.removeItem('lpic_practice_history');
+      localStorage.removeItem('lpi_diagnostic_result');
+      localStorage.removeItem('lpi_diagnostic_seen');
+      localStorage.removeItem('lpi_onboarding_completed');
+      localStorage.removeItem('lpic_glossary_bookmarks');
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('lpi_progress_reset'));
+    } catch (e) {
+      console.error('Failed to reset localStorage progress', e);
+    }
+    setDataResetKey((prev) => prev + 1);
     setIsProfileOpen(false);
   };
 
@@ -260,7 +290,8 @@ export default function App() {
         onSelectLearningTopic={handleOpenLearningTopic}
         onStartExam={handleStartExam}
         onOpenProfile={() => handleOpenSettings('profile')}
-        onOpenSettings={() => handleOpenSettings('updates')}
+        onOpenSettings={(tab) => handleOpenSettings(tab || 'updates')}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
         userStats={userStats}
         onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
       />
@@ -270,7 +301,7 @@ export default function App() {
         <DesktopSidebar currentTab={currentTab} onTabChange={handleSelectTab} />
 
         {/* Main Content Area */}
-        <main className="flex-1 px-4 md:px-8 py-6 md:pl-72 max-w-7xl mx-auto w-full transition-all duration-200">
+        <main key={`main-app-content-${dataResetKey}`} className="flex-1 px-4 md:px-8 py-6 md:pl-72 max-w-7xl mx-auto w-full transition-all duration-200">
           <ErrorBoundary>
             {currentTab === 'dashboard' && (
               <DashboardView
@@ -370,6 +401,7 @@ export default function App() {
         userStats={userStats}
         onResetStats={handleResetStats}
         initialTab={settingsInitialTab}
+        onReplayOnboarding={() => setIsOnboardingOpen(true)}
       />
 
       {/* Profile & Stats Modal */}
@@ -387,6 +419,15 @@ export default function App() {
         onNavigate={handleSelectTab}
         onStartExam={handleStartExam}
         initialMode={diagnosticMode}
+      />
+
+      {/* Welcome & Interactive Onboarding Tour Modal */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        onNavigate={handleSelectTab}
+        onStartExam={handleStartExam}
+        onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
       />
 
       {/* Floating Automatic Update Notification Banner */}

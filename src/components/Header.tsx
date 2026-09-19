@@ -18,6 +18,7 @@ interface HeaderProps {
   isMenuOpen?: boolean;
   hasUpdateAvailable?: boolean;
   onOpenDiagnostic?: () => void;
+  onOpenExplainDifferently?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -33,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
   isMenuOpen = false,
   hasUpdateAvailable = false,
   onOpenDiagnostic,
+  onOpenExplainDifferently,
 }) => {
   const { t, isFrench } = useLanguage();
 
@@ -154,6 +156,18 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-1.5 md:gap-2">
         {/* Prominent Language Switcher Button in Header */}
         <LanguageSelector variant="header" />
+
+        {onOpenExplainDifferently && (
+          <button
+            id="header-explain-differently-btn"
+            onClick={onOpenExplainDifferently}
+            title={isFrench ? 'Explique-moi autrement (« Explain it differently »)' : 'Explain it differently (5 angles)'}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#fff8f2] hover:bg-[#ebdcc8] border border-[#ffc20e] text-xs font-bold text-[#785a00] transition-colors cursor-pointer shadow-2xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#ffc20e] fill-[#ffc20e]" />
+            <span>{isFrench ? 'Explique-moi' : 'Explain'}</span>
+          </button>
+        )}
 
         {onOpenDiagnostic && (
           <button

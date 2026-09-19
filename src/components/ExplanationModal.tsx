@@ -1,16 +1,30 @@
 import React from 'react';
-import { X, Lightbulb, Terminal, BookOpen, CheckCircle } from 'lucide-react';
+import { X, Lightbulb, Terminal, BookOpen, CheckCircle, Sparkles } from 'lucide-react';
 import { PracticeQuestion } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface ExplanationModalProps {
   question: PracticeQuestion | null;
   onClose: () => void;
+  onExplainDifferently?: (topic: string, context?: string) => void;
 }
 
-export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, onClose }) => {
-  const { t } = useLanguage();
+export const ExplanationModal: React.FC<ExplanationModalProps> = ({
+  question,
+  onClose,
+  onExplainDifferently,
+}) => {
+  const { t, isFrench } = useLanguage();
   if (!question) return null;
+
+  const extractConcept = () => {
+    if (question.commandSnippet) {
+      return question.commandSnippet.split(' ')[0];
+    }
+    const match = question.question.match(/\b(umask|chmod|chown|systemctl|systemd|find|grep|tar|kill|ln|fdisk|mount|crontab|sed|awk)\b/i);
+    if (match) return match[1];
+    return question.question.slice(0, 40);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
@@ -74,9 +88,27 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({ question, on
           </div>
         )}
 
+        {/* Explain Differently Button */}
+        {onExplainDifferently && (
+          <button
+            id="modal-explain-differently-btn"
+            onClick={() => {
+              onExplainDifferently(extractConcept(), question.question);
+            }}
+            className="w-full py-2.5 px-4 rounded-xl bg-[#fff8f2] hover:bg-[#f2e7d6] text-[#785a00] border border-[#d3c5ab] font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-[#ffc20e] fill-[#ffc20e]" />
+            <span>
+              {isFrench
+                ? '💡 Explique-moi autrement (5 angles pédagogiques)'
+                : '💡 Explain it differently (5 angles)'}
+            </span>
+          </button>
+        )}
+
         <button
           onClick={onClose}
-          className="mt-2 w-full py-3 bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-xs cursor-pointer"
+          className="mt-1 w-full py-3 bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-xs cursor-pointer"
         >
           {t.explanation.gotIt}
         </button>

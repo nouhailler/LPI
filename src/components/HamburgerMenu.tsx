@@ -30,6 +30,7 @@ import {
   RefreshCw,
   Wrench,
   Zap,
+  Compass,
 } from 'lucide-react';
 import { TabType, UserStats } from '../types';
 import { CURRENT_APP_VERSION, CURRENT_RELEASE_DATE } from '../utils/updateService';
@@ -44,7 +45,8 @@ interface HamburgerMenuProps {
   onSelectLearningTopic: (topicId: string) => void;
   onStartExam: (examId: string) => void;
   onOpenProfile: () => void;
-  onOpenSettings?: () => void;
+  onOpenSettings?: (tab?: 'updates' | 'profile' | 'preferences' | 'language') => void;
+  onOpenOnboarding?: () => void;
   userStats: UserStats;
   onOpenDiagnostic?: () => void;
 }
@@ -78,6 +80,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   onStartExam,
   onOpenProfile,
   onOpenSettings,
+  onOpenOnboarding,
   userStats,
   onOpenDiagnostic,
 }) => {
@@ -562,12 +565,47 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
           action: () => {
             if (onOpenSettings) {
-              onOpenSettings();
+              onOpenSettings('updates');
             } else {
               onOpenProfile();
             }
           },
-          keywords: ['settings', 'update', 'version', 'force update', 'release', 'cache', 'system', 'preferences', 'paramètres', 'mises à jour'],
+          keywords: ['settings', 'update', 'version', 'force update', 'release', 'cache', 'system', 'paramètres', 'mises à jour'],
+        },
+        {
+          id: 'item-onboarding',
+          title: isFrench ? 'Guide de bienvenue (Onboarding)' : 'Welcome Guide & Tour',
+          subtitle: isFrench
+            ? 'Rejouer la visite guidée interactive de l\'application et des modules LPIC'
+            : 'Replay the interactive walkthrough of the app and LPIC modules',
+          icon: Compass,
+          badge: isFrench ? 'Guide' : 'Tour',
+          badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
+          action: () => {
+            onClose();
+            if (onOpenOnboarding) {
+              onOpenOnboarding();
+            }
+          },
+          keywords: ['onboarding', 'guide', 'aide', 'bienvenue', 'tour', 'visite', 'commencer', 'découverte', 'help', 'tutorial'],
+        },
+        {
+          id: 'item-preferences',
+          title: isFrench ? 'Préférences & Remise à zéro' : 'Preferences & Progress Reset',
+          subtitle: isFrench
+            ? 'Raccourcis, gestion du cache et remise à zéro de la progression'
+            : 'Keyboard shortcuts, cache management and complete progress reset',
+          icon: RotateCcw,
+          badge: isFrench ? 'Préférences' : 'Preferences',
+          badgeColor: 'bg-[#ebdcc8] text-[#785a00]',
+          action: () => {
+            if (onOpenSettings) {
+              onOpenSettings('preferences');
+            } else {
+              onOpenProfile();
+            }
+          },
+          keywords: ['preferences', 'reset', 'remettre', 'zero', 'progression', 'raccourcis', 'recommencer', 'shortcuts'],
         },
         {
           id: 'item-profile',

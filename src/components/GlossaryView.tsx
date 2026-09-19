@@ -34,6 +34,7 @@ import { getCommandPedagogy } from '../data/commandPedagogyData';
 interface GlossaryViewProps {
   onNavigate: (tab: TabType) => void;
   onOpenLearningTopic?: (topicId?: string) => void;
+  onExplainDifferently?: (topic: string, context?: string) => void;
 }
 
 type TierFilter = 'all' | 'lpic-1' | 'lpic-2' | 'lpic-3';
@@ -43,6 +44,7 @@ type TypeFilter = 'all' | GlossaryItemType;
 export const GlossaryView: React.FC<GlossaryViewProps> = ({
   onNavigate,
   onOpenLearningTopic,
+  onExplainDifferently,
 }) => {
   const { t, isFrench } = useLanguage();
   const allEntries = useMemo(() => getAllGlossaryEntries(), []);
@@ -963,6 +965,21 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                     </button>
                   )}
 
+                  {onExplainDifferently && (
+                    <button
+                      id={`card-explain-${entry.id}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onExplainDifferently(entry.term, entry.definition);
+                      }}
+                      title={isFrench ? 'Explique-le moi autrement (5 modes)' : 'Explain it differently (5 angles)'}
+                      className="px-2 py-1 rounded-lg bg-[#fff8f2] hover:bg-[#ebdcc8] text-[#785a00] text-xs font-bold transition-colors border border-[#d3c5ab] flex items-center gap-1 cursor-pointer"
+                    >
+                      <Lightbulb className="w-3 h-3 text-[#ffc20e] fill-[#ffc20e]" />
+                      <span className="hidden md:inline">{isFrench ? 'Expliquer' : 'Explain'}</span>
+                    </button>
+                  )}
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1178,6 +1195,9 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
                     setInspectEntry(null);
                     onNavigate(tab);
                   }}
+                  onExplainDifferently={(term) => {
+                    onExplainDifferently?.(term, inspectEntry.definition);
+                  }}
                 />
               )}
 
@@ -1230,6 +1250,19 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({
             {/* Modal Footer */}
             <div className="p-4 bg-[#fef9f4] border-t border-[#ebdcc8] flex flex-wrap justify-between items-center gap-3">
               <div className="flex items-center gap-2 flex-wrap">
+                {onExplainDifferently && (
+                  <button
+                    id="inspect-explain-differently-btn"
+                    onClick={() => {
+                      onExplainDifferently(inspectEntry.term, inspectEntry.definition);
+                    }}
+                    className="px-3.5 py-2.5 rounded-xl bg-[#fff8f2] hover:bg-[#ebdcc8] text-[#785a00] text-xs md:text-sm font-bold transition-colors border border-[#d3c5ab] flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Lightbulb className="w-4 h-4 text-[#ffc20e] fill-[#ffc20e]" />
+                    <span>{isFrench ? 'Explique-moi autrement' : 'Explain differently'}</span>
+                  </button>
+                )}
+
                 <button
                   onClick={() => setGraphTerm(inspectEntry.term)}
                   className="px-3.5 py-2.5 rounded-xl bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] text-xs md:text-sm font-bold transition-colors border border-[#d3c5ab] flex items-center gap-1.5 cursor-pointer shadow-xs"

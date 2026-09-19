@@ -20,7 +20,9 @@ import {
   Bell,
   Trash2,
   HardDrive,
-  Globe
+  Globe,
+  Compass,
+  GraduationCap,
 } from 'lucide-react';
 import { UserStats } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -43,6 +45,7 @@ interface SettingsModalProps {
   userStats: UserStats;
   onResetStats: () => void;
   initialTab?: 'updates' | 'profile' | 'preferences' | 'language';
+  onReplayOnboarding?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -51,17 +54,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   userStats,
   onResetStats,
   initialTab = 'updates',
+  onReplayOnboarding,
 }) => {
-  const { t, language } = useLanguage();
+  const { t, language, isFrench } = useLanguage();
   const [activeTab, setActiveTab] = useState<'updates' | 'profile' | 'preferences' | 'language'>(initialTab);
   const [updateSettings, setUpdateSettings] = useState<UpdateSettings>(getUpdateSettings());
   const [isChecking, setIsChecking] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetSuccessToast, setResetSuccessToast] = useState(false);
   const [checkResult, setCheckResult] = useState<{
     status: 'idle' | 'up-to-date' | 'update-available' | 'error';
     message?: string;
     latestInfo?: VersionInfo;
   }>({ status: 'idle' });
+
+  // Execute comprehensive reset
+  const handleExecuteReset = () => {
+    onResetStats();
+    setShowResetConfirm(false);
+    setResetSuccessToast(true);
+    setTimeout(() => {
+      setResetSuccessToast(false);
+    }, 4500);
+  };
 
   // Sync initial tab when opened
   useEffect(() => {
@@ -69,6 +85,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setActiveTab(initialTab);
       setUpdateSettings(getUpdateSettings());
       setCheckResult({ status: 'idle' });
+      setShowResetConfirm(false);
     }
   }, [isOpen, initialTab]);
 
@@ -501,14 +518,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="pt-2 border-t border-[#d3c5ab]">
                 <button
                   onClick={() => {
-                    if (confirm('Reset practice question scores and study statistics?')) {
-                      onResetStats();
+                    if (confirm(isFrench ? 'Réinitialiser tous les scores de quiz et métriques ?' : 'Reset practice question scores and study statistics?')) {
+                      handleExecuteReset();
                     }
                   }}
                   className="w-full py-2.5 border border-[#ba1a1a]/30 text-[#ba1a1a] hover:bg-[#ffdad6] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  Reset Practice Statistics
+                  {isFrench ? 'Réinitialiser les statistiques d\'entraînement' : 'Reset Practice Statistics'}
                 </button>
               </div>
             </div>
@@ -519,6 +536,162 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ============================================================ */}
           {activeTab === 'preferences' && (
             <div className="space-y-4">
+              {/* Replay Onboarding Tour Card */}
+              <div className="bg-[#ffffff] rounded-2xl border border-[#ebdcc8] p-4 sm:p-5 space-y-3.5 shadow-2xs">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#fff8f2] text-[#785a00] border border-[#ebdcc8] flex items-center justify-center shrink-0 shadow-2xs">
+                    <Compass className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-sm sm:text-base text-[#201b11]">
+                        {isFrench ? 'Visite guidée & Découverte (Onboarding)' : 'Welcome Guide & Interactive Tour'}
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-[#ffc20e] text-[#6d5100]">
+                        {isFrench ? 'Interactif' : 'Interactive'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#4f4632] mt-1 leading-relaxed">
+                      {isFrench
+                        ? 'Rejouez à tout moment la visite guidée pour redécouvrir l\'ensemble des modules d\'apprentissage, le déroulement des examens blancs, le terminal et la méthode de mémorisation.'
+                        : 'Replay the step-by-step interactive onboarding tour anytime to rediscover LPIC modules, mock exams, terminal labs, and active recall methods.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    id="preferences-replay-onboarding-btn"
+                    onClick={() => {
+                      onClose();
+                      if (onReplayOnboarding) {
+                        onReplayOnboarding();
+                      }
+                    }}
+                    className="w-full py-2.5 px-4 bg-[#785a00] hover:bg-[#5c4400] text-white rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                  >
+                    <GraduationCap className="w-4 h-4" />
+                    <span>{isFrench ? 'Rejouer l\'onboarding interactif' : 'Replay Interactive Onboarding'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Reset All Progression & Counters Card */}
+              <div className="bg-[#ffffff] rounded-2xl border border-[#ebdcc8] p-4 sm:p-5 space-y-4 shadow-2xs">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center shrink-0 shadow-2xs">
+                    <RotateCcw className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-sm sm:text-base text-[#201b11]">
+                        {isFrench ? 'Réinitialisation de la progression' : 'Reset Learning Progress & Counters'}
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-[#ffdad6] text-[#ba1a1a]">
+                        {isFrench ? 'Remise à zéro' : 'Start Fresh'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#4f4632] mt-1 leading-relaxed">
+                      {isFrench
+                        ? 'Remet l\'ensemble des compteurs, objectifs et statistiques à zéro pour redémarrer votre préparation aux certifications LPIC depuis le tout début.'
+                        : 'Reset all counters, completed objectives, and study statistics to restart your LPIC certification journey from scratch.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Scope checklist */}
+                <div className="bg-[#fff8f2] rounded-xl border border-[#ebdcc8] p-3 text-xs space-y-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#817660] block">
+                    {isFrench ? 'Compteurs & données remis à zéro :' : 'Counters & data that will be reset:'}
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[#4f4632]">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] shrink-0" />
+                      <span>{isFrench ? 'Objectifs LPIC maîtrisés (0/60)' : 'Mastered LPIC objectives (0/60)'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] shrink-0" />
+                      <span>{isFrench ? 'Scores & historique des examens blancs' : 'Mock exam scores & attempt history'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] shrink-0" />
+                      <span>{isFrench ? 'Cartes mémoire & répétition espacée (SRS)' : 'Flashcards & SRS spaced repetition'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] shrink-0" />
+                      <span>{isFrench ? 'Progression des ateliers pratiques (Labs)' : 'Hands-on terminal labs progress'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] shrink-0" />
+                      <span>{isFrench ? 'Série quotidienne (Streak) & stats du jour' : 'Daily streak & study goal counters'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] shrink-0" />
+                      <span>{isFrench ? 'Statut certifications & diagnostic' : 'Certification statuses & diagnostic test'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Feedback Toast on success */}
+                {resetSuccessToast && (
+                  <div className="p-3 bg-[#e8f5e9] border border-[#a5d6a7] rounded-xl flex items-center gap-2 text-xs font-semibold text-[#1b5e20] animate-fadeIn">
+                    <CheckCircle2 className="w-4 h-4 text-[#2e7d32] shrink-0" />
+                    <span>
+                      {isFrench
+                        ? '✓ Tous les compteurs ont été remis à zéro avec succès ! Vous redémarrez depuis le début.'
+                        : '✓ All counters have been reset to zero! You are starting fresh from the beginning.'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Button / Inline Confirmation State */}
+                {!showResetConfirm ? (
+                  <button
+                    id="preferences-reset-progress-btn"
+                    onClick={() => setShowResetConfirm(true)}
+                    className="w-full py-2.5 px-4 bg-[#fff8f2] hover:bg-[#ba1a1a] text-[#ba1a1a] hover:text-white border border-[#ba1a1a]/40 hover:border-[#ba1a1a] rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>{isFrench ? 'Remettre à zéro tous les compteurs' : 'Reset All Counters to Zero'}</span>
+                  </button>
+                ) : (
+                  <div className="p-3.5 bg-[#ffdad6]/40 border border-[#ba1a1a]/40 rounded-xl space-y-3 animate-fadeIn">
+                    <div className="flex items-start gap-2.5 text-xs text-[#93000a]">
+                      <AlertCircle className="w-4 h-4 text-[#ba1a1a] shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="block font-bold mb-0.5">
+                          {isFrench ? 'Confirmer la remise à zéro complète :' : 'Confirm complete progress reset:'}
+                        </strong>
+                        <p className="text-[#410002] leading-relaxed">
+                          {isFrench
+                            ? 'Êtes-vous certain de vouloir remettre tous vos compteurs à zéro ? Vos scores, vos objectifs validés, vos fiches mémorisées et l\'historique d\'examens seront effacés pour redémarrer depuis le début.'
+                            : 'Are you sure you want to reset all your progress? All scores, completed objectives, mastered cards, and exam history will be cleared to restart from scratch.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        id="preferences-confirm-reset-btn"
+                        onClick={handleExecuteReset}
+                        className="flex-1 py-2 px-3 bg-[#ba1a1a] hover:bg-[#93000a] text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>{isFrench ? 'Oui, remettre tout à zéro' : 'Yes, Reset Everything'}</span>
+                      </button>
+                      <button
+                        id="preferences-cancel-reset-btn"
+                        onClick={() => setShowResetConfirm(false)}
+                        className="px-4 py-2 bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#201b11] rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        {isFrench ? 'Annuler' : 'Cancel'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Storage & Cache Management */}
               <div className="bg-[#ffffff] rounded-2xl border border-[#d3c5ab] p-4 space-y-3">
                 <h4 className="font-bold text-xs uppercase tracking-wider text-[#817660]">
                   Storage & Cache Management
