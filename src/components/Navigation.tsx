@@ -1,8 +1,10 @@
-import React from 'react';
-import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library, Zap, Brain } from 'lucide-react';
 import { TabType } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
+import { loadSRSRecords, getCardsDueToday } from '../utils/srsEngine';
+import { flashcardsData } from '../data/lpiData';
 
 interface NavigationProps {
   currentTab: TabType;
@@ -11,6 +13,23 @@ interface NavigationProps {
 
 export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }) => {
   const { t } = useLanguage();
+  const [dueTodayCount, setDueTodayCount] = useState<number>(() => {
+    const records = loadSRSRecords(flashcardsData);
+    return getCardsDueToday(flashcardsData, records).length;
+  });
+
+  useEffect(() => {
+    const updateCount = () => {
+      const records = loadSRSRecords(flashcardsData);
+      setDueTodayCount(getCardsDueToday(flashcardsData, records).length);
+    };
+    window.addEventListener('storage', updateCount);
+    window.addEventListener('srs_updated', updateCount);
+    return () => {
+      window.removeEventListener('storage', updateCount);
+      window.removeEventListener('srs_updated', updateCount);
+    };
+  }, []);
 
   const tabs: { id: TabType; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'dashboard', label: t.nav.dashboard, icon: LayoutGrid },
@@ -26,18 +45,26 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = currentTab === tab.id;
+        const isFlashcards = tab.id === 'flashcards';
 
         return (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`flex flex-col items-center justify-center py-1.5 px-2 flex-1 rounded-xl transition-all duration-150 ${
+            className={`relative flex flex-col items-center justify-center py-1.5 px-2 flex-1 rounded-xl transition-all duration-150 ${
               isActive
                 ? 'bg-[#ffc20e] text-[#6d5100] font-bold shadow-xs'
                 : 'text-[#4f4632] hover:bg-[#ebdcc8]/50 font-medium'
             }`}
           >
-            <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+            <div className="relative">
+              <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              {isFlashcards && dueTodayCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-[#ba1a1a] text-white text-[9px] font-bold px-1 rounded-full leading-tight">
+                  {dueTodayCount}
+                </span>
+              )}
+            </div>
             <span className="text-[9.5px] uppercase tracking-wider font-sans leading-none truncate max-w-full">
               {tab.label}
             </span>
@@ -50,15 +77,38 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }
 
 export const DesktopSidebar: React.FC<NavigationProps> = ({ currentTab, onTabChange }) => {
   const { t } = useLanguage();
+  const [dueTodayCount, setDueTodayCount] = useState<number>(() => {
+    const records = loadSRSRecords(flashcardsData);
+    return getCardsDueToday(flashcardsData, records).length;
+  });
 
-  const navItems: { id: TabType; label: string; icon: React.FC<{ className?: string }>; badge?: string }[] = [
+  useEffect(() => {
+    const updateCount = () => {
+      const records = loadSRSRecords(flashcardsData);
+      setDueTodayCount(getCardsDueToday(flashcardsData, records).length);
+    };
+    window.addEventListener('storage', updateCount);
+    window.addEventListener('srs_updated', updateCount);
+    return () => {
+      window.removeEventListener('storage', updateCount);
+      window.removeEventListener('srs_updated', updateCount);
+    };
+  }, []);
+
+  const navItems: { id: TabType; label: string; icon: React.FC<{ className?: string }>; badge?: string; badgeColor?: string }[] = [
     { id: 'dashboard', label: t.nav.dashboard, icon: LayoutGrid },
     { id: 'learning', label: t.nav.learning, icon: BookOpen, badge: t.nav.learningBadge },
     { id: 'training', label: t.nav.training, icon: Zap, badge: t.nav.trainingBadge },
     { id: 'glossary', label: t.nav.glossary, icon: Library, badge: t.nav.glossaryBadge },
     { id: 'path', label: t.nav.path, icon: GraduationCap },
     { id: 'practice', label: t.nav.practice, icon: HelpCircle },
-    { id: 'flashcards', label: t.nav.flashcards, icon: Layers, badge: t.nav.flashcardsBadge },
+    {
+      id: 'flashcards',
+      label: t.nav.flashcards,
+      icon: Layers,
+      badge: dueTodayCount > 0 ? `🧠 ${dueTodayCount}` : 'SRS',
+      badgeColor: dueTodayCount > 0 ? 'bg-[#ba1a1a] text-white' : undefined,
+    },
   ];
 
   return (
@@ -87,7 +137,11 @@ export const DesktopSidebar: React.FC<NavigationProps> = ({ currentTab, onTabCha
                 <span>{item.label}</span>
               </div>
               {item.badge && !isActive && (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[#ebdcc8] text-[#785a00] rounded">
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    item.badgeColor || 'bg-[#ebdcc8] text-[#785a00]'
+                  }`}
+                >
                   {item.badge}
                 </span>
               )}

@@ -46,6 +46,7 @@ interface HamburgerMenuProps {
   onOpenProfile: () => void;
   onOpenSettings?: () => void;
   userStats: UserStats;
+  onOpenDiagnostic?: () => void;
 }
 
 interface MenuItem {
@@ -78,6 +79,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   onOpenProfile,
   onOpenSettings,
   userStats,
+  onOpenDiagnostic,
 }) => {
   const { t, isFrench } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -143,6 +145,18 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           tabTarget: 'dashboard',
           action: () => onSelectTab('dashboard'),
           keywords: ['home', 'metrics', 'streak', 'progress', 'overview', 'accueil', 'tableau de bord', 'série', 'progression'],
+        },
+        {
+          id: 'nav-diagnostic',
+          title: isFrench ? 'Évaluation Diagnostique (20 Q)' : 'Diagnostic Assessment (20 Q)',
+          subtitle: isFrench ? 'Matrice de compétences & vos 3 priorités d\'apprentissage' : 'Skills matrix & your top 3 learning priorities',
+          icon: Sparkles,
+          badge: isFrench ? 'Recommandé' : 'Recommended',
+          badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
+          action: () => {
+            if (onOpenDiagnostic) onOpenDiagnostic();
+          },
+          keywords: ['diagnostic', 'test', 'évaluation', 'matrice', 'priorités', 'niveau', 'skills', 'assessment'],
         },
         {
           id: 'nav-learning',

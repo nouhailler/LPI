@@ -1,6 +1,6 @@
 {
   "name": "LPI Certification Prep",
-  "description": "Interactive Linux Professional Institute (LPI) certification preparation platform featuring learning paths, practice exams, and interactive flashcard decks grouped by LPIC-1, LPIC-2, and LPIC-3 certifications.",
+  "description": "Interactive Linux Professional Institute (LPI) preparation platform featuring LPIC-1/2/3 learning paths, practice exams, hands-on Incident Response troubleshooting labs, and an automated Weakness Engine with targeted adaptive training.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, X, Timer, MoreVertical, Menu, Settings } from 'lucide-react';
+import { User, X, Timer, MoreVertical, Menu, Settings, Sparkles } from 'lucide-react';
 import { TabType } from '../types';
 import { CURRENT_APP_VERSION } from '../utils/updateService';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -17,6 +17,7 @@ interface HeaderProps {
   onToggleMenu?: () => void;
   isMenuOpen?: boolean;
   hasUpdateAvailable?: boolean;
+  onOpenDiagnostic?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,8 +32,9 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleMenu,
   isMenuOpen = false,
   hasUpdateAvailable = false,
+  onOpenDiagnostic,
 }) => {
-  const { t } = useLanguage();
+  const { t, isFrench } = useLanguage();
 
   if (currentTab === 'practice') {
     return (
@@ -152,6 +154,18 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-1.5 md:gap-2">
         {/* Prominent Language Switcher Button in Header */}
         <LanguageSelector variant="header" />
+
+        {onOpenDiagnostic && (
+          <button
+            id="header-diagnostic-btn"
+            onClick={onOpenDiagnostic}
+            title={isFrench ? 'Évaluation diagnostique (20 Q)' : 'Diagnostic assessment (20 Q)'}
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f8ecdb] hover:bg-[#ebdcc8] border border-[#ffc20e] text-xs font-bold text-[#785a00] transition-colors cursor-pointer shadow-2xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#785a00]" />
+            <span>{isFrench ? 'Diagnostic (20 Q)' : 'Diagnostic (20 Q)'}</span>
+          </button>
+        )}
 
         {onToggleMenu && (
           <button

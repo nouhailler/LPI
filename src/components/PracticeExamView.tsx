@@ -23,6 +23,7 @@ import {
   getExamQuestions,
   PracticeExamInfo,
 } from '../data/practiceExamsData';
+import { recordQuestionInteraction } from '../utils/weaknessEngine';
 
 interface PracticeExamViewProps {
   initialExamId?: string;
@@ -133,9 +134,24 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
 
       let correct = 0;
       questions.forEach((q) => {
-        if (userAnswers[q.id] === q.correctIndex) {
+        const isAnswered = userAnswers[q.id] !== undefined;
+        const isCorrect = userAnswers[q.id] === q.correctIndex;
+        if (isCorrect) {
           correct++;
         }
+        try {
+          recordQuestionInteraction({
+            questionId: q.id,
+            questionText: q.question,
+            category: q.category,
+            isCorrect,
+            timeSpentSeconds: 45,
+            wasFlagged: !!flaggedQuestions[q.id],
+            wasSkipped: !isAnswered,
+            correctAnswer: q.options[q.correctIndex],
+            explanation: q.explanation
+          });
+        } catch {}
       });
       onCompleteSession(correct, questions.length, activeExamId);
     }

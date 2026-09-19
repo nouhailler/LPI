@@ -171,3 +171,11 @@ export {
   guidedMiniLabsLpic3,
 };
 
+// =========================================================================
+// 6. MODULE « 🚨 RÉPONSE AUX INCIDENTS » (Realistic Incident Response Labs)
+// =========================================================================
+
+import { incidentScenarios } from './incidentResponseData';
+
+export { incidentScenarios };
+

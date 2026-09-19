@@ -9,14 +9,17 @@ import { PracticeExamView } from './components/PracticeExamView';
 import { FlashcardsView } from './components/FlashcardsView';
 import { GlossaryView } from './components/GlossaryView';
 import { TrainingHubView } from './components/training/TrainingHubView';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { ExplanationModal } from './components/ExplanationModal';
 import { ProfileModal } from './components/ProfileModal';
 import { SettingsModal } from './components/SettingsModal';
+import { DiagnosticExamModal } from './components/DiagnosticExamModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
 import { PracticeQuestion, TabType, UserStats } from './types';
 import { useLanguage } from './i18n/LanguageContext';
 import { frenchCertificationTiers, frenchPracticeQuestions } from './i18n/frenchData';
+import { getStoredDiagnosticResult } from './data/diagnosticExamData';
 import {
   initServiceWorker,
   subscribeToUpdateEvents,
@@ -38,10 +41,36 @@ export default function App() {
   const [selectedLearningTopic, setSelectedLearningTopic] = useState<string | undefined>(undefined);
   const [selectedExamId, setSelectedExamId] = useState<string>('exam-101');
 
+  // Diagnostic Exam Modal state
+  const [isDiagnosticOpen, setIsDiagnosticOpen] = useState(false);
+  const [diagnosticMode, setDiagnosticMode] = useState<'intro' | 'test' | 'results'>('intro');
+  const [selectedFlashcardsTopic, setSelectedFlashcardsTopic] = useState<any>('srs-daily');
+
+  const handleOpenFlashcards = (topic: any = 'srs-daily') => {
+    setSelectedFlashcardsTopic(topic);
+    setCurrentTab('flashcards');
+  };
+
   // Automatic Updates & Service Worker state
   const [hasUpdateAvailable, setHasUpdateAvailable] = useState(false);
   const [latestVersionInfo, setLatestVersionInfo] = useState<VersionInfo | null>(null);
   const [showUpdateBanner, setShowUpdateBanner] = useState(false);
+
+  // First launch diagnostic check
+  useEffect(() => {
+    try {
+      const hasSeen = localStorage.getItem('lpi_diagnostic_seen');
+      const existingResult = getStoredDiagnosticResult();
+      if (!existingResult && !hasSeen) {
+        const timer = setTimeout(() => {
+          setIsDiagnosticOpen(true);
+          setDiagnosticMode('intro');
+          localStorage.setItem('lpi_diagnostic_seen', 'true');
+        }, 800);
+        return () => clearTimeout(timer);
+      }
+    } catch {}
+  }, []);
 
   // Initialize service worker and update listener
   useEffect(() => {
@@ -195,6 +224,11 @@ export default function App() {
 
   const currentTiers = isFrench ? frenchCertificationTiers : certificationTiers;
 
+  const handleOpenDiagnostic = (mode: 'intro' | 'test' | 'results' = 'intro') => {
+    setDiagnosticMode(mode);
+    setIsDiagnosticOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#fff8f2] text-[#201b11] font-sans flex flex-col selection:bg-[#ffc20e] selection:text-[#6d5100]">
       {/* Top App Bar */}
@@ -206,6 +240,7 @@ export default function App() {
         onOpenProfile={() => handleOpenSettings('profile')}
         onOpenSettings={() => handleOpenSettings('updates')}
         hasUpdateAvailable={hasUpdateAvailable}
+        onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
         onClosePractice={() => setCurrentTab('dashboard')}
         onOpenExamMenu={() => {
           if (confirm('Pause timer?')) {
@@ -227,6 +262,7 @@ export default function App() {
         onOpenProfile={() => handleOpenSettings('profile')}
         onOpenSettings={() => handleOpenSettings('updates')}
         userStats={userStats}
+        onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
       />
 
       <div className="flex flex-1 w-full pt-16 md:pt-20">
@@ -235,76 +271,83 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className="flex-1 px-4 md:px-8 py-6 md:pl-72 max-w-7xl mx-auto w-full transition-all duration-200">
-          {currentTab === 'dashboard' && (
-            <DashboardView
-              userStats={userStats}
-              tiers={currentTiers}
-              onNavigate={handleSelectTab}
-              onSelectTier={() => handleSelectTab('path')}
-              onStartExam={handleStartExam}
-              onOpenLearning={handleOpenLearningTopic}
-            />
-          )}
+          <ErrorBoundary>
+            {currentTab === 'dashboard' && (
+              <DashboardView
+                userStats={userStats}
+                tiers={currentTiers}
+                onNavigate={handleSelectTab}
+                onSelectTier={() => handleSelectTab('path')}
+                onStartExam={handleStartExam}
+                onOpenLearning={handleOpenLearningTopic}
+                onOpenDiagnostic={handleOpenDiagnostic}
+                onOpenFlashcards={handleOpenFlashcards}
+              />
+            )}
 
-          {currentTab === 'learning' && (
-            <LearningObjectivesView
-              onNavigate={handleSelectTab}
-              onStartExam={handleStartExam}
-              initialTopicId={selectedLearningTopic}
-            />
-          )}
+            {currentTab === 'learning' && (
+              <LearningObjectivesView
+                onNavigate={handleSelectTab}
+                onStartExam={handleStartExam}
+                initialTopicId={selectedLearningTopic}
+              />
+            )}
 
-          {currentTab === 'glossary' && (
-            <GlossaryView
-              onNavigate={handleSelectTab}
-              onOpenLearningTopic={handleOpenLearningTopic}
-            />
-          )}
+            {currentTab === 'glossary' && (
+              <GlossaryView
+                onNavigate={handleSelectTab}
+                onOpenLearningTopic={handleOpenLearningTopic}
+              />
+            )}
 
-          {currentTab === 'path' && (
-            <CertificationPathView
-              userStats={userStats}
-              tiers={currentTiers}
-              onStartExam={handleStartExam}
-              onNavigate={handleSelectTab}
-              onOpenLearning={handleOpenLearningTopic}
-              onUpdateTarget={handleUpdateTarget}
-            />
-          )}
+            {currentTab === 'path' && (
+              <CertificationPathView
+                userStats={userStats}
+                tiers={currentTiers}
+                onStartExam={handleStartExam}
+                onNavigate={handleSelectTab}
+                onOpenLearning={handleOpenLearningTopic}
+                onUpdateTarget={handleUpdateTarget}
+              />
+            )}
 
-          {currentTab === 'practice' && (
-            <PracticeExamView
-              initialExamId={selectedExamId}
-              onCompleteSession={handleCompletePracticeSession}
-              onExit={() => handleSelectTab('dashboard')}
-              onOpenExplanation={(q) => setActiveExplanation(q)}
-              onStartTimer={() => {
-                setExamTimerSeconds(45 * 60);
-                setIsTimerRunning(true);
-              }}
-              onStopTimer={() => {
-                setIsTimerRunning(false);
-              }}
-            />
-          )}
+            {currentTab === 'practice' && (
+              <PracticeExamView
+                initialExamId={selectedExamId}
+                onCompleteSession={handleCompletePracticeSession}
+                onExit={() => handleSelectTab('dashboard')}
+                onOpenExplanation={(q) => setActiveExplanation(q)}
+                onStartTimer={() => {
+                  setExamTimerSeconds(45 * 60);
+                  setIsTimerRunning(true);
+                }}
+                onStopTimer={() => {
+                  setIsTimerRunning(false);
+                }}
+              />
+            )}
 
-          {currentTab === 'flashcards' && (
-            <FlashcardsView
-              cards={flashcardsData}
-              onCardLearned={() => {
-                setUserStats((prev) => ({
-                  ...prev,
-                  questionsDoneToday: Math.min(prev.dailyGoal, prev.questionsDoneToday + 1),
-                }));
-              }}
-            />
-          )}
+            {currentTab === 'flashcards' && (
+              <ErrorBoundary fallbackTitle={isFrench ? "Erreur d'affichage des Flashcards" : "Flashcards Display Error"}>
+                <FlashcardsView
+                  cards={flashcardsData}
+                  initialTopic={selectedFlashcardsTopic}
+                  onCardLearned={() => {
+                    setUserStats((prev) => ({
+                      ...prev,
+                      questionsDoneToday: Math.min(prev.dailyGoal, prev.questionsDoneToday + 1),
+                    }));
+                  }}
+                />
+              </ErrorBoundary>
+            )}
 
-          {currentTab === 'training' && (
-            <TrainingHubView
-              onNavigateTab={handleSelectTab}
-            />
-          )}
+            {currentTab === 'training' && (
+              <TrainingHubView
+                onNavigateTab={handleSelectTab}
+              />
+            )}
+          </ErrorBoundary>
         </main>
       </div>
 
@@ -332,6 +375,15 @@ export default function App() {
         onClose={() => setIsProfileOpen(false)}
         userStats={userStats}
         onResetStats={handleResetStats}
+      />
+
+      {/* Initial Diagnostic Level Assessment Modal (20 Questions & Matrix) */}
+      <DiagnosticExamModal
+        isOpen={isDiagnosticOpen}
+        onClose={() => setIsDiagnosticOpen(false)}
+        onNavigate={handleSelectTab}
+        onStartExam={handleStartExam}
+        initialMode={diagnosticMode}
       />
 
       {/* Floating Automatic Update Notification Banner */}

@@ -42,8 +42,28 @@ import {
   Users,
   Boxes,
   Cloud,
+  Brain,
+  Clock,
+  Flame,
+  Calendar,
+  ArrowRight,
+  Target,
+  Award,
+  ThumbsUp,
+  AlertCircle,
 } from 'lucide-react';
-import { Flashcard } from '../types';
+import { Flashcard, SRSCardRecord, SRSRating, SRSDeckSummary } from '../types';
+import {
+  loadSRSRecords,
+  saveSRSRecords,
+  applySRSRating,
+  getCardsDueToday,
+  getSRSDeckSummary,
+  previewNextInterval,
+  addNewCardsToReviewQueue,
+  SRS_INTERVALS,
+} from '../utils/srsEngine';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
@@ -57,7 +77,8 @@ type SelectedTopic =
   | 301 | 302 | 303 | 304 | 305 | 306 | 325 | 326 | 327 | 328
   | 351 | 352 | 353 | 361 | 362 | 363 | 364
   | 'lpic1' | 'lpic2' | 'lpic3'
-  | 'all';
+  | 'all'
+  | 'srs-daily';
 
 type FilterObjective =
   | 'all-topic'
@@ -201,13 +222,17 @@ type FilterObjective =
   | '328.3'
   | '328.4'
   | 'starred'
-  | 'review';
+  | 'review'
+  | 'srs-due'
+  | 'srs-learning'
+  | 'srs-mastered';
 
 export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   cards,
   onCardLearned,
   initialTopic = 203,
 }) => {
+  const { isFrench } = useLanguage();
   const [selectedTopic, setSelectedTopic] = useState<SelectedTopic>(initialTopic);
   const [activeDeckFilter, setActiveDeckFilter] = useState<FilterObjective>('all-topic');
   const [searchQuery, setSearchQuery] = useState('');
@@ -218,7 +243,38 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   const [showGridModal, setShowGridModal] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
-  // Local persistence for mastered cards and starred cards
+  // Sync when initialTopic prop updates
+  useEffect(() => {
+    if (initialTopic !== undefined) {
+      setSelectedTopic(initialTopic);
+      setActiveDeckFilter('all-topic');
+      setCurrentIndex(0);
+      setIsFlipped(false);
+    }
+  }, [initialTopic]);
+
+  // SRS Records Engine State
+  const [srsRecords, setSrsRecords] = useState<Record<number, SRSCardRecord>>(() =>
+    loadSRSRecords(cards)
+  );
+
+  // Synchronize SRS records across components & tabs
+  useEffect(() => {
+    const handleSync = () => {
+      setSrsRecords(loadSRSRecords(cards));
+    };
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('srs_updated', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('srs_updated', handleSync);
+    };
+  }, [cards]);
+
+  // SRS Deck Summary for stats & counters
+  const srsSummary = useMemo(() => getSRSDeckSummary(cards, srsRecords), [cards, srsRecords]);
+
+  // Local persistence for mastered cards and starred cards (legacy compatibility synced with SRS)
   const [masteredCardIds, setMasteredCardIds] = useState<number[]>(() => {
     try {
       const saved = localStorage.getItem('lpic1_mastered_cards');
@@ -284,7 +340,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
     let result = cards;
 
     // Filter by Certification or Topic level first
-    if (selectedTopic === 'lpic1') {
+    if (selectedTopic === 'srs-daily') {
+      result = getCardsDueToday(cards, srsRecords);
+    } else if (selectedTopic === 'lpic1') {
       result = result.filter(
         (c) =>
           (c.topicNumber && c.topicNumber >= 101 && c.topicNumber <= 110) ||
@@ -797,6 +855,14 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       result = result.filter((c) => starredCardIds.includes(c.id));
     } else if (activeDeckFilter === 'review') {
       result = result.filter((c) => reviewCardIds.includes(c.id));
+    } else if (activeDeckFilter === 'srs-due') {
+      result = getCardsDueToday(result, srsRecords);
+    } else if (activeDeckFilter === 'srs-learning') {
+      result = result.filter(
+        (c) => srsRecords[c.id]?.state === 'learning' || srsRecords[c.id]?.state === 'review'
+      );
+    } else if (activeDeckFilter === 'srs-mastered') {
+      result = result.filter((c) => srsRecords[c.id]?.state === 'mastered');
     }
 
     // Filter by search query
@@ -815,7 +881,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
     }
 
     return result;
-  }, [cards, selectedTopic, activeDeckFilter, searchQuery, starredCardIds, reviewCardIds]);
+  }, [cards, selectedTopic, activeDeckFilter, searchQuery, starredCardIds, reviewCardIds, srsRecords]);
 
   // Display deck
   const [deckOrder, setDeckOrder] = useState<Flashcard[]>([]);
@@ -866,29 +932,46 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
     }
   }, [currentIndex, totalInDeck]);
 
+  // SRS Card status & next interval calculations
+  const currentSRS = currentCard ? srsRecords[currentCard.id] : undefined;
+  const currentIntervalLevel = currentSRS ? currentSRS.intervalLevel : 0;
+  const previewGood = previewNextInterval(currentIntervalLevel, 'good');
+  const previewEasy = previewNextInterval(currentIntervalLevel, 'easy');
+
+  // SRS Rating Action Handler (Spaced Repetition System)
+  const handleSRSRating = useCallback(
+    (rating: SRSRating) => {
+      if (!currentCard) return;
+      const cardId = currentCard.id;
+      const { updatedRecord, allRecords } = applySRSRating(cardId, rating, srsRecords);
+      setSrsRecords(allRecords);
+
+      // Keep legacy lists synced
+      if (rating === 'mastered' || updatedRecord.state === 'mastered') {
+        setMasteredCardIds((prev) => (prev.includes(cardId) ? prev : [...prev, cardId]));
+        setReviewCardIds((prev) => prev.filter((id) => id !== cardId));
+        if (onCardLearned) onCardLearned(cardId);
+      } else if (rating === 'hard') {
+        setReviewCardIds((prev) => (prev.includes(cardId) ? prev : [...prev, cardId]));
+        setMasteredCardIds((prev) => prev.filter((id) => id !== cardId));
+      } else {
+        // good or easy rating
+        if (onCardLearned) onCardLearned(cardId);
+      }
+
+      nextCard();
+    },
+    [currentCard, srsRecords, onCardLearned, nextCard]
+  );
+
   // Action handlers
   const handleGotIt = useCallback(() => {
-    if (!currentCard) return;
-    const cardId = currentCard.id;
-
-    setMasteredCardIds((prev) => (prev.includes(cardId) ? prev : [...prev, cardId]));
-    setReviewCardIds((prev) => prev.filter((id) => id !== cardId));
-
-    if (onCardLearned) {
-      onCardLearned(cardId);
-    }
-    nextCard();
-  }, [currentCard, onCardLearned, nextCard]);
+    handleSRSRating('good');
+  }, [handleSRSRating]);
 
   const handleStudyAgain = useCallback(() => {
-    if (!currentCard) return;
-    const cardId = currentCard.id;
-
-    setReviewCardIds((prev) => (prev.includes(cardId) ? prev : [...prev, cardId]));
-    setMasteredCardIds((prev) => prev.filter((id) => id !== cardId));
-
-    nextCard();
-  }, [currentCard, nextCard]);
+    handleSRSRating('hard');
+  }, [handleSRSRating]);
 
   const toggleStarred = useCallback(() => {
     if (!currentCard) return;
@@ -929,20 +1012,50 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if typing in search input
-      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.tagName === 'SELECT'
+      ) {
         return;
       }
 
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
         handleFlip();
-      } else if (e.code === 'ArrowRight' || e.key === 'l' || e.key === 'L') {
-        e.preventDefault();
-        handleGotIt();
-      } else if (e.code === 'ArrowLeft' || e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        handleStudyAgain();
-      } else if (e.key === 's' || e.key === 'S') {
+      } else if (isFlipped) {
+        // Direct SRS shortcuts when flipped
+        if (e.key === '1' || e.key === 'd' || e.key === 'D') {
+          e.preventDefault();
+          handleSRSRating('hard');
+        } else if (e.key === '2' || e.key === 'c' || e.key === 'C') {
+          e.preventDefault();
+          handleSRSRating('good');
+        } else if (e.key === '3' || e.key === 'f' || e.key === 'F') {
+          e.preventDefault();
+          handleSRSRating('easy');
+        } else if (e.key === '4' || e.key === 'm' || e.key === 'M') {
+          e.preventDefault();
+          handleSRSRating('mastered');
+        } else if (e.code === 'ArrowRight' || e.key === 'l' || e.key === 'L') {
+          e.preventDefault();
+          handleSRSRating('good');
+        } else if (e.code === 'ArrowLeft' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          handleSRSRating('hard');
+        }
+      } else {
+        // Navigation shortcuts when card is face up
+        if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          nextCard();
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          prevCard();
+        }
+      }
+
+      if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
         handleShuffleToggle();
       } else if (e.key === 'b' || e.key === 'B') {
@@ -953,7 +1066,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleFlip, handleGotIt, handleStudyAgain, toggleStarred]);
+  }, [isFlipped, handleFlip, handleSRSRating, nextCard, prevCard, toggleStarred]);
 
   // Certification-level card groupings
   const lpic1Cards = useMemo(
@@ -1320,7 +1433,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   const topic364Mastered = topic364Cards.filter((c) => masteredCardIds.includes(c.id)).length;
 
   const activeTopicTitle =
-    selectedTopic === 'lpic1'
+    selectedTopic === 'srs-daily'
+      ? '🧠 Révision du Jour (Moteur de Répétition Espacée)'
+      : selectedTopic === 'lpic1'
       ? 'LPIC-1: Linux Administrator (All Decks)'
       : selectedTopic === 'lpic2'
       ? 'LPIC-2: Linux Engineer (All Decks)'
@@ -1409,7 +1524,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       : 'All LPIC Flashcards';
 
   const activeTopicBadge =
-    selectedTopic === 'lpic1'
+    selectedTopic === 'srs-daily'
+      ? `${srsSummary.dueTodayCount} Cartes Dues Aujourd'hui • Algorithme SRS (10m → 60j)`
+      : selectedTopic === 'lpic1'
       ? `${lpic1Cards.length} Cards • 10 Topics (Exams 101 & 102)`
       : selectedTopic === 'lpic2'
       ? `${lpic2Cards.length} Cards • 13 Topics (Exams 201 & 202)`
@@ -1679,6 +1796,120 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto w-full flex flex-col items-center justify-center pb-24 px-2">
+      {/* Moteur de Répétition Espacée (SRS) - Banner Card */}
+      <div className="w-full mb-5 bg-[#fffaf3] border-2 border-[#ffc20e] rounded-2xl p-4 sm:p-5 shadow-xs transition-all">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center font-bold text-2xl shadow-xs shrink-0">
+              🧠
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 bg-[#ffc20e] text-[#6d5100] text-[11px] font-extrabold uppercase tracking-wider rounded-md">
+                  Moteur de Répétition Espacée (SRS)
+                </span>
+                <span className="px-2.5 py-0.5 bg-[#28A745]/15 text-[#28A745] text-xs font-bold rounded-md flex items-center gap-1">
+                  <span>🧠</span>
+                  <strong>{srsSummary.dueTodayCount} cartes à revoir aujourd'hui</strong>
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-[#201b11] mt-1.5 flex items-center gap-2">
+                <span>« Révision du jour »</span>
+                <span className="text-xs font-normal text-[#817660]">
+                  • Consolidation active de la mémoire à long terme
+                </span>
+              </h2>
+              <p className="text-xs text-[#5f523b] mt-1 max-w-2xl leading-relaxed">
+                Algorithme à intervalles progressifs : chaque révision réussie double l'espacement dans le temps.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0 flex-wrap">
+            <button
+              onClick={() => handleTopicSelect('srs-daily')}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2 flex-1 sm:flex-initial ${
+                selectedTopic === 'srs-daily'
+                  ? 'bg-[#785a00] text-white ring-2 ring-[#ffc20e]'
+                  : 'bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100]'
+              }`}
+            >
+              <Brain className="w-4 h-4" />
+              <span>
+                {selectedTopic === 'srs-daily'
+                  ? `Mode Révision Actif (${srsSummary.dueTodayCount})`
+                  : `Lancer la révision du jour (${srsSummary.dueTodayCount})`}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                const updated = addNewCardsToReviewQueue(cards, srsRecords, 10);
+                setSrsRecords(updated);
+              }}
+              className="px-3 py-2.5 rounded-xl font-bold text-xs bg-white text-[#785a00] border border-[#d3c5ab] hover:bg-[#f8ecdb] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              title="Ajouter 10 nouvelles cartes à la file de révision d'aujourd'hui"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#ffc20e]" />
+              <span>+10 Cartes</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Progression Machine & Intervals Ladder */}
+        <div className="mt-4 pt-4 border-t border-[#ffc20e]/40 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+          {/* Progression Workflow */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-semibold text-[#5f523b] shrink-0">
+            <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">Nouvelle</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200">À revoir</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
+              Difficile (10m) • Correct (+1) • Facile (+2)
+            </span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold">
+              Maîtrisée (60j)
+            </span>
+          </div>
+
+          {/* Intervals Ladder */}
+          <div className="flex items-center gap-1 text-[11px] text-[#817660] flex-wrap">
+            <span className="font-bold text-[#4f4632]">Intervalles :</span>
+            {SRS_INTERVALS.map((item, idx) => (
+              <span
+                key={idx}
+                className="px-1.5 py-0.5 bg-white rounded border border-[#d3c5ab] font-mono text-[10px] text-[#4f4632]"
+              >
+                {item.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* SRS Mini Counters Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 pt-3 border-t border-[#ffc20e]/30">
+          <div className="bg-white/80 p-2 rounded-xl border border-[#d3c5ab]/60 flex items-center justify-between">
+            <span className="text-[11px] text-[#817660] font-medium">À revoir aujourd'hui</span>
+            <strong className="text-sm font-bold text-[#ba1a1a]">{srsSummary.dueTodayCount}</strong>
+          </div>
+          <div className="bg-white/80 p-2 rounded-xl border border-[#d3c5ab]/60 flex items-center justify-between">
+            <span className="text-[11px] text-[#817660] font-medium">En apprentissage</span>
+            <strong className="text-sm font-bold text-[#1976d2]">
+              {srsSummary.learningCount + srsSummary.reviewCount}
+            </strong>
+          </div>
+          <div className="bg-white/80 p-2 rounded-xl border border-[#d3c5ab]/60 flex items-center justify-between">
+            <span className="text-[11px] text-[#817660] font-medium">Maîtrisées (60j)</span>
+            <strong className="text-sm font-bold text-[#28A745]">{srsSummary.masteredCount}</strong>
+          </div>
+          <div className="bg-white/80 p-2 rounded-xl border border-[#d3c5ab]/60 flex items-center justify-between">
+            <span className="text-[11px] text-[#817660] font-medium">Nouvelles disponibles</span>
+            <strong className="text-sm font-bold text-[#785a00]">{srsSummary.newCount}</strong>
+          </div>
+        </div>
+      </div>
+
       {/* 3 Certification Comboboxes Section */}
       <div className="w-full mb-5 bg-white border border-[#d3c5ab] rounded-2xl p-3 sm:p-4 shadow-2xs">
         {/* Header with Title and All Certifications Quick Button */}
@@ -4234,7 +4465,19 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               </>
             )}
 
-            {/* Global Starred & Needs Review Filters */}
+            {/* Global SRS, Starred & Needs Review Filters */}
+            <button
+              onClick={() => setActiveDeckFilter('srs-due')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeDeckFilter === 'srs-due'
+                  ? 'bg-[#785a00] text-white shadow-xs'
+                  : 'bg-white text-[#785a00] hover:bg-[#fffaf3] border border-[#ffc20e]'
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 text-[#ffc20e]" />
+              Dues aujourd'hui ({srsSummary.dueTodayCount})
+            </button>
+
             <button
               onClick={() => setActiveDeckFilter('starred')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
@@ -4334,24 +4577,81 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
 
       {/* Main Flashcard Container */}
       {totalInDeck === 0 ? (
-        <div className="w-full max-w-xl bg-white border border-[#d3c5ab] rounded-2xl p-12 text-center my-6">
-          <HelpCircle className="w-12 h-12 text-[#817660] mx-auto mb-3 opacity-60" />
-          <h3 className="text-lg font-bold text-[#201b11]">No flashcards found</h3>
-          <p className="text-xs text-[#817660] mt-1 max-w-xs mx-auto">
-            {searchQuery
-              ? `No cards matching "${searchQuery}" in this filter.`
-              : 'You have no cards in this category yet.'}
-          </p>
-          <button
-            onClick={() => {
-              setActiveDeckFilter('all-topic');
-              setSearchQuery('');
-            }}
-            className="mt-4 px-4 py-2 bg-[#785a00] text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer hover:bg-[#6d5100]"
-          >
-            Show All Cards
-          </button>
-        </div>
+        selectedTopic === 'srs-daily' || activeDeckFilter === 'srs-due' ? (
+          <div className="w-full max-w-xl bg-white border border-[#d3c5ab] rounded-2xl p-6 sm:p-8 text-center my-6 shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-4 text-3xl shadow-xs">
+              🧠
+            </div>
+            <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 inline-block mb-2">
+              Objectif du jour accompli
+            </span>
+            <h3 className="font-bold text-xl text-[#201b11]">
+              Toutes vos révisions du jour sont terminées !
+            </h3>
+            <p className="text-xs sm:text-sm text-[#817660] mt-2 max-w-md mx-auto leading-relaxed">
+              Félicitations ! Votre mémoire à long terme consolide activement ces notions. Les prochaines cartes réapparaîtront automatiquement selon leurs intervalles (1j, 3j, 7j, 14j, 30j, 60j).
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 my-5 text-left">
+              <div className="p-3 bg-[#fdf9f4] rounded-xl border border-[#d3c5ab]">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">Dues aujourd'hui</span>
+                <span className="text-lg font-bold text-[#28A745]">0</span>
+              </div>
+              <div className="p-3 bg-[#fdf9f4] rounded-xl border border-[#d3c5ab]">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">En progression</span>
+                <span className="text-lg font-bold text-[#1976d2]">
+                  {srsSummary.learningCount + srsSummary.reviewCount}
+                </span>
+              </div>
+              <div className="p-3 bg-[#fdf9f4] rounded-xl border border-[#d3c5ab]">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">Maîtrisées</span>
+                <span className="text-lg font-bold text-[#2e7d32]">{srsSummary.masteredCount}</span>
+              </div>
+              <div className="p-3 bg-[#fdf9f4] rounded-xl border border-[#d3c5ab]">
+                <span className="text-[10px] uppercase font-bold text-[#817660] block">Nouvelles dispo</span>
+                <span className="text-lg font-bold text-[#785a00]">{srsSummary.newCount}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => {
+                  const updated = addNewCardsToReviewQueue(cards, srsRecords, 10);
+                  setSrsRecords(updated);
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Ajouter 10 nouvelles cartes (+10)</span>
+              </button>
+              <button
+                onClick={() => handleTopicSelect('lpic1')}
+                className="w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-[#f8ecdb] text-[#4f4632] border border-[#d3c5ab] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+              >
+                Explorer les thèmes LPIC
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full max-w-xl bg-white border border-[#d3c5ab] rounded-2xl p-12 text-center my-6">
+            <HelpCircle className="w-12 h-12 text-[#817660] mx-auto mb-3 opacity-60" />
+            <h3 className="text-lg font-bold text-[#201b11]">No flashcards found</h3>
+            <p className="text-xs text-[#817660] mt-1 max-w-xs mx-auto">
+              {searchQuery
+                ? `No cards matching "${searchQuery}" in this filter.`
+                : 'You have no cards in this category yet.'}
+            </p>
+            <button
+              onClick={() => {
+                setActiveDeckFilter('all-topic');
+                setSearchQuery('');
+              }}
+              className="mt-4 px-4 py-2 bg-[#785a00] text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer hover:bg-[#6d5100]"
+            >
+              Show All Cards
+            </button>
+          </div>
+        )
       ) : (
         <div className="w-full max-w-2xl flex flex-col items-center">
           {/* Deck Progress Bar & Counter */}
@@ -4414,6 +4714,32 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                         <HelpCircle className="w-3 h-3 text-[#785a00]" />
                         Challenge
                       </span>
+
+                      {currentSRS && (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${
+                            currentSRS.state === 'mastered'
+                              ? 'bg-[#e8f5e9] text-[#2e7d32] border-[#2e7d32]/30'
+                              : currentSRS.state === 'review'
+                              ? 'bg-[#e3f2fd] text-[#1565c0] border-[#1565c0]/30'
+                              : currentSRS.state === 'learning'
+                              ? 'bg-[#fff3e0] text-[#e65100] border-[#e65100]/30'
+                              : 'bg-[#f5f5f5] text-[#616161] border-[#9e9e9e]/30'
+                          }`}
+                          title={`Intervalle actuel: ${currentSRS.intervalLabel} • Prochaine révision: ${new Date(currentSRS.dueDate).toLocaleDateString()}`}
+                        >
+                          <Brain className="w-3 h-3" />
+                          <span>
+                            {currentSRS.state === 'mastered'
+                              ? 'Maîtrisée (60j)'
+                              : currentSRS.state === 'review'
+                              ? `SRS ${currentSRS.intervalLabel}`
+                              : currentSRS.state === 'learning'
+                              ? 'À revoir (10m)'
+                              : 'Nouvelle'}
+                          </span>
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -4517,6 +4843,22 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                       <span className="font-mono text-xs text-[#785a00] font-bold bg-[#f8ecdb] px-2.5 py-0.5 rounded border border-[#d3c5ab]">
                         {currentCard?.command}
                       </span>
+                      {currentSRS && (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${
+                            currentSRS.state === 'mastered'
+                              ? 'bg-[#e8f5e9] text-[#2e7d32] border-[#2e7d32]/30'
+                              : currentSRS.state === 'review'
+                              ? 'bg-[#e3f2fd] text-[#1565c0] border-[#1565c0]/30'
+                              : currentSRS.state === 'learning'
+                              ? 'bg-[#fff3e0] text-[#e65100] border-[#e65100]/30'
+                              : 'bg-[#f5f5f5] text-[#616161] border-[#9e9e9e]/30'
+                          }`}
+                        >
+                          <Brain className="w-3 h-3" />
+                          <span>Intervalle actuel: {currentSRS.intervalLabel}</span>
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -4631,59 +4973,124 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons: Study Again vs Mastered */}
-          <div className="w-full flex items-center justify-between gap-3 mt-5">
-            <button
-              onClick={prevCard}
-              className="p-3 rounded-xl bg-white border border-[#d3c5ab] text-[#4f4632] hover:bg-[#f8ecdb] transition-colors cursor-pointer shadow-2xs"
-              title="Previous card (Left Arrow)"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+          {/* Action Buttons: SRS Rating System (Difficile, Correct, Facile, Maîtrisée) */}
+          <div className="w-full flex flex-col gap-2 mt-5">
+            {/* Top Navigation Row if not flipped */}
+            {!isFlipped ? (
+              <div className="w-full flex items-center justify-between gap-2.5">
+                <button
+                  onClick={prevCard}
+                  className="p-3 rounded-xl bg-white border border-[#d3c5ab] text-[#4f4632] hover:bg-[#f8ecdb] transition-colors cursor-pointer shadow-2xs"
+                  title="Previous card (Left Arrow)"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
 
-            <button
-              onClick={handleStudyAgain}
-              className="flex-1 flex items-center justify-center py-3.5 px-4 rounded-xl border border-[#ba1a1a] bg-white text-[#ba1a1a] hover:bg-[#ffdad6] transition-all gap-2 shadow-2xs active:scale-98 cursor-pointer font-bold text-xs uppercase tracking-wider"
-            >
-              <RotateCw className="w-4 h-4" />
-              <span>Study Again</span>
-              <kbd className="hidden sm:inline px-1.5 py-0.5 bg-[#ffdad6] rounded text-[10px] lowercase font-normal">
-                R key
-              </kbd>
-            </button>
+                <button
+                  onClick={handleFlip}
+                  className="flex-1 flex items-center justify-center py-3.5 px-4 rounded-xl bg-[#785a00] hover:bg-[#644b00] text-white transition-all gap-2 shadow-xs active:scale-98 cursor-pointer font-bold text-xs uppercase tracking-wider"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Retourner la carte pour évaluer</span>
+                  <kbd className="hidden sm:inline px-1.5 py-0.5 bg-black/20 text-white rounded text-[10px] lowercase font-normal">
+                    Espace
+                  </kbd>
+                </button>
 
-            <button
-              onClick={handleGotIt}
-              className="flex-1 flex items-center justify-center py-3.5 px-4 rounded-xl bg-[#28A745] text-white hover:bg-[#218838] transition-all gap-2 shadow-xs active:scale-98 cursor-pointer font-bold text-xs uppercase tracking-wider"
-            >
-              <Check className="w-4 h-4 stroke-[3]" />
-              <span>Got It (Mastered)</span>
-              <kbd className="hidden sm:inline px-1.5 py-0.5 bg-black/20 text-white rounded text-[10px] lowercase font-normal">
-                L key
-              </kbd>
-            </button>
+                <button
+                  onClick={nextCard}
+                  className="p-3 rounded-xl bg-white border border-[#d3c5ab] text-[#4f4632] hover:bg-[#f8ecdb] transition-colors cursor-pointer shadow-2xs"
+                  title="Next card (Right Arrow)"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            ) : null}
 
-            <button
-              onClick={nextCard}
-              className="p-3 rounded-xl bg-white border border-[#d3c5ab] text-[#4f4632] hover:bg-[#f8ecdb] transition-colors cursor-pointer shadow-2xs"
-              title="Next card (Right Arrow)"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            {/* SRS 4-Button Rating Matrix */}
+            <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* 1. Difficile (10 min) */}
+              <button
+                onClick={() => handleSRSRating('hard')}
+                className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border-2 border-[#ba1a1a] bg-white text-[#ba1a1a] hover:bg-[#ffdad6] transition-all shadow-2xs active:scale-98 cursor-pointer"
+                title="Raccourci: 1 ou D"
+              >
+                <div className="flex items-center gap-1 font-bold text-xs uppercase tracking-wider">
+                  <RotateCw className="w-3.5 h-3.5" />
+                  <span>Difficile</span>
+                </div>
+                <span className="text-[10px] font-semibold opacity-90 mt-0.5">10 min</span>
+                <kbd className="hidden sm:inline text-[9px] px-1 bg-[#ffdad6] text-[#ba1a1a] rounded mt-0.5 font-mono">
+                  1 ou D
+                </kbd>
+              </button>
+
+              {/* 2. Correct (Next interval, e.g. 1j, 3j, 7j...) */}
+              <button
+                onClick={() => handleSRSRating('good')}
+                className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl bg-[#1976d2] text-white hover:bg-[#1565c0] transition-all shadow-xs active:scale-98 cursor-pointer"
+                title="Raccourci: 2 ou C"
+              >
+                <div className="flex items-center gap-1 font-bold text-xs uppercase tracking-wider">
+                  <ThumbsUp className="w-3.5 h-3.5" />
+                  <span>{isFrench ? 'Correct' : 'Good'}</span>
+                </div>
+                <span className="text-[10px] font-semibold opacity-90 mt-0.5">
+                  {isFrench ? (previewGood?.labelFr ?? '1 jour') : (previewGood?.labelEn ?? '1 day')}
+                </span>
+                <kbd className="hidden sm:inline text-[9px] px-1 bg-black/20 text-white rounded mt-0.5 font-mono">
+                  2 ou C
+                </kbd>
+              </button>
+
+              {/* 3. Facile (Skips 2 intervals, e.g. 3j, 7j...) */}
+              <button
+                onClick={() => handleSRSRating('easy')}
+                className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl bg-[#28A745] text-white hover:bg-[#218838] transition-all shadow-xs active:scale-98 cursor-pointer"
+                title="Raccourci: 3 ou F"
+              >
+                <div className="flex items-center gap-1 font-bold text-xs uppercase tracking-wider">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>{isFrench ? 'Facile' : 'Easy'}</span>
+                </div>
+                <span className="text-[10px] font-semibold opacity-90 mt-0.5">
+                  {isFrench ? (previewEasy?.labelFr ?? '3 jours') : (previewEasy?.labelEn ?? '3 days')}
+                </span>
+                <kbd className="hidden sm:inline text-[9px] px-1 bg-black/20 text-white rounded mt-0.5 font-mono">
+                  3 ou F
+                </kbd>
+              </button>
+
+              {/* 4. Maîtrisée (60 jours) */}
+              <button
+                onClick={() => handleSRSRating('mastered')}
+                className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl bg-[#ffc20e] text-[#6d5100] hover:bg-[#f9bd00] transition-all shadow-xs active:scale-98 cursor-pointer font-bold"
+                title="Raccourci: 4 ou M"
+              >
+                <div className="flex items-center gap-1 font-bold text-xs uppercase tracking-wider">
+                  <Award className="w-3.5 h-3.5 text-[#6d5100]" />
+                  <span>Maîtrisée</span>
+                </div>
+                <span className="text-[10px] font-semibold text-[#6d5100] mt-0.5">60 jours</span>
+                <kbd className="hidden sm:inline text-[9px] px-1 bg-black/10 text-[#6d5100] rounded mt-0.5 font-mono">
+                  4 ou M
+                </kbd>
+              </button>
+            </div>
           </div>
 
           {/* Stats Bar */}
-          <div className="flex justify-between items-center w-full px-2 mt-4 text-xs font-semibold text-[#817660]">
+          <div className="flex justify-between items-center w-full px-2 mt-4 text-xs font-semibold text-[#817660] flex-wrap gap-2">
             <span>
-              Mastered: <strong className="text-[#28A745]">{masteredCardIds.length}</strong>
+              🧠 Dues aujourd'hui: <strong className="text-[#ba1a1a] font-bold">{srsSummary.dueTodayCount}</strong>
             </span>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <span className="hidden sm:inline text-[11px] text-[#817660]">
-                Press <kbd className="px-1 bg-[#f8ecdb] rounded text-[10px]">Space</kbd> to flip
+                Raccourcis clavier : <kbd className="px-1 bg-[#f8ecdb] rounded text-[10px]">Espace</kbd> (retourner) • <kbd className="px-1 bg-[#f8ecdb] rounded text-[10px]">1-4</kbd> (évaluer)
               </span>
             </div>
             <span>
-              Needs Review: <strong className="text-[#ba1a1a]">{reviewCardIds.length}</strong>
+              🏆 Maîtrisées (60j): <strong className="text-[#28A745] font-bold">{srsSummary.masteredCount}</strong>
             </span>
           </div>
         </div>

@@ -9,7 +9,10 @@ import {
   Award,
   Zap,
   CheckCircle2,
-  HelpCircle
+  HelpCircle,
+  ShieldAlert,
+  Flame,
+  ArrowRight
 } from 'lucide-react';
 import { TrainingModeType } from '../../types';
 import {
@@ -18,12 +21,16 @@ import {
   sequencingChallenges,
   matchingGames,
   guidedLabScenarios,
+  incidentScenarios,
 } from '../../data/trainingData';
 import { FillInTheBlankModule } from './FillInTheBlankModule';
 import { TroubleshootingModule } from './TroubleshootingModule';
 import { SequencingModule } from './SequencingModule';
 import { MatchingModule } from './MatchingModule';
 import { GuidedMiniLabsModule } from './GuidedMiniLabsModule';
+import { IncidentResponseModule } from './IncidentResponseModule';
+import { WeaknessTrainingModal } from '../weakness/WeaknessTrainingModal';
+import { getWeaknessReport } from '../../utils/weaknessEngine';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Props {
@@ -31,12 +38,14 @@ interface Props {
   onNavigateTab?: (tab: any) => void;
 }
 
-export const TrainingHubView: React.FC<Props> = ({ initialMode = 'fill_in_blank', onNavigateTab }) => {
+export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_response', onNavigateTab }) => {
   const { isFrench } = useLanguage();
   const isFr = isFrench;
 
   const [currentMode, setCurrentMode] = useState<TrainingModeType>(initialMode);
   const [totalScore, setTotalScore] = useState(0);
+  const [isWeaknessModalOpen, setIsWeaknessModalOpen] = useState(false);
+  const report = getWeaknessReport();
 
   const handleScoreUpdate = (points: number) => {
     setTotalScore((prev) => prev + points);
@@ -51,6 +60,15 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'fill_in_blank'
     description: string;
     descriptionFr: string;
   }[] = [
+    {
+      id: 'incident_response',
+      label: 'Incident Response',
+      labelFr: '🚨 Incident Response',
+      badge: `${incidentScenarios.length} scénarios d'astreinte réels`,
+      icon: ShieldAlert,
+      description: 'Realistic live enterprise outage scenarios with 15-minute countdown, diagnostic console (journalctl, systemctl, ip, ss, df, mount), progressive clues, and root-cause analysis (RCA).',
+      descriptionFr: 'Scénarios réels de pannes en production avec compte à rebours de 15 minutes, console de diagnostic (journalctl, systemctl, ip, ss, df, mount), indices progressifs et analyse RCA.',
+    },
     {
       id: 'fill_in_blank',
       label: 'Fill-in-the-Blank',
@@ -130,8 +148,41 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'fill_in_blank'
         </div>
       </div>
 
+      {/* Weakness Engine Targeted Banner */}
+      <div className="bg-[#fff8f2] border-2 border-red-300 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-100 border border-red-300 flex items-center justify-center text-red-600 shrink-0">
+            <Flame className="w-5 h-5 fill-red-500/30 text-red-600 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold uppercase tracking-wider text-red-700 bg-red-100 px-2 py-0.5 rounded border border-red-200">
+                {isFr ? '🔥 Vos points faibles' : '🔥 Priority Weaknesses'}
+              </span>
+              <span className="text-xs font-mono font-bold text-[#4f4632]">
+                {report.domains.slice(0, 3).map((d) => `${d.nameFr.split('(')[0].trim()} ${d.masteryPct}%`).join(' • ')}
+              </span>
+            </div>
+            <p className="text-xs text-[#4f4632] mt-1">
+              {isFr
+                ? 'L\'algorithme a détecté vos principales lacunes (DNS, routing, scripts, SELinux). Entraînez-vous avec des questions adaptatives ciblées.'
+                : 'The engine pinpointed your highest error rates (DNS, routing, shell, SELinux). Train with targeted adaptive challenges.'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setIsWeaknessModalOpen(true)}
+          className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-linear-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-98"
+        >
+          <Flame className="w-4 h-4 fill-white/30" />
+          <span>{isFr ? 'Entraîner mes faiblesses' : 'Train Weaknesses'}</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
       {/* Mode Navigation Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         {trainingModes.map((mode) => {
           const Icon = mode.icon;
           const isActive = currentMode === mode.id;
@@ -181,6 +232,13 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'fill_in_blank'
 
       {/* Render Selected Module */}
       <div className="transition-all">
+        {currentMode === 'incident_response' && (
+          <IncidentResponseModule
+            scenarios={incidentScenarios}
+            onScoreUpdate={handleScoreUpdate}
+          />
+        )}
+
         {currentMode === 'fill_in_blank' && (
           <FillInTheBlankModule
             challenges={fillInTheBlankChallenges}
@@ -216,6 +274,12 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'fill_in_blank'
           />
         )}
       </div>
+
+      {/* Weakness Engine Training Modal */}
+      <WeaknessTrainingModal
+        isOpen={isWeaknessModalOpen}
+        onClose={() => setIsWeaknessModalOpen(false)}
+      />
     </div>
   );
 };

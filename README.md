@@ -42,10 +42,11 @@
   - [5. 📝 Timed Practice Exam Engine & Simulation](#5--timed-practice-exam-engine--simulation)
   - [6. 🗂️ Spaced-Repetition Interactive Flashcards (2,000+ Cards)](#6-️-spaced-repetition-interactive-flashcards-2000-cards)
   - [7. ⚡ Hands-on Interactive Training Hub (Labs & Scenarios)](#7-️-hands-on-interactive-training-hub-labs--scenarios)
-  - [8. 📊 Intelligent Dashboard, LPI Guide & Exam Standards](#8--intelligent-dashboard-lpi-guide--exam-standards)
-  - [9. 🗺️ Career Roadmap & Certification Path](#9-️-career-roadmap--certification-path)
-  - [10. 📈 Progress Tracker & Exam Analytics](#10--progress-tracker--exam-analytics)
-  - [11. 🌐 Full Bilingual Experience (Français / English)](#11--full-bilingual-experience-français--english)
+  - [8. 🎯 Examen Diagnostique Initial & Matrice de Compétences](#8--examen-diagnostique-initial--matrice-de-compétences)
+  - [9. 📊 Intelligent Dashboard, LPI Guide & Exam Standards](#9--intelligent-dashboard-lpi-guide--exam-standards)
+  - [10. 🗺️ Career Roadmap & Certification Path](#10-️-career-roadmap--certification-path)
+  - [11. 📈 Progress Tracker & Exam Analytics](#11--progress-tracker--exam-analytics)
+  - [12. 🌐 Full Bilingual Experience (Français / English)](#12--full-bilingual-experience-français--english)
 - [📱 Install on Desktop & Mobile (PWA)](#-install-on-desktop--mobile-pwa)
 - [🎯 Covered LPI Certification Exams](#-covered-lpi-certification-exams)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
@@ -124,16 +125,26 @@
     - **Topic 110**: Security (Host Hardening, Permissions, SSH, GPG)
   - **LPIC-2 Curriculum**: Exhaustive decks spanning Topics 200 through 212 (Capacity Planning, Linux Kernel, System Startup, Advanced Storage LVM/RAID, Networking, BIND9 DNS, Apache/Nginx Web Services, Samba/NFS File Sharing, DHCP/PAM/LDAP Client Management, Postfix/Dovecot E-Mail, and System Security/Firewalls).
   - **LPIC-3 Enterprise Specialties**: Dedicated card sets covering Samba AD DC & LDAP (300), Advanced Cryptography & Hardening (303), Virtualization & Containers (305), and High Availability Clusters (306).
+- **Moteur Scientifique de Répétition Espacée (SRS Engine)**:
+  - **Machine d'états 5 niveaux** : `Nouvelle` ➔ `À revoir` ➔ (`Difficile` / `Correct` / `Facile`) ➔ `Maîtrisée`.
+  - **Échelle d'intervalles calculée** : `10 min` ➔ `1 jour` ➔ `3 jours` ➔ `7 jours` ➔ `14 jours` ➔ `30 jours` ➔ `60 jours (Maîtrisée)`.
+  - **« Révision du jour » (Daily Review)** : File d'attente intelligente sélectionnant précisément les cartes dues à la date du jour (ex: `🧠 23 cartes à revoir aujourd'hui`).
+  - **Matrice de notation à 4 touches** :
+    - `1` / **Difficile** : Ramène l'intervalle à 10 min pour consolider la notion immédiatement.
+    - `2` / **Correct** : Progresse vers l'intervalle supérieur (1j, 3j, 7j, etc.).
+    - `3` / **Facile** : Avance de 2 paliers d'intervalles.
+    - `4` / **Maîtrisée** : Ancre directement à 60 jours.
+  - **Widget Dédié sur le Tableau de bord** : Accès direct avec compteur dynamique en temps réel, échelle des paliers et ventilation des cartes en cours d'apprentissage.
+  - **Synchronisation locale** : Persistance automatique dans `localStorage` avec synchronisation inter-onglets et événements d'état en direct.
 - **Interactive Deck Controls & Features**:
   - Sub-objective filter pills to narrow down exact focus areas.
   - 3D perspective flip card animations with tactile feedback.
   - Search filter across all commands, definitions, examples, and exam tips.
   - Card Index visual modal to quickly jump to any card in the deck.
-  - Keyboard shortcuts (`Space`/`Enter` to flip, `Left`/`Right` arrow or `R`/`L` keys for review/mastery, `S` for shuffle, `B` to star/bookmark).
+  - Keyboard shortcuts (`Space`/`Enter` to flip, `1-4` for SRS ratings, `S` for shuffle, `B` to star/bookmark).
   - Speech synthesis (TTS) pronunciation audio for commands and definitions.
   - One-click copy for command syntax examples.
   - High-yield **Exam Tip** callouts highlighting gotchas and edge cases.
-  - Local persistence for Mastered, Needs Review, and Starred status across browser sessions.
 
 ### 7. ⚡ Hands-on Interactive Training Hub (Labs & Scenarios)
 - **Guided Mini-Labs**: Step-by-step interactive CLI challenges guiding students through partition setup, systemd unit configuration, user administration, and network troubleshooting with real-time command syntax validation.
@@ -142,21 +153,35 @@
 - **Matching Pairs Game**: Rapid-fire visual matching linking commands to syntax flags, configuration files to services, network ports to protocols, and utilities to LPI topics.
 - **Fill-in-the-Blank Challenges**: Test exact CLI command syntax, options, and configuration directives.
 
-### 8. 📊 Intelligent Dashboard, LPI Guide & Exam Standards
-- **Dynamic "Next Recommended Step"**: Real-time evaluation of study progress that automatically identifies the highest-weight unmastered objective and offers a 1-click shortcut into the curriculum.
+### 8. 🎯 Examen Diagnostique Initial & Matrice de Compétences
+- **Évaluation initiale 20 questions** : Déclenchée au premier lancement (ou accessible à tout moment depuis le menu et le bandeau d'accueil) pour calibrer le niveau de l'étudiant sur les 6 domaines fondamentaux LPIC-1.
+- **Matrice Domaine / Niveau détaillée** :
+  | Domaine | Niveau visuel | Seuil |
+  | :--- | :--- | :--- |
+  | **Architecture système** | 🟢 Vert (Acquis) | $\ge 75\%$ |
+  | **Commandes GNU/Linux** | 🟢 Vert (Acquis) | $\ge 75\%$ |
+  | **Filesystems & Périphériques** | 🟠 Orange (En cours) | $50\% - 74\%$ |
+  | **Bash & Shell Scripting** | 🔴 Rouge (Prioritaire) | $< 50\%$ |
+  | **Réseau (Networking)** | 🔴 Rouge (Prioritaire) | $< 50\%$ |
+  | **Sécurité (Security)** | 🟠 Orange (En cours) | $50\% - 74\%$ |
+- **« Vos 3 Priorités »** : Extraction automatique des 3 domaines les plus faibles avec indicateurs d'urgence (`#1 Priorité`, `#2`, `#3`) et boutons d'action directe en 1 clic (Cours, Flashcards ciblées, Labs interactifs).
+- **Alimentation directe du moteur de recommandation** : Le bandeau « Prochaine étape recommandée » du tableau de bord bascule automatiquement en ciblant en priorité absolue le thème le plus faible révélé par le diagnostic jusqu'à sa maîtrise complète.
+
+### 9. 📊 Intelligent Dashboard, LPI Guide & Exam Standards
+- **Dynamic "Next Recommended Step"**: Real-time evaluation of study progress that automatically prioritizes the diagnostic assessment's weakest domains before falling back to the highest-weight unmastered LPIC-1 objectives.
 - **LPI Certification Methodology Guide (`LpiCertificationGuideModal`)**: Direct-access guide outlining the 4 pillars of preparation (weight prioritization, active recall, hands-on terminal practice, exam simulation) and how to avoid common traps (case sensitivity, absolute paths, multi-select questions).
 - **Context-Aware Tooltips (`InfoTooltip`)**: Discreet tooltips explaining LPI weights (1 weight point ≈ 1 exam question), official 90-minute testing vs 45-minute sprint mode, and passing standards (70% / 500 out of 800).
 - **Recent Practice Exam Performance Widget**: Preserves recent test runs with scores, dates, correct answer counts, pass/fail status, and average percentage.
 
-### 9. 🗺️ Career Roadmap & Certification Path
+### 10. 🗺️ Career Roadmap & Certification Path
 - Visual step-by-step career path from **Linux Essentials** $\rightarrow$ **LPIC-1** $\rightarrow$ **LPIC-2** $\rightarrow$ **LPIC-3 Specialties**.
 - Prerequisites, exam codes, question counts, passing scores, and recommended hands-on experience requirements.
 
-### 10. 📈 Progress Tracker & Analytics
+### 11. 📈 Progress Tracker & Analytics
 - Track study streaks, completed questions, practice exam attempts, and category proficiencies.
 - Persistent local storage: no account or sign-up needed, your study progress stays securely in your browser.
 
-### 11. 🌐 Full Bilingual Experience (Français / English)
+### 12. 🌐 Full Bilingual Experience (Français / English)
 - Instant language toggle (`FR` / `EN`) in the top navigation bar.
 - Fully localized interface labels, curriculum objectives, practice questions, technical explanations, exam rules, and methodologies.
 

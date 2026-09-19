@@ -99,6 +99,30 @@ export interface PracticeQuestion {
   commandSnippet?: string;
 }
 
+export type SRSState = 'new' | 'learning' | 'review' | 'mastered';
+export type SRSRating = 'hard' | 'good' | 'easy' | 'mastered';
+
+export interface SRSCardRecord {
+  cardId: number;
+  state: SRSState;
+  intervalLevel: number; // 0: 10 min, 1: 1j, 2: 3j, 3: 7j, 4: 14j, 5: 30j, 6: 60j
+  intervalLabel: string; // "10 min", "1 jour", "3 jours", "7 jours", "14 jours", "30 jours", "60 jours"
+  dueDate: string; // ISO string
+  lastReviewedAt?: string;
+  repetitions: number;
+  lapses: number;
+  lastRating?: SRSRating;
+}
+
+export interface SRSDeckSummary {
+  dueTodayCount: number;
+  newCount: number;
+  learningCount: number;
+  reviewCount: number;
+  masteredCount: number;
+  totalCards: number;
+}
+
 export interface Flashcard {
   id: number;
   deck: string;
@@ -115,6 +139,7 @@ export interface Flashcard {
   keyNotes?: string[];
   difficulty?: 'Fundamental' | 'Intermediate' | 'Advanced';
   status?: 'unseen' | 'learning' | 'mastered';
+  srsRecord?: SRSCardRecord;
 }
 
 export interface UserStats {
@@ -145,7 +170,13 @@ export interface ExamSessionHistory {
 // Specialized Interactive Training Modules
 // ----------------------------------------------------
 
-export type TrainingModeType = 'fill_in_blank' | 'troubleshooting' | 'sequencing' | 'matching' | 'guided_labs';
+export type TrainingModeType =
+  | 'incident_response'
+  | 'fill_in_blank'
+  | 'troubleshooting'
+  | 'sequencing'
+  | 'matching'
+  | 'guided_labs';
 
 export interface FillInTheBlankChallenge {
   id: string;
@@ -273,4 +304,192 @@ export interface GuidedLabScenario {
   contextFr?: string;
   steps: GuidedLabStep[];
 }
+
+export type DiagnosticDomainId =
+  | 'architecture'
+  | 'commands'
+  | 'filesystems'
+  | 'bash'
+  | 'networking'
+  | 'security';
+
+export interface DiagnosticDomainScore {
+  domainId: DiagnosticDomainId;
+  name: string;
+  nameFr: string;
+  totalQuestions: number;
+  correctQuestions: number;
+  percentage: number;
+  level: 'high' | 'medium' | 'low'; // 🟢 high (>=75%), 🟠 medium (50-74%), 🔴 low (<50%)
+  associatedTopicId: string;
+  associatedTopicNumber: number;
+  summaryNoteFr: string;
+  summaryNoteEn: string;
+}
+
+export interface DiagnosticQuestion {
+  id: number;
+  domainId: DiagnosticDomainId;
+  question: string;
+  questionFr: string;
+  commandSnippet?: string;
+  options: string[];
+  optionsFr: string[];
+  correctIndex: number;
+  explanation: string;
+  explanationFr: string;
+  topicId: string;
+  topicNumber: number;
+  objectiveId: string;
+}
+
+export interface DiagnosticResult {
+  completedAt: string;
+  totalQuestions: number;
+  correctAnswers: number;
+  percentage: number;
+  domainScores: DiagnosticDomainScore[];
+  topPriorities: DiagnosticDomainScore[];
+  answers: Record<number, number>;
+}
+
+// ----------------------------------------------------
+// 🚨 Realistic Incident Response Scenarios
+// ----------------------------------------------------
+
+export interface IncidentDiagnosticCommand {
+  command: string;
+  aliases?: string[];
+  category: 'systemd' | 'network' | 'storage' | 'logs' | 'process' | 'security' | 'kernel';
+  output: string;
+  analysis: string;
+  analysisFr?: string;
+  isKeyEvidence?: boolean;
+}
+
+export interface IncidentProgressiveHint {
+  level: 1 | 2 | 3;
+  title: string;
+  titleFr?: string;
+  hint: string;
+  hintFr?: string;
+  penaltyPoints?: number;
+}
+
+export interface IncidentRCAOption {
+  id: string;
+  text: string;
+  textFr?: string;
+  isCorrect: boolean;
+  feedback: string;
+  feedbackFr?: string;
+}
+
+export interface IncidentRCAQuestion {
+  id: string;
+  type: 'root_cause' | 'immediate_action' | 'prevention' | 'long_term_fix';
+  title: string;
+  titleFr?: string;
+  question: string;
+  questionFr?: string;
+  options: IncidentRCAOption[];
+}
+
+export interface IncidentScenario {
+  id: string;
+  title: string;
+  titleFr: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+  timeLimitMinutes: number; // e.g. 15 minutes
+  certification: 'lpic-1' | 'lpic-2' | 'lpic-3';
+  topicNumber: number;
+  objectiveId: string;
+  category: string;
+  context: string;
+  contextFr: string;
+  symptoms: string[];
+  symptomsFr: string[];
+  diagnosticCommands: IncidentDiagnosticCommand[];
+  progressiveHints: IncidentProgressiveHint[];
+  rcaQuestions: IncidentRCAQuestion[];
+  postMortemReport: {
+    summary: string;
+    summaryFr?: string;
+    timeline: string[];
+    timelineFr?: string[];
+    sysadminKeyTakeaways: string[];
+    sysadminKeyTakeawaysFr?: string[];
+  };
+}
+
+// ----------------------------------------------------
+// 🔥 WEAKNESS ENGINE (Moteur d'analyse des faiblesses)
+// ----------------------------------------------------
+
+export type WeaknessDomainId =
+  | 'networking'
+  | 'scripting'
+  | 'security'
+  | 'filesystems'
+  | 'commands'
+  | 'boot'
+  | 'packages';
+
+export interface WeaknessSubtopicMetric {
+  id: string;
+  name: string;
+  nameFr: string;
+  errorsCount: number;
+  luckyGuessesCount?: number;
+  skippedCount?: number;
+  descriptionFr?: string;
+}
+
+export interface WeaknessQuestionDetail {
+  id: string | number;
+  question: string;
+  questionFr?: string;
+  category: string;
+  subtopic: string;
+  correctAnswer: string;
+  explanation: string;
+  explanationFr?: string;
+  mistakeReason?: string;
+  mistakeReasonFr?: string;
+}
+
+export interface WeaknessDomainStats {
+  id: WeaknessDomainId;
+  name: string;
+  nameFr: string;
+  masteryPct: number; // e.g. 41 for 41%
+  totalErrors: number; // e.g. 12
+  subtopics: WeaknessSubtopicMetric[];
+  luckyGuessesCount: number; // Questions répondues par hasard / avec hésitation
+  skippedCount: number; // Questions sautées
+  failedLabsCount: number; // Labs échoués sur ce thème
+  untestedSubtopicsCount: number; // Sujets jamais étudiés
+  timeSpentAvgSeconds: number; // Temps moyen (anormalement élevé = hésitation)
+  status: 'critical' | 'moderate' | 'review' | 'solid';
+  whyWeakExplanation: string;
+  whyWeakExplanationFr: string;
+  commonPitfalls: string[];
+  commonPitfallsFr: string[];
+  recommendedAction: string;
+  recommendedActionFr: string;
+  targetObjectiveIds: string[];
+  sampleMistakes: WeaknessQuestionDetail[];
+}
+
+export interface WeaknessEngineReport {
+  domains: WeaknessDomainStats[];
+  totalErrors: number;
+  totalLuckyGuesses: number;
+  totalSkipped: number;
+  totalFailedLabs: number;
+  untestedTopicsCount: number;
+  overallHealthPct: number;
+  lastUpdated: string;
+}
+
 

@@ -14,13 +14,22 @@ import {
   ArrowRight,
   Calendar,
   Sparkles,
+  Target,
+  BarChart3,
+  RotateCcw,
+  Brain,
+  ShieldAlert,
+  Terminal,
 } from 'lucide-react';
-import { ExamTier, TabType, UserStats, ExamSessionHistory } from '../types';
+import { ExamTier, TabType, UserStats, ExamSessionHistory, DiagnosticResult } from '../types';
 import { flashcardsData } from '../data/lpiData';
 import { lpicTopicsData } from '../data/lpicObjectivesData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
 import { LpiCertificationGuideModal } from './LpiCertificationGuideModal';
+import { getStoredDiagnosticResult } from '../data/diagnosticExamData';
+import { loadSRSRecords, computeSRSDeckSummary } from '../utils/srsEngine';
+import { WeaknessEngineWidget } from './weakness/WeaknessEngineWidget';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -29,6 +38,8 @@ interface DashboardViewProps {
   onSelectTier: (tierId: string) => void;
   onStartExam: (examId: string) => void;
   onOpenLearning?: (topicId?: string) => void;
+  onOpenDiagnostic?: (mode?: 'intro' | 'test' | 'results') => void;
+  onOpenFlashcards?: (topic?: any) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -38,9 +49,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onSelectTier,
   onStartExam,
   onOpenLearning,
+  onOpenDiagnostic,
+  onOpenFlashcards,
 }) => {
   const { t, isFrench } = useLanguage();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+
+  // SRS Deck Summary State (auto-updates via custom events & storage)
+  const [srsSummary, setSrsSummary] = useState(() => {
+    const records = loadSRSRecords();
+    return computeSRSDeckSummary(flashcardsData, records);
+  });
+
+  useEffect(() => {
+    const handleSRSUpdate = () => {
+      const records = loadSRSRecords();
+      setSrsSummary(computeSRSDeckSummary(flashcardsData, records));
+    };
+    window.addEventListener('storage', handleSRSUpdate);
+    window.addEventListener('srs_updated', handleSRSUpdate);
+    return () => {
+      window.removeEventListener('storage', handleSRSUpdate);
+      window.removeEventListener('srs_updated', handleSRSUpdate);
+    };
+  }, []);
+
+  // Diagnostic result state
+  const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResult | null>(() =>
+    getStoredDiagnosticResult()
+  );
 
   // Read mastered objectives dynamically from localStorage
   const [masteredObjectiveIds, setMasteredObjectiveIds] = useState<string[]>(() => {
@@ -91,6 +128,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         if (savedHistory) {
           setExamHistory(JSON.parse(savedHistory));
         }
+        setDiagnosticResult(getStoredDiagnosticResult());
       } catch {}
     };
     window.addEventListener('storage', handleStorage);
@@ -98,11 +136,64 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }, []);
 
   // Compute Next Recommended Step dynamically
-  // Target the highest-weight unmastered objective in LPIC-1 (101-110)
+  // If diagnostic exists, target the highest-weight unmastered objective inside Top Priority #1 (or #2/#3)
+  // Otherwise target the highest-weight unmastered objective across LPIC-1 (101-110)
   const nextRecommendedStep = useMemo(() => {
     const lpic1Topics = lpicTopicsData.filter(
       (topic) => topic.topicNumber && topic.topicNumber >= 101 && topic.topicNumber <= 110
     );
+
+    // Check priorities from diagnostic first
+    if (diagnosticResult && diagnosticResult.topPriorities && diagnosticResult.topPriorities.length > 0) {
+      for (let i = 0; i < diagnosticResult.topPriorities.length; i++) {
+        const prio = diagnosticResult.topPriorities[i];
+        const targetTopic = lpic1Topics.find(
+          (t) => t.topicNumber === prio.associatedTopicNumber || t.id === prio.associatedTopicId
+        );
+
+        if (targetTopic) {
+          let candidateInPrio: {
+            topicId: string;
+            topicNumber: number;
+            topicTitle: string;
+            objectiveId: string;
+            objectiveTitle: string;
+            weight: number;
+            examCode: string;
+            examId: string;
+            isFromDiagnostic?: boolean;
+            diagnosticRank?: number;
+            diagnosticDomainName?: string;
+            diagnosticScore?: number;
+          } | null = null;
+
+          for (const obj of targetTopic.objectives) {
+            if (!masteredObjectiveIds.includes(obj.id)) {
+              if (!candidateInPrio || obj.weight > candidateInPrio.weight) {
+                candidateInPrio = {
+                  topicId: targetTopic.id,
+                  topicNumber: targetTopic.topicNumber,
+                  topicTitle: targetTopic.title,
+                  objectiveId: obj.id,
+                  objectiveTitle: obj.title,
+                  weight: obj.weight,
+                  examCode: targetTopic.examId === 'exam-102' ? '102-500' : '101-500',
+                  examId: targetTopic.examId,
+                  isFromDiagnostic: true,
+                  diagnosticRank: i + 1,
+                  diagnosticDomainName: isFrench ? prio.nameFr : prio.name,
+                  diagnosticScore: prio.percentage,
+                };
+              }
+            }
+          }
+
+          if (candidateInPrio) {
+            return candidateInPrio;
+          }
+        }
+      }
+    }
 
     let candidateObj: {
       topicId: string;
@@ -113,6 +204,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       weight: number;
       examCode: string;
       examId: string;
+      isFromDiagnostic?: boolean;
+      diagnosticRank?: number;
+      diagnosticDomainName?: string;
+      diagnosticScore?: number;
     } | null = null;
 
     for (const topic of lpic1Topics) {
@@ -135,7 +230,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
 
     return candidateObj;
-  }, [masteredObjectiveIds]);
+  }, [masteredObjectiveIds, diagnosticResult, isFrench]);
 
   const sysArchDone = masteredObjectiveIds.filter((id) => id.startsWith('101.')).length;
   const sysArchTotal = 3;
@@ -251,11 +346,56 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </section>
 
+      {/* 1. Diagnostic First Launch Invitation Banner (If not yet completed) */}
+      {!diagnosticResult && (
+        <div className="bg-[#fff8f2] border-2 border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">
+          <div className="flex items-start gap-4 z-10">
+            <div className="w-12 h-12 rounded-xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center font-bold shrink-0 shadow-xs">
+              <Target className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#ffc20e] text-[#6d5100]">
+                  {isFrench ? 'Évaluation Initiale Recommandée' : 'Recommended Initial Assessment'}
+                </span>
+                <span className="text-xs font-mono font-bold text-[#785a00] bg-[#ffffff] px-2 py-0.5 rounded border border-[#ffc20e]/60">
+                  20 {isFrench ? 'Questions • 6 Domaines' : 'Questions • 6 Domains'}
+                </span>
+              </div>
+              <h3 className="text-base md:text-lg font-bold text-[#201b11] mt-1">
+                {isFrench
+                  ? 'Passez le test diagnostic pour calibrer votre matrice et vos 3 priorités'
+                  : 'Take the diagnostic test to calibrate your skills matrix and top 3 priorities'}
+              </h3>
+              <p className="text-xs md:text-sm text-[#4f4632]">
+                {isFrench
+                  ? 'Évaluez vos compétences sur Architecture, Commandes GNU/Linux, Filesystems, Bash, Réseau et Sécurité pour piloter vos révisions de manière ciblée.'
+                  : 'Assess your skills across Architecture, GNU/Linux Commands, Filesystems, Bash, Networking and Security to power your targeted study engine.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full md:w-auto shrink-0 z-10">
+            <button
+              onClick={() => onOpenDiagnostic && onOpenDiagnostic('intro')}
+              className="w-full md:w-auto px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>{isFrench ? 'Démarrer le diagnostic' : 'Start diagnostic'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Recommended Next Step Banner (Action directe 1-clic) */}
       <div className="bg-[#fff8f2] border border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">
         <div className="flex items-start gap-4 z-10">
           <div className="w-12 h-12 rounded-xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center font-bold shrink-0 shadow-xs">
-            <Sparkles className="w-6 h-6" />
+            {nextRecommendedStep?.isFromDiagnostic ? (
+              <Target className="w-6 h-6" />
+            ) : (
+              <Sparkles className="w-6 h-6" />
+            )}
           </div>
 
           <div className="space-y-1">
@@ -263,6 +403,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#ffc20e] text-[#6d5100]">
                 {t.dashboard.nextStepTitle}
               </span>
+              {nextRecommendedStep?.isFromDiagnostic && (
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
+                  {isFrench
+                    ? `🎯 Priorité #${nextRecommendedStep.diagnosticRank} (${nextRecommendedStep.diagnosticDomainName} ${nextRecommendedStep.diagnosticScore}%)`
+                    : `🎯 Priority #${nextRecommendedStep.diagnosticRank} (${nextRecommendedStep.diagnosticDomainName} ${nextRecommendedStep.diagnosticScore}%)`}
+                </span>
+              )}
               {nextRecommendedStep && (
                 <span className="text-xs font-mono font-bold text-[#785a00] bg-[#ffffff] px-2 py-0.5 rounded border border-[#ffc20e]/60">
                   {nextRecommendedStep.examCode} • Obj {nextRecommendedStep.objectiveId}
@@ -285,7 +432,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {isFrench ? 'Thème' : 'Topic'} {nextRecommendedStep.topicNumber} : {nextRecommendedStep.topicTitle} — {nextRecommendedStep.objectiveTitle}
                 </h3>
                 <p className="text-xs md:text-sm text-[#4f4632]">
-                  {t.dashboard.nextStepSubtitle}
+                  {nextRecommendedStep.isFromDiagnostic
+                    ? isFrench
+                      ? `Recommandé directement par votre test diagnostic pour consolider vos acquis en ${nextRecommendedStep.diagnosticDomainName}.`
+                      : `Recommended directly by your diagnostic test to strengthen your foundation in ${nextRecommendedStep.diagnosticDomainName}.`
+                    : t.dashboard.nextStepSubtitle}
                 </p>
               </>
             ) : (
@@ -327,6 +478,168 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           )}
         </div>
       </div>
+
+      {/* 2. Matrice Diagnostique & Tes 3 Priorités Card (When diagnostic is completed) */}
+      {diagnosticResult && (
+        <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col gap-5">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#ebdcc8] pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#f8ecdb] border border-[#d3c5ab] text-[#785a00] flex items-center justify-center font-bold shrink-0">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base md:text-lg font-bold text-[#201b11]">
+                    {isFrench ? 'Matrice Diagnostique & Vos 3 Priorités' : 'Diagnostic Matrix & Top 3 Priorities'}
+                  </h3>
+                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#fff8f2] border border-[#ffc20e] text-[#785a00]">
+                    {diagnosticResult.percentage}% ({diagnosticResult.correctAnswers}/{diagnosticResult.totalQuestions})
+                  </span>
+                </div>
+                <p className="text-xs text-[#4f4632]">
+                  {isFrench
+                    ? `Dernière évaluation le ${new Date(diagnosticResult.completedAt).toLocaleDateString('fr-FR')} • Alimente le moteur de recommandation`
+                    : `Last evaluated on ${new Date(diagnosticResult.completedAt).toLocaleDateString()} • Powers the recommendation engine`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onOpenDiagnostic && onOpenDiagnostic('results')}
+                className="px-3 py-1.5 rounded-lg border border-[#d3c5ab] hover:bg-[#fbf5ed] text-[#4f4632] text-xs font-bold transition-colors cursor-pointer"
+              >
+                {isFrench ? 'Matrice complète' : 'Full matrix'}
+              </button>
+              <button
+                onClick={() => onOpenDiagnostic && onOpenDiagnostic('test')}
+                className="px-3 py-1.5 rounded-lg bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] border border-[#d3c5ab] text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{isFrench ? 'Refaire le test' : 'Retake test'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Grid: 6 Domains Table (Left) + 3 Priorities (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left: 6 Domains Table (7 cols) */}
+            <div className="lg:col-span-7 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-xs font-bold text-[#4f4632] px-1">
+                <span>{isFrench ? 'Domaine' : 'Domain'}</span>
+                <span>{isFrench ? 'Niveau' : 'Level'}</span>
+              </div>
+
+              <div className="border border-[#ebdcc8] rounded-xl overflow-hidden divide-y divide-[#ebdcc8] bg-[#fdfaf5]">
+                {diagnosticResult.domainScores.map((domain) => {
+                  const isHigh = domain.percentage >= 75;
+                  const isMed = domain.percentage >= 50 && domain.percentage < 75;
+                  const badgeEmoji = isHigh ? '🟢' : isMed ? '🟠' : '🔴';
+                  const barColor = isHigh ? 'bg-emerald-500' : isMed ? 'bg-amber-500' : 'bg-rose-500';
+
+                  return (
+                    <div
+                      key={domain.domainId}
+                      className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs hover:bg-[#ffffff] transition-colors"
+                    >
+                      <div className="flex items-center gap-2 font-medium text-[#201b11] min-w-[140px]">
+                        <span className="text-sm">{badgeEmoji}</span>
+                        <span className="font-bold">{isFrench ? domain.nameFr : domain.name}</span>
+                      </div>
+
+                      <div className="flex-1 max-w-[170px] hidden sm:block">
+                        <div className="w-full h-2 bg-[#ebdcc8] rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${barColor}`}
+                            style={{ width: `${domain.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-right font-mono font-bold text-[#201b11] min-w-[50px]">
+                        {domain.percentage}%
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right: Tes 3 Priorités (5 cols) */}
+            <div className="lg:col-span-5 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-xs font-bold text-rose-700 px-1">
+                <span className="flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5" />
+                  <span>{isFrench ? 'Tes 3 priorités' : 'Your 3 Priorities'}</span>
+                </span>
+                <span className="text-[10px] text-[#817660] font-normal">
+                  {isFrench ? 'Action directe' : 'Direct action'}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {diagnosticResult.topPriorities.map((prio, idx) => (
+                  <div
+                    key={prio.domainId}
+                    className="p-3 rounded-xl border border-[#ebdcc8] bg-[#fbf5ed] flex items-center justify-between gap-3 hover:border-[#ffc20e] transition-all"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
+                            idx === 0
+                              ? 'bg-rose-100 text-rose-800'
+                              : idx === 1
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-[#ebdcc8] text-[#4f4632]'
+                          }`}
+                        >
+                          #{idx + 1}
+                        </span>
+                        <span className="font-bold text-xs text-[#201b11]">
+                          {isFrench ? prio.nameFr : prio.name}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#817660] font-mono">
+                        Topic {prio.associatedTopicNumber} • {prio.percentage}%
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => {
+                          if (onOpenLearning) onOpenLearning(prio.associatedTopicId);
+                          else onNavigate('learning');
+                        }}
+                        title={isFrench ? 'Étudier ce thème' : 'Study this topic'}
+                        className="px-2 py-1 rounded-lg bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <BookOpen className="w-3 h-3" />
+                        <span>{isFrench ? 'Cours' : 'Learn'}</span>
+                      </button>
+                      <button
+                        onClick={() => onNavigate('training')}
+                        title={isFrench ? 'Pratique hands-on' : 'Hands-on practice'}
+                        className="px-2 py-1 rounded-lg bg-[#f8ecdb] hover:bg-[#ebdcc8] text-[#785a00] text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <Zap className="w-3 h-3" />
+                        <span>Labs</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Weakness Engine: Mes Faiblesses & Entraînement Ciblé */}
+      <WeaknessEngineWidget
+        onNavigateToTraining={(mode) => onNavigate('training')}
+        onNavigateToExam={(examId) => onStartExam(examId || 'exam-101')}
+      />
 
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
@@ -464,6 +777,52 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Right Column: Certification Path Grid */}
         <div className="lg:col-span-2 flex flex-col gap-4">
+          {/* 🚨 NOUVEAU : INCIDENT RESPONSE BANNER */}
+          <div
+            onClick={() => onNavigate('training')}
+            className="bg-[#1e1313] border-2 border-[#ba1a1a] rounded-2xl p-4 md:p-5 text-white shadow-md relative overflow-hidden cursor-pointer hover:border-red-400 hover:shadow-lg transition-all group"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-[#ba1a1a] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <ShieldAlert className="w-6 h-6 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 bg-[#ba1a1a] text-white text-[10px] font-extrabold uppercase tracking-widest rounded">
+                      {isFrench ? '🚨 NOUVEL ATELIER' : '🚨 NEW LAB'}
+                    </span>
+                    <span className="px-2 py-0.5 bg-red-950/80 border border-red-700/60 text-red-200 text-[10px] font-bold rounded">
+                      {isFrench ? 'Astreinte & Pannes Réelles' : 'Live Incident Triage'}
+                    </span>
+                    <span className="text-xs text-red-300/80 font-mono">15 min chrono</span>
+                  </div>
+                  <h4 className="text-base md:text-lg font-bold font-serif text-white mt-1">
+                    {isFrench ? 'Incident Response : Raisonnement & Dépannage Réaliste' : 'Incident Response: Realistic Sysadmin Outage Triage'}
+                  </h4>
+                  <p className="text-xs text-red-100/80 mt-0.5 leading-relaxed max-w-xl">
+                    {isFrench
+                      ? 'Serveurs inaccessibles au boot, systemd bloqué, saturation d\'inodes, sockets en conflit... Sorties CLI réelles (journalctl, ss, mount, df), indices progressifs et diagnostic RCA.'
+                      : 'Server boot lockups, systemd halts, inode exhaustion, port collisions... Real CLI outputs (journalctl, ss, mount, df), progressive hints, and root-cause analysis.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="shrink-0 sm:self-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNavigate('training');
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>{isFrench ? 'Résoudre un incident' : 'Start Incident Lab'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-bold text-[#201b11]">{t.dashboard.certPath}</h3>
@@ -740,43 +1099,107 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         )}
       </div>
 
-      {/* Comprehensive Flashcards Banner */}
-      <div className="bg-[#fff8f2] border border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center font-bold shrink-0 shadow-xs">
-            <Layers className="w-6 h-6" />
+      {/* SRS « Révision du jour » Spaced Repetition Engine Widget */}
+      <div className="bg-[#fff8f2] border-2 border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-sm flex flex-col gap-4">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center text-3xl font-bold shrink-0 shadow-xs">
+              🧠
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 bg-[#785a00] text-white text-[10px] font-bold uppercase tracking-wider rounded-md">
+                  {isFrench ? 'Moteur de Répétition Espacée (SRS)' : 'Spaced Repetition System (SRS)'}
+                </span>
+                <span className="px-2.5 py-0.5 bg-[#ba1a1a] text-white text-[11px] font-bold rounded-md flex items-center gap-1">
+                  <Brain className="w-3.5 h-3.5" />
+                  <span>
+                    {isFrench
+                      ? `${srsSummary.dueTodayCount} carte${srsSummary.dueTodayCount > 1 ? 's' : ''} à revoir aujourd'hui`
+                      : `${srsSummary.dueTodayCount} card${srsSummary.dueTodayCount > 1 ? 's' : ''} due today`}
+                  </span>
+                </span>
+                <span className="text-xs text-[#817660]">
+                  {totalCardsCount} {isFrench ? 'cartes LPIC indexées' : 'total LPIC cards indexed'}
+                </span>
+              </div>
+
+              <h3 className="text-lg md:text-xl font-bold text-[#201b11] mt-1.5 flex items-center gap-2">
+                <span>{isFrench ? '« Révision du jour »' : '« Daily Review »'}</span>
+                <span className="text-xs font-normal text-[#817660]">
+                  (Algorithme 10 min • 1j • 3j • 7j • 14j • 30j • 60j)
+                </span>
+              </h3>
+
+              <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl leading-relaxed">
+                {isFrench
+                  ? 'La répétition espacée calcule scientifiquement le moment exact où votre cerveau s\'apprête à oublier une commande, un fichier de configuration ou une notion système pour l\'ancrer définitivement dans votre mémoire à long terme.'
+                  : 'Spaced repetition algorithmically schedules cards just as your memory begins to fade, securing Linux administration commands, configuration paths, and architectures into permanent memory.'}
+              </p>
+            </div>
           </div>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-[#ffc20e] text-[#6d5100] text-[10px] font-bold uppercase tracking-wider rounded">
-                {isFrench ? 'Système de répétition espacée' : 'Spaced Repetition Engine'}
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto shrink-0">
+            <button
+              onClick={() => (onOpenFlashcards ? onOpenFlashcards('srs-daily') : onNavigate('flashcards'))}
+              className="px-6 py-3.5 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+            >
+              <Brain className="w-4 h-4 text-[#6d5100]" />
+              <span>
+                {isFrench
+                  ? `Lancer la révision (${srsSummary.dueTodayCount})`
+                  : `Start Daily Review (${srsSummary.dueTodayCount})`}
               </span>
-              <span className="text-xs text-[#817660]">
-                {totalCardsCount} {isFrench ? 'cartes disponibles' : 'cards available'}
-              </span>
-            </div>
-            <h3 className="text-base md:text-lg font-bold text-[#201b11] mt-1">
-              {isFrench
-                ? 'Maîtrisez les concepts d\'administration système & ingénierie Linux à travers 20 thèmes complets'
-                : 'Master System Admin & Linux Engineering Concepts Across 20 Comprehensive Topics'}
-            </h3>
-            <p className="text-xs md:text-sm text-[#4f4632] mt-0.5 max-w-2xl">
-              {isFrench
-                ? '100 cartes par thème couvrant le matériel/systemd (101), paquets/GRUB (102), commandes Unix (103), systèmes de fichiers/FHS (104), shells/scripts (105), bureaux (106), services/journaux (108), réseau (109), sécurité (110) et les thèmes avancés LPIC-2.'
-                : '100 cards per topic covering hardware/systemd (101), packaging/GRUB (102), Unix commands (103), filesystems/FHS (104), shells/scripting (105), desktops (106), services/logs (108), networking (109), security (110), capacity planning (200), kernel (201), system startup (202), and advanced networking.'}
-            </p>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => (onOpenFlashcards ? onOpenFlashcards('all') : onNavigate('flashcards'))}
+              className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#f8ecdb] text-[#4f4632] border border-[#d3c5ab] font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>{isFrench ? 'Explorer les 20 thèmes' : 'Browse All 20 Topics'}</span>
+            </button>
           </div>
         </div>
 
-        <button
-          onClick={() => onNavigate('flashcards')}
-          className="px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer whitespace-nowrap"
-        >
-          <Layers className="w-4 h-4" />
-          <span>{isFrench ? `Lancer les cartes (${totalCardsCount})` : `Launch Flashcards (${totalCardsCount})`}</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
+        {/* SRS Interval Progression Ladder & Metrics Grid */}
+        <div className="pt-3 border-t border-[#d3c5ab]/60 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Ladder Visual */}
+          <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] font-semibold text-[#4f4632] flex-wrap">
+            <span className="text-[10px] uppercase font-bold text-[#817660] mr-1">Intervalles :</span>
+            <span className="px-2 py-0.5 rounded bg-white border border-[#d3c5ab] text-[#ba1a1a] font-mono font-bold">10 min</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-white border border-[#d3c5ab] text-[#1976d2] font-mono font-bold">1 jour</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-white border border-[#d3c5ab] text-[#1976d2] font-mono font-bold">3 jours</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-white border border-[#d3c5ab] text-[#1976d2] font-mono font-bold">7 jours</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-white border border-[#d3c5ab] text-[#1976d2] font-mono font-bold">14 jours</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-white border border-[#d3c5ab] text-[#1976d2] font-mono font-bold">30 jours</span>
+            <span className="text-[#817660]">➔</span>
+            <span className="px-2 py-0.5 rounded bg-[#e8f5e9] border border-[#2e7d32]/30 text-[#2e7d32] font-mono font-bold">60 jours (Maîtrisée)</span>
+          </div>
+
+          {/* Quick Counter Summary */}
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-1.5 font-semibold text-[#4f4632]">
+              <span className="w-2 h-2 rounded-full bg-[#ba1a1a]" />
+              <span>Dues : <strong className="text-[#ba1a1a]">{srsSummary.dueTodayCount}</strong></span>
+            </div>
+            <div className="flex items-center gap-1.5 font-semibold text-[#4f4632]">
+              <span className="w-2 h-2 rounded-full bg-[#1976d2]" />
+              <span>En cours : <strong className="text-[#1976d2]">{srsSummary.learningCount + srsSummary.reviewCount}</strong></span>
+            </div>
+            <div className="flex items-center gap-1.5 font-semibold text-[#4f4632]">
+              <span className="w-2 h-2 rounded-full bg-[#2e7d32]" />
+              <span>Maîtrisées : <strong className="text-[#2e7d32]">{srsSummary.masteredCount}</strong></span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Featured Learning Section with Weight Tooltips */}
