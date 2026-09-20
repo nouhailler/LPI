@@ -29,6 +29,7 @@ import { SequencingModule } from './SequencingModule';
 import { MatchingModule } from './MatchingModule';
 import { GuidedMiniLabsModule } from './GuidedMiniLabsModule';
 import { IncidentResponseModule } from './IncidentResponseModule';
+import { VirtualTerminalModule } from './VirtualTerminalModule';
 import { WeaknessTrainingModal } from '../weakness/WeaknessTrainingModal';
 import { getWeaknessReport } from '../../utils/weaknessEngine';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -60,6 +61,15 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
     description: string;
     descriptionFr: string;
   }[] = [
+    {
+      id: 'virtual_terminal',
+      label: 'Virtual Terminal & Labs',
+      labelFr: '🖥️ Terminal Virtuel & Labs',
+      badge: '100% PWA & Offline — VirtualFS',
+      icon: Terminal,
+      description: 'Simulated JavaScript Linux engine with real VirtualFS (/home/student, /etc, /var/log). Run real chmod, chown, grep, find, tar, ps, kill, and verify exact filesystem state offline!',
+      descriptionFr: 'Moteur Linux simulé 100% JavaScript avec filesystem virtuel (/home/student, /etc, /var/log). Exécutez chmod, chown, grep, find, tar, ps, kill et vérifiez l\'état réel du système hors-ligne !',
+    },
     {
       id: 'incident_response',
       label: 'Incident Response',
@@ -127,12 +137,12 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
               <span>{isFr ? 'Ateliers d\'entraînement intensif' : 'Hands-On Practice Labs'}</span>
             </div>
             <h2 className="text-xl md:text-2xl font-bold font-serif tracking-tight text-white">
-              {isFr ? 'Au-delà des Flashcards : 5 Ateliers Pratiques' : 'Beyond Flashcards: 5 Practical Training Modes'}
+              {isFr ? 'Ateliers Pratiques & Terminal Virtuel PWA' : 'Hands-On Labs & PWA Virtual Terminal'}
             </h2>
             <p className="text-xs md:text-sm text-[#d3c5ab] leading-relaxed">
               {isFr
-                ? 'Préparez l\'examen LPI avec les formats réels : saisie sans choix multiples, analyse de pannes, chronologie des processus, associations rapides et mini-labs guidés.'
-                : 'Master the LPI exams with authentic hands-on formats: fill-in-the-blank commands, bug troubleshooting, timeline sequencing, matching games, and guided terminal labs.'}
+                ? 'Préparez l\'examen LPI avec les formats réels : terminal simulé 100% hors-ligne (VirtualFS), astreinte Incident Response, saisie directe, pannes système et ordonnancement.'
+                : 'Master the LPI exams with authentic formats: 100% offline simulated terminal (VirtualFS), live Incident Response, exact command typing, troubleshooting, and sequencing.'}
             </p>
           </div>
 
@@ -232,6 +242,12 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
 
       {/* Render Selected Module */}
       <div className="transition-all">
+        {currentMode === 'virtual_terminal' && (
+          <VirtualTerminalModule
+            onScoreUpdate={handleScoreUpdate}
+          />
+        )}
+
         {currentMode === 'incident_response' && (
           <IncidentResponseModule
             scenarios={incidentScenarios}

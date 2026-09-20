@@ -244,6 +244,7 @@ export interface ExamSessionHistory {
 // ----------------------------------------------------
 
 export type TrainingModeType =
+  | 'virtual_terminal'
   | 'incident_response'
   | 'fill_in_blank'
   | 'troubleshooting'

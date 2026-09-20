@@ -1,0 +1,533 @@
+import { SimulatedLabScenario, LabScenarioValidation } from './types';
+import { VirtualFs } from './VirtualFs';
+import { ShellInterpreter } from './ShellInterpreter';
+
+export const simulatedLabScenarios: SimulatedLabScenario[] = [
+  {
+    id: 'lab-chmod-backup',
+    title: 'Permissions d\'exécution pour backup.sh (chmod 750)',
+    titleFr: 'Permissions d\'exécution pour backup.sh (chmod 750)',
+    certification: 'lpic-1',
+    category: 'permissions',
+    difficulty: 'Beginner',
+    difficultyFr: 'Débutant',
+    estimatedMinutes: 5,
+    goal: 'Accorder au script de sauvegarde les permissions rwxr-x--- (750) pour autoriser l\'exécution par l\'utilisateur student et le groupe, tout en interdisant tout accès aux autres.',
+    goalFr: 'Accorder au script de sauvegarde les permissions rwxr-x--- (750) pour autoriser l\'exécution par l\'utilisateur student et le groupe, tout en interdisant tout accès aux autres.',
+    initialDirectory: '/home/student/scripts',
+    instructions: [
+      'Examinez les permissions actuelles de backup.sh avec ls -l',
+      'Appliquez la commande chmod 750 backup.sh (ou chmod u=rwx,g=rx,o= backup.sh)',
+      'Vérifiez le résultat avec ls -l backup.sh pour confirmer les permissions -rwxr-x---',
+    ],
+    instructionsFr: [
+      'Examinez les permissions actuelles de backup.sh avec ls -l',
+      'Appliquez la commande chmod 750 backup.sh (ou chmod u=rwx,g=rx,o= backup.sh)',
+      'Vérifiez le résultat avec ls -l backup.sh pour confirmer les permissions -rwxr-x---',
+    ],
+    hints: [
+      'En octal, 7 = rwx (4+2+1), 5 = r-x (4+0+1), 0 = --- (aucun droit).',
+      'Tapez : chmod 750 backup.sh dans le dossier /home/student/scripts.',
+    ],
+    hintsFr: [
+      'En octal, 7 = rwx (4+2+1), 5 = r-x (4+0+1), 0 = --- (aucun droit).',
+      'Tapez : chmod 750 backup.sh dans le dossier /home/student/scripts.',
+    ],
+    solutionCommands: ['cd /home/student/scripts', 'ls -l backup.sh', 'chmod 750 backup.sh', 'ls -l backup.sh'],
+    solutionExplanation: 'La commande chmod 750 configure le propriétaire (student) en lecture/écriture/exécution (rwx=7), le groupe en lecture/exécution (r-x=5) et retire tout droit au reste du système (---=0).',
+    solutionExplanationFr: 'La commande chmod 750 configure le propriétaire (student) en lecture/écriture/exécution (rwx=7), le groupe en lecture/exécution (r-x=5) et retire tout droit au reste du système (---=0).',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/home/student/scripts/backup.sh');
+      if (!node) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'Le fichier /home/student/scripts/backup.sh est introuvable.',
+          feedbackFr: 'Le fichier /home/student/scripts/backup.sh est introuvable.',
+          unmetCriteria: ['Fichier manquant'],
+          unmetCriteriaFr: ['Fichier manquant'],
+        };
+      }
+      const permMask = node.mode & 0o777;
+      if (permMask === 0o750) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Parfait ! backup.sh possède désormais exactement le mode 750 (-rwxr-x---).',
+          feedbackFr: 'Parfait ! backup.sh possède désormais exactement le mode 750 (-rwxr-x---).',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      const actualStr = VirtualFs.formatMode(node);
+      return {
+        isComplete: false,
+        score: 30,
+        feedback: `Permissions actuelles : ${actualStr} (${permMask.toString(8)}). Le mode attendu est -rwxr-x--- (750).`,
+        feedbackFr: `Permissions actuelles : ${actualStr} (${permMask.toString(8)}). Le mode attendu est -rwxr-x--- (750).`,
+        unmetCriteria: [`Mode requis : 750 (actuel : ${permMask.toString(8)})`],
+        unmetCriteriaFr: [`Mode requis : 750 (actuel : ${permMask.toString(8)})`],
+      };
+    },
+  },
+  {
+    id: 'lab-grep-auth',
+    title: 'Extraction et redirection des connexions réussies (grep & pipe)',
+    titleFr: 'Extraction et redirection des connexions réussies (grep & pipe)',
+    certification: 'lpic-1',
+    category: 'files',
+    difficulty: 'Beginner',
+    difficultyFr: 'Débutant',
+    estimatedMinutes: 6,
+    goal: 'Extraire toutes les lignes contenant "Accepted" dans /var/log/auth.log et les rediriger dans un nouveau fichier /tmp/accepted_logins.txt.',
+    goalFr: 'Extraire toutes les lignes contenant "Accepted" dans /var/log/auth.log et les rediriger dans un nouveau fichier /tmp/accepted_logins.txt.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Inspectez le fichier /var/log/auth.log avec cat ou grep',
+      'Exécutez la commande d\'extraction avec redirection : grep "Accepted" /var/log/auth.log > /tmp/accepted_logins.txt',
+      'Vérifiez le contenu de /tmp/accepted_logins.txt avec cat',
+    ],
+    instructionsFr: [
+      'Inspectez le fichier /var/log/auth.log avec cat ou grep',
+      'Exécutez la commande d\'extraction avec redirection : grep "Accepted" /var/log/auth.log > /tmp/accepted_logins.txt',
+      'Vérifiez le contenu de /tmp/accepted_logins.txt avec cat',
+    ],
+    hints: [
+      'Utilisez le chevron simple > pour créer ou écraser le fichier de destination.',
+      'Commande exacte : grep "Accepted" /var/log/auth.log > /tmp/accepted_logins.txt',
+    ],
+    hintsFr: [
+      'Utilisez le chevron simple > pour créer ou écraser le fichier de destination.',
+      'Commande exacte : grep "Accepted" /var/log/auth.log > /tmp/accepted_logins.txt',
+    ],
+    solutionCommands: [
+      'grep "Accepted" /var/log/auth.log > /tmp/accepted_logins.txt',
+      'cat /tmp/accepted_logins.txt',
+    ],
+    solutionExplanation: 'La commande grep filtre les lignes correspondant au motif et la redirection > écrit le flux de sortie standard dans le fichier cible /tmp/accepted_logins.txt.',
+    solutionExplanationFr: 'La commande grep filtre les lignes correspondant au motif et la redirection > écrit le flux de sortie standard dans le fichier cible /tmp/accepted_logins.txt.',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/tmp/accepted_logins.txt');
+      if (!node) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'Le fichier /tmp/accepted_logins.txt n\'a pas encore été créé.',
+          feedbackFr: 'Le fichier /tmp/accepted_logins.txt n\'a pas encore été créé.',
+          unmetCriteria: ['Fichier /tmp/accepted_logins.txt manquant'],
+          unmetCriteriaFr: ['Fichier /tmp/accepted_logins.txt manquant'],
+        };
+      }
+      const content = node.content || '';
+      if (content.includes('Accepted publickey for student') && content.includes('Accepted publickey for bob')) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Bravo ! Les 2 sessions SSH validées ont bien été extraites dans /tmp/accepted_logins.txt.',
+          feedbackFr: 'Bravo ! Les 2 sessions SSH validées ont bien été extraites dans /tmp/accepted_logins.txt.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 50,
+        feedback: 'Le fichier existe mais ne contient pas les entrées attendues.',
+        feedbackFr: 'Le fichier existe mais ne contient pas les entrées attendues.',
+        unmetCriteria: ['Contenu non conforme'],
+        unmetCriteriaFr: ['Contenu non conforme'],
+      };
+    },
+  },
+  {
+    id: 'lab-tar-archive',
+    title: 'Archivage compressé tar.gz de projet web',
+    titleFr: 'Archivage compressé tar.gz de projet web',
+    certification: 'lpic-1',
+    category: 'files',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 7,
+    goal: 'Créer une archive tar compressée avec gzip nommée web_backup.tar.gz dans /var/backups contenant le dossier /home/student/projects/web.',
+    goalFr: 'Créer une archive tar compressée avec gzip nommée web_backup.tar.gz dans /var/backups contenant le dossier /home/student/projects/web.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Vérifiez la présence du dossier /home/student/projects/web',
+      'Créez l\'archive compressée : tar -czf /var/backups/web_backup.tar.gz /home/student/projects/web',
+      'Vérifiez l\'archive avec tar -tf /var/backups/web_backup.tar.gz',
+    ],
+    instructionsFr: [
+      'Vérifiez la présence du dossier /home/student/projects/web',
+      'Créez l\'archive compressée : tar -czf /var/backups/web_backup.tar.gz /home/student/projects/web',
+      'Vérifiez l\'archive avec tar -tf /var/backups/web_backup.tar.gz',
+    ],
+    hints: [
+      'Les options tar : -c pour créer, -z pour compresser avec gzip, -f pour spécifier le fichier cible.',
+      'Commande : tar -czf /var/backups/web_backup.tar.gz /home/student/projects/web',
+    ],
+    hintsFr: [
+      'Les options tar : -c pour créer, -z pour compresser avec gzip, -f pour spécifier le fichier cible.',
+      'Commande : tar -czf /var/backups/web_backup.tar.gz /home/student/projects/web',
+    ],
+    solutionCommands: [
+      'tar -czf /var/backups/web_backup.tar.gz /home/student/projects/web',
+      'ls -la /var/backups',
+    ],
+    solutionExplanation: 'tar -czf associe la création (-c), le filtre gzip (-z) et le nom du fichier archive (-f).',
+    solutionExplanationFr: 'tar -czf associe la création (-c), le filtre gzip (-z) et le nom du fichier archive (-f).',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/var/backups/web_backup.tar.gz');
+      if (!node) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'L\'archive /var/backups/web_backup.tar.gz n\'existe pas.',
+          feedbackFr: 'L\'archive /var/backups/web_backup.tar.gz n\'existe pas.',
+          unmetCriteria: ['Archive manquante'],
+          unmetCriteriaFr: ['Archive manquante'],
+        };
+      }
+      return {
+        isComplete: true,
+        score: 100,
+        feedback: 'Succès ! L\'archive de sauvegarde a été créée correctement dans /var/backups/web_backup.tar.gz.',
+        feedbackFr: 'Succès ! L\'archive de sauvegarde a été créée correctement dans /var/backups/web_backup.tar.gz.',
+        unmetCriteria: [],
+        unmetCriteriaFr: [],
+      };
+    },
+  },
+  {
+    id: 'lab-chown-ownership',
+    title: 'Transfert de propriété de groupe avec chown',
+    titleFr: 'Transfert de propriété de groupe avec chown',
+    certification: 'lpic-1',
+    category: 'permissions',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 6,
+    goal: 'Changer le groupe propriétaire de l\'arborescence /home/student/projects pour le groupe developers de manière récursive.',
+    goalFr: 'Changer le groupe propriétaire de l\'arborescence /home/student/projects pour le groupe developers de manière récursive.',
+    initialDirectory: '/home/student',
+    initialSetup: (fs: VirtualFs) => {
+      fs.chown('/home/student/projects', 'student:student', true);
+    },
+    instructions: [
+      'Examinez le groupe actuel avec ls -l /home/student',
+      'Appliquez la récursion avec chown : chown -R :developers /home/student/projects (ou chown -R student:developers /home/student/projects)',
+      'Vérifiez que tous les sous-fichiers appartiennent au groupe developers',
+    ],
+    instructionsFr: [
+      'Examinez le groupe actuel avec ls -l /home/student',
+      'Appliquez la récursion avec chown : chown -R :developers /home/student/projects (ou chown -R student:developers /home/student/projects)',
+      'Vérifiez que tous les sous-fichiers appartiennent au groupe developers',
+    ],
+    hints: [
+      'L\'option -R permet d\'appliquer la modification à tous les sous-dossiers et fichiers.',
+      'Tapez : chown -R student:developers /home/student/projects',
+    ],
+    hintsFr: [
+      'L\'option -R permet d\'appliquer la modification à tous les sous-dossiers et fichiers.',
+      'Tapez : chown -R student:developers /home/student/projects',
+    ],
+    solutionCommands: [
+      'chown -R student:developers /home/student/projects',
+      'ls -ld /home/student/projects',
+    ],
+    solutionExplanation: 'La syntaxe chown -R utilisateur:groupe cible applique l\'appartenance sur l\'ensemble de l\'arborescence.',
+    solutionExplanationFr: 'La syntaxe chown -R utilisateur:groupe cible applique l\'appartenance sur l\'ensemble de l\'arborescence.',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const proj = fs.getNode('/home/student/projects');
+      const csv = fs.getNode('/home/student/projects/data.csv');
+      if (!proj || !csv) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'Le dossier des projets est introuvable.',
+          feedbackFr: 'Le dossier des projets est introuvable.',
+          unmetCriteria: ['Dossier introuvable'],
+          unmetCriteriaFr: ['Dossier introuvable'],
+        };
+      }
+      if (proj.group === 'developers' && csv.group === 'developers') {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Excellent ! Le groupe developers a bien été assigné récursivement à tous les fichiers du projet.',
+          feedbackFr: 'Excellent ! Le groupe developers a bien été assigné récursivement à tous les fichiers du projet.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 40,
+        feedback: `Le groupe actuel est ${proj.group}. Le groupe developers est attendu.`,
+        feedbackFr: `Le groupe actuel est ${proj.group}. Le groupe developers est attendu.`,
+        unmetCriteria: ['Groupe developers non appliqué récursivement'],
+        unmetCriteriaFr: ['Groupe developers non appliqué récursivement'],
+      };
+    },
+  },
+  {
+    id: 'lab-symlink-creation',
+    title: 'Création d\'un lien symbolique (ln -s)',
+    titleFr: 'Création d\'un lien symbolique (ln -s)',
+    certification: 'lpic-1',
+    category: 'files',
+    difficulty: 'Beginner',
+    difficultyFr: 'Débutant',
+    estimatedMinutes: 5,
+    goal: 'Créer un lien symbolique dans le répertoire personnel /home/student/run_backup.sh pointant vers le script réel /home/student/scripts/backup.sh.',
+    goalFr: 'Créer un lien symbolique dans le répertoire personnel /home/student/run_backup.sh pointant vers le script réel /home/student/scripts/backup.sh.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Positionnez-vous dans /home/student',
+      'Créez le lien symbolique avec ln -s : ln -s /home/student/scripts/backup.sh /home/student/run_backup.sh',
+      'Vérifiez la cible du lien avec ls -l run_backup.sh',
+    ],
+    instructionsFr: [
+      'Positionnez-vous dans /home/student',
+      'Créez le lien symbolique avec ln -s : ln -s /home/student/scripts/backup.sh /home/student/run_backup.sh',
+      'Vérifiez la cible du lien avec ls -l run_backup.sh',
+    ],
+    hints: [
+      'Syntaxe : ln -s <cible> <nom_du_lien>',
+      'Tapez : ln -s /home/student/scripts/backup.sh /home/student/run_backup.sh',
+    ],
+    hintsFr: [
+      'Syntaxe : ln -s <cible> <nom_du_lien>',
+      'Tapez : ln -s /home/student/scripts/backup.sh /home/student/run_backup.sh',
+    ],
+    solutionCommands: [
+      'ln -s /home/student/scripts/backup.sh /home/student/run_backup.sh',
+      'ls -l run_backup.sh',
+    ],
+    solutionExplanation: 'La commande ln -s crée un inode de type symlink contenant le chemin textuel de la cible.',
+    solutionExplanationFr: 'La commande ln -s crée un inode de type symlink contenant le chemin textuel de la cible.',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/home/student/run_backup.sh');
+      if (!node) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'Le lien /home/student/run_backup.sh n\'existe pas.',
+          feedbackFr: 'Le lien /home/student/run_backup.sh n\'existe pas.',
+          unmetCriteria: ['Lien symbolique manquant'],
+          unmetCriteriaFr: ['Lien symbolique manquant'],
+        };
+      }
+      if (node.type === 'symlink' && node.target?.includes('backup.sh')) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Parfait ! Le lien symbolique run_backup.sh pointe correctement vers le script de sauvegarde.',
+          feedbackFr: 'Parfait ! Le lien symbolique run_backup.sh pointe correctement vers le script de sauvegarde.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 30,
+        feedback: 'Le fichier créé n\'est pas un lien symbolique valide.',
+        feedbackFr: 'Le fichier créé n\'est pas un lien symbolique valide.',
+        unmetCriteria: ['Cible non conforme'],
+        unmetCriteriaFr: ['Cible non conforme'],
+      };
+    },
+  },
+  {
+    id: 'lab-kill-process',
+    title: 'Gestion et arrêt de processus avec kill',
+    titleFr: 'Gestion et arrêt de processus avec kill',
+    certification: 'lpic-1',
+    category: 'processes',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 5,
+    goal: 'Identifier le processus rogue (PID 1040 nginx worker bloqué) avec ps aux et l\'arrêter à l\'aide de la commande kill.',
+    goalFr: 'Identifier le processus rogue (PID 1040 nginx worker bloqué) avec ps aux et l\'arrêter à l\'aide de la commande kill.',
+    initialDirectory: '/home/student',
+    initialSetup: (fs: VirtualFs, interpreter: ShellInterpreter) => {
+      if (!interpreter.processes.find((p) => p.pid === 1040)) {
+        interpreter.processes.push({
+          pid: 1040,
+          user: 'www-data',
+          cpu: 99.8,
+          mem: 4.2,
+          vsz: 240000,
+          rss: 42000,
+          tty: '?',
+          stat: 'R',
+          start: '10:05',
+          time: '12:45',
+          command: 'nginx: worker process (stuck loop)',
+        });
+      }
+    },
+    instructions: [
+      'Affichez la table des processus avec ps aux',
+      'Repérez le PID du processus consommant anormalement le CPU (PID 1040)',
+      'Envoyez le signal d\'arrêt : kill 1040 (ou kill -9 1040)',
+      'Vérifiez la disparition du processus avec ps aux',
+    ],
+    instructionsFr: [
+      'Affichez la table des processus avec ps aux',
+      'Repérez le PID du processus consommant anormalement le CPU (PID 1040)',
+      'Envoyez le signal d\'arrêt : kill 1040 (ou kill -9 1040)',
+      'Vérifiez la disparition du processus avec ps aux',
+    ],
+    hints: [
+      'Tapez ps aux pour observer les PID en cours d\'exécution.',
+      'Pour stopper le processus 1040, exécutez kill 1040 ou kill -9 1040.',
+    ],
+    hintsFr: [
+      'Tapez ps aux pour observer les PID en cours d\'exécution.',
+      'Pour stopper le processus 1040, exécutez kill 1040 ou kill -9 1040.',
+    ],
+    solutionCommands: ['ps aux', 'kill -9 1040', 'ps aux'],
+    solutionExplanation: 'La commande kill envoie par défaut le signal SIGTERM (15). Le paramètre -9 transmet SIGKILL pour une terminaison immédiate.',
+    solutionExplanationFr: 'La commande kill envoie par défaut le signal SIGTERM (15). Le paramètre -9 transmet SIGKILL pour une terminaison immédiate.',
+    validate: (fs: VirtualFs, interpreter: ShellInterpreter): LabScenarioValidation => {
+      const exists = interpreter.processes.some((p) => p.pid === 1040);
+      if (!exists) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Succès ! Le processus 1040 a été terminé.',
+          feedbackFr: 'Succès ! Le processus 1040 a été terminé.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 0,
+        feedback: 'Le processus PID 1040 est toujours actif dans la table des processus.',
+        feedbackFr: 'Le processus PID 1040 est toujours actif dans la table des processus.',
+        unmetCriteria: ['PID 1040 non arrêté'],
+        unmetCriteriaFr: ['PID 1040 non arrêté'],
+      };
+    },
+  },
+  {
+    id: 'lab-find-and-clean',
+    title: 'Nettoyage des fichiers temporaires (.tmp) avec find et rm',
+    titleFr: 'Nettoyage des fichiers temporaires (.tmp) avec find et rm',
+    certification: 'lpic-1',
+    category: 'files',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 6,
+    goal: 'Supprimer le fichier temporaire résiduel /tmp/session_dump.tmp pour libérer de l\'espace disque.',
+    goalFr: 'Supprimer le fichier temporaire résiduel /tmp/session_dump.tmp pour libérer de l\'espace disque.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Inspectez le contenu du dossier /tmp avec ls -la /tmp',
+      'Supprimez le fichier session_dump.tmp avec rm /tmp/session_dump.tmp',
+      'Vérifiez la suppression avec ls /tmp',
+    ],
+    instructionsFr: [
+      'Inspectez le contenu du dossier /tmp avec ls -la /tmp',
+      'Supprimez le fichier session_dump.tmp avec rm /tmp/session_dump.tmp',
+      'Vérifiez la suppression avec ls /tmp',
+    ],
+    hints: [
+      'Utilisez rm /tmp/session_dump.tmp',
+    ],
+    hintsFr: [
+      'Utilisez rm /tmp/session_dump.tmp',
+    ],
+    solutionCommands: ['ls -l /tmp', 'rm /tmp/session_dump.tmp', 'ls /tmp'],
+    solutionExplanation: 'Le dossier /tmp contient les fichiers volatils. La commande rm supprime l\'entrée de répertoire et libère les blocs.',
+    solutionExplanationFr: 'Le dossier /tmp contient les fichiers volatils. La commande rm supprime l\'entrée de répertoire et libère les blocs.',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/tmp/session_dump.tmp');
+      if (!node) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Le fichier temporaire a bien été supprimé.',
+          feedbackFr: 'Le fichier temporaire a bien été supprimé.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 0,
+        feedback: 'Le fichier /tmp/session_dump.tmp est toujours présent.',
+        feedbackFr: 'Le fichier /tmp/session_dump.tmp est toujours présent.',
+        unmetCriteria: ['Fichier non supprimé'],
+        unmetCriteriaFr: ['Fichier non supprimé'],
+      };
+    },
+  },
+  {
+    id: 'lab-security-shadow',
+    title: 'Audit et sécurisation des droits de /etc/shadow (chmod 600)',
+    titleFr: 'Audit et sécurisation des droits de /etc/shadow (chmod 600)',
+    certification: 'lpic-1',
+    category: 'security',
+    difficulty: 'Advanced',
+    difficultyFr: 'Avancé',
+    estimatedMinutes: 6,
+    goal: 'Restreindre l\'accès au fichier de mots de passe hachés /etc/shadow au seul compte root avec les permissions 600 (-rw-------) en utilisant sudo.',
+    goalFr: 'Restreindre l\'accès au fichier de mots de passe hachés /etc/shadow au seul compte root avec les permissions 600 (-rw-------) en utilisant sudo.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Inspectez les permissions actuelles : ls -l /etc/shadow',
+      'Appliquez la restriction en tant que root : sudo chmod 600 /etc/shadow',
+      'Vérifiez que le mode est désormais -rw-------',
+    ],
+    instructionsFr: [
+      'Inspectez les permissions actuelles : ls -l /etc/shadow',
+      'Appliquez la restriction en tant que root : sudo chmod 600 /etc/shadow',
+      'Vérifiez que le mode est désormais -rw-------',
+    ],
+    hints: [
+      'Pour modifier un fichier sous /etc, préfixez la commande par sudo.',
+      'Tapez : sudo chmod 600 /etc/shadow',
+    ],
+    hintsFr: [
+      'Pour modifier un fichier sous /etc, préfixez la commande par sudo.',
+      'Tapez : sudo chmod 600 /etc/shadow',
+    ],
+    solutionCommands: ['ls -l /etc/shadow', 'sudo chmod 600 /etc/shadow', 'ls -l /etc/shadow'],
+    solutionExplanation: '/etc/shadow contient les empreintes cryptographiques des mots de passe. Il ne doit être lisible et modifiable que par root (mode 600 ou 640 avec groupe shadow).',
+    solutionExplanationFr: '/etc/shadow contient les empreintes cryptographiques des mots de passe. Il ne doit être lisible et modifiable que par root (mode 600 ou 640 avec groupe shadow).',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/etc/shadow');
+      if (!node) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: '/etc/shadow est introuvable.',
+          feedbackFr: '/etc/shadow est introuvable.',
+          unmetCriteria: ['Fichier manquant'],
+          unmetCriteriaFr: ['Fichier manquant'],
+        };
+      }
+      const permMask = node.mode & 0o777;
+      if (permMask === 0o600) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Sécurité validée ! /etc/shadow est désormais protégé en mode 600 (-rw-------).',
+          feedbackFr: 'Sécurité validée ! /etc/shadow est désormais protégé en mode 600 (-rw-------).',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 30,
+        feedback: `Permissions actuelles : ${VirtualFs.formatMode(node)}. Le mode attendu est -rw------- (600).`,
+        feedbackFr: `Permissions actuelles : ${VirtualFs.formatMode(node)}. Le mode attendu est -rw------- (600).`,
+        unmetCriteria: ['Mode 600 requis'],
+        unmetCriteriaFr: ['Mode 600 requis'],
+      };
+    },
+  },
+];
