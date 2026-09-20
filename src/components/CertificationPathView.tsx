@@ -20,6 +20,8 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { allLpicTopicsData } from '../data/lpicObjectivesData';
 import { getLearningMapNodes } from './learningMap/learningMapData';
 import { LearningMapTree } from './learningMap/LearningMapTree';
+import { ThematicLearningPathsView } from './ThematicLearningPathsView';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface CertificationPathViewProps {
   userStats: UserStats;
@@ -29,6 +31,8 @@ interface CertificationPathViewProps {
   onOpenLearning?: (topicId?: string) => void;
   onUpdateTarget?: (target: string) => void;
   onOpenFlashcardsTopic?: (topicId: string) => void;
+  onOpenExplainDifferently?: (topic: string, mode?: any, context?: string) => void;
+  initialViewMode?: 'thematic' | 'map' | 'detailed';
 }
 
 export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
@@ -39,11 +43,29 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
   onOpenLearning,
   onUpdateTarget,
   onOpenFlashcardsTopic,
+  onOpenExplainDifferently,
+  initialViewMode,
 }) => {
   const { t, isFrench } = useLanguage();
 
-  // View mode: 'map' (Learning Map interactive tree - default) | 'detailed' (Curriculum tiers list)
-  const [viewMode, setViewMode] = useState<'map' | 'detailed'>('map');
+  // View mode: 'thematic' (Independent Career Skill Paths) | 'map' (Learning Map interactive tree) | 'detailed' (Curriculum tiers list)
+  const [viewMode, setViewMode] = useState<'thematic' | 'map' | 'detailed'>(() => {
+    if (initialViewMode) return initialViewMode;
+    try {
+      const saved = localStorage.getItem('cert_path_view_mode');
+      if (saved === 'thematic' || saved === 'map' || saved === 'detailed') {
+        return saved;
+      }
+    } catch {}
+    return 'thematic';
+  });
+
+  const handleSetViewMode = (mode: 'thematic' | 'map' | 'detailed') => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('cert_path_view_mode', mode);
+    } catch {}
+  };
 
   // Mastered objectives read from localStorage (clean prototype data if present)
   const [masteredObjectiveIds, setMasteredObjectiveIds] = useState<string[]>(() => {
@@ -296,47 +318,75 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
         </div>
       </div>
 
-      {/* View Switcher: Interactive Learning Map vs Detailed Curriculum */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-2 md:p-2.5 shadow-xs">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+      {/* View Switcher: Thematic Career Paths vs Interactive Learning Map vs Detailed Curriculum */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-2 md:p-2.5 shadow-xs">
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
           <button
-            onClick={() => setViewMode('map')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            onClick={() => handleSetViewMode('thematic')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewMode === 'thematic'
+                ? 'bg-[#785a00] text-white shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-[#ffc20e] fill-[#ffc20e]" />
+            <span>{isFrench ? 'Parcours Thématiques (Métier)' : 'Thematic Skill Paths'}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+              viewMode === 'thematic' ? 'bg-[#ffc20e] text-[#6d5100]' : 'bg-[#ece1d0] text-[#4f4632]'
+            }`}>
+              {isFrench ? 'Indépendant LPI' : 'Career'}
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleSetViewMode('map')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               viewMode === 'map'
                 ? 'bg-[#785a00] text-white shadow-xs'
                 : 'text-[#4f4632] hover:bg-[#f8ecdb]'
             }`}
           >
             <Compass className="w-4 h-4" />
-            <span>{isFrench ? 'Learning Map (Arborescence Interactive)' : 'Interactive Learning Map'}</span>
+            <span>{isFrench ? 'Learning Map (Arborescence)' : 'Learning Map'}</span>
           </button>
 
           <button
-            onClick={() => setViewMode('detailed')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            onClick={() => handleSetViewMode('detailed')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               viewMode === 'detailed'
                 ? 'bg-[#785a00] text-white shadow-xs'
                 : 'text-[#4f4632] hover:bg-[#f8ecdb]'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>{isFrench ? 'Vue Paliers & Règles LPI' : 'Tiers & LPI Rules'}</span>
+            <span>{isFrench ? 'Paliers & Règles LPI' : 'Tiers & LPI Rules'}</span>
           </button>
         </div>
 
-        <span className="text-xs text-[#817660] hidden md:inline px-2">
-          {viewMode === 'map'
+        <span className="text-xs text-[#817660] hidden lg:inline px-2">
+          {viewMode === 'thematic'
             ? isFrench
-              ? '💡 Cliquez sur un nœud pour inspecter progression, questions, flashcards, labs et readiness'
-              : '💡 Click any node to inspect progress, questions, flashcards, labs & readiness'
+              ? '🎯 3 feuilles de route concrètes (Admin, Bash, Networking) axées sur la pratique réelle'
+              : '🎯 3 pragmatic real-world engineering roadmaps (Admin, Bash, Networking)'
+            : viewMode === 'map'
+            ? isFrench
+              ? '💡 Cliquez sur un nœud pour inspecter progression, flashcards et labs'
+              : '💡 Click any node to inspect progress, flashcards & labs'
             : isFrench
             ? 'Règles officielles et prérequis de la filière LPI'
             : 'Official LPI progression rules'}
         </span>
       </div>
 
-      {/* VIEW 1: INTERACTIVE LEARNING MAP */}
-      {viewMode === 'map' ? (
+      {/* VIEW SELECTION */}
+      {viewMode === 'thematic' ? (
+        <ErrorBoundary fallbackTitle={isFrench ? "Erreur d'affichage des Parcours Métier" : "Career Paths Display Error"}>
+          <ThematicLearningPathsView
+            onNavigate={onNavigate}
+            onOpenExplainDifferently={onOpenExplainDifferently}
+          />
+        </ErrorBoundary>
+      ) : viewMode === 'map' ? (
         <LearningMapTree
           nodes={learningMapNodes}
           activeTarget={activeTarget}

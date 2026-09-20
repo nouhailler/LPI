@@ -802,20 +802,22 @@ export function generateOfflineExplanation(
 
   // Dynamic fallback synthesis for custom questions or unlisted topics
   if (mode === 'simple') {
+    const definitionSnippet = context ? (isFrench ? `\n\n📌 **Définition officielle du glossaire** :\n> ${context}\n` : `\n\n📌 **Official Glossary Definition**:\n> ${context}\n`) : '';
+
     return {
       title: clean,
       category: isFrench ? 'Administration Système Linux' : 'Linux System Administration',
       content: isFrench
-        ? `Synthèse directe de « ${clean} » :\n\n• Rôle principal : Outil ou directive standard de l\'environnement Unix/Linux intervenant dans l\'administration système et la gestion des ressources.\n• Contexte d\'utilisation : Indispensable pour automatiser les tâches, configurer l\'environnement ou diagnostiquer les composants matériels et logiciels.\n• Syntaxe fondamentale : Généralement invoqué avec des options pour modifier son comportement et des arguments désignant les cibles ou fichiers concernés.\n• Bonnes pratiques : Toujours consulter la page de manuel officielle avec \`man ${clean.split(' ')[0]}\` ou \`--help\` pour vérifier les options disponibles.`
-        : `Direct synthesis for "${clean}":\n\n• Core purpose: Standard Unix/Linux tool or directive used in system administration and resource management.\n• Context: Essential for automation, environment configuration, and diagnosing hardware/software components.\n• Syntax: Typically called with command-line flags and target arguments.\n• Best practice: Always consult \`man ${clean.split(' ')[0]}\` or \`--help\` to verify specific options.`,
+        ? `Synthèse directe de « ${clean} » :${definitionSnippet}\n• Rôle principal : Outil ou directive standard de l'environnement Unix/Linux intervenant dans l'administration système et la gestion des ressources.\n• Contexte d'utilisation : Indispensable pour automatiser les tâches, configurer l'environnement ou diagnostiquer les composants matériels et logiciels.\n• Syntaxe fondamentale : Généralement invoqué avec des options pour modifier son comportement et des arguments désignant les cibles ou fichiers concernés.\n• Bonnes pratiques : Toujours consulter la page de manuel officielle avec \`man ${clean.split(' ')[0]}\` ou \`--help\` pour vérifier les options disponibles.`
+        : `Direct synthesis for "${clean}":${definitionSnippet}\n• Core purpose: Standard Unix/Linux tool or directive used in system administration and resource management.\n• Context: Essential for automation, environment configuration, and diagnosing hardware/software components.\n• Syntax: Typically called with command-line flags and target arguments.\n• Best practice: Always consult \`man ${clean.split(' ')[0]}\` or \`--help\` to verify specific options.`,
       keyPoints: isFrench
         ? [
-            `Fonction principale liée à l'administration de ${clean}.`,
+            context ? `Définition : ${context.slice(0, 100)}...` : `Fonction principale liée à l'administration de ${clean}.`,
             'Comportement prévisible documenté dans les standards POSIX / FHS.',
             'Vérifier les droits nécessaires (utilisateur vs root via sudo).',
           ]
         : [
-            `Primary function linked to managing ${clean}.`,
+            context ? `Definition: ${context.slice(0, 100)}...` : `Primary function linked to managing ${clean}.`,
             'Standardized behavior across POSIX and FHS compliance.',
             'Check required privilege level (standard user vs root via sudo).',
           ],
@@ -823,12 +825,13 @@ export function generateOfflineExplanation(
   }
 
   if (mode === 'beginner') {
+    const roleHint = context ? (isFrench ? ` (sa mission : ${context})` : ` (its mission: ${context})`) : '';
     return {
       title: clean,
       category: isFrench ? 'Vulgarisation & Découverte' : 'Beginner Friendly Analogy',
       content: isFrench
-        ? `Imagine ${clean} comme un outil spécialisé dans une boîte à outils d'artisan :\n\nChaque commande Linux ne fait QU'UNE SEULE CHOSE, mais elle la fait à la perfection (c'est la philosophie fondamentale d'Unix).\n\nPlutôt que d'avoir une usine à gaz compliquée, Linux te donne un jeu de tournevis précis : ${clean} est celui qui s'occupe de cette tâche spécifique. Tu peux même le combiner avec d'autres outils grâce au tube magique qu'est le pipe (\`|\`) !`
-        : `Think of ${clean} like a specialized tool in a craftsperson's toolbox:\n\nIn Unix, every command does ONE thing and does it well. Rather than a bloated all-in-one suite, Linux gives you precise tools. ${clean} handles this specific task cleanly, and can be chained with other tools using the pipe (\`|\`).`,
+        ? `Imagine ${clean} comme un outil ultra-spécialisé dans une boîte à outils d'artisan${roleHint} :\n\nChaque commande Linux ne fait QU'UNE SEULE CHOSE, mais elle la fait à la perfection (c'est la philosophie fondamentale d'Unix).\n\nPlutôt que d'avoir une usine à gaz compliquée, Linux te donne un jeu d'outils précis : ${clean} est celui qui s'occupe de cette tâche spécifique. Tu peux même le combiner avec d'autres outils grâce au tube magique qu'est le pipe (\`|\`) !`
+        : `Think of ${clean} like a specialized tool in a craftsperson's toolbox${roleHint}:\n\nIn Unix, every command does ONE thing and does it well. Rather than a bloated all-in-one suite, Linux gives you precise tools. ${clean} handles this specific task cleanly, and can be chained with other tools using the pipe (\`|\`).`,
       analogyTitle: isFrench ? 'La philosophie Unix de l\'outil unique et efficace' : 'The Unix philosophy of single-purpose tools',
       analogyStory: isFrench
         ? `Pas besoin de tout mémoriser par cœur : comprends simplement quelle entrée l'outil reçoit, et quelle sortie il produit.`

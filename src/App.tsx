@@ -15,9 +15,11 @@ import { ProfileModal } from './components/ProfileModal';
 import { SettingsModal } from './components/SettingsModal';
 import { DiagnosticExamModal } from './components/DiagnosticExamModal';
 import { OnboardingModal } from './components/OnboardingModal';
+import { ExplainDifferentlyModal } from './components/ExplainDifferentlyModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
 import { PracticeQuestion, TabType, UserStats } from './types';
+import { PedagogicalMode } from './data/pedagogicalExplanations';
 import { useLanguage } from './i18n/LanguageContext';
 import { frenchCertificationTiers, frenchPracticeQuestions } from './i18n/frenchData';
 import { getStoredDiagnosticResult } from './data/diagnosticExamData';
@@ -48,6 +50,23 @@ export default function App() {
   const [diagnosticMode, setDiagnosticMode] = useState<'intro' | 'test' | 'results'>('intro');
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [selectedFlashcardsTopic, setSelectedFlashcardsTopic] = useState<any>('srs-daily');
+
+  // Explain Differently Modal state (5 pedagogical angles & dynamic explanations)
+  const [isExplainModalOpen, setIsExplainModalOpen] = useState(false);
+  const [explainTopic, setExplainTopic] = useState<string>('umask');
+  const [explainMode, setExplainMode] = useState<PedagogicalMode>('simple');
+  const [explainContext, setExplainContext] = useState<string | undefined>(undefined);
+
+  const handleOpenExplainDifferently = (
+    topic = 'umask',
+    mode: PedagogicalMode = 'simple',
+    context?: string
+  ) => {
+    setExplainTopic(topic);
+    setExplainMode(mode);
+    setExplainContext(context);
+    setIsExplainModalOpen(true);
+  };
 
   const handleOpenFlashcards = (topic: any = 'srs-daily') => {
     setSelectedFlashcardsTopic(topic);
@@ -271,6 +290,7 @@ export default function App() {
         onOpenSettings={() => handleOpenSettings('updates')}
         hasUpdateAvailable={hasUpdateAvailable}
         onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
+        onOpenExplainDifferently={() => handleOpenExplainDifferently('umask', 'simple')}
         onClosePractice={() => setCurrentTab('dashboard')}
         onOpenExamMenu={() => {
           if (confirm('Pause timer?')) {
@@ -294,11 +314,16 @@ export default function App() {
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
         userStats={userStats}
         onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
+        onOpenExplainDifferently={() => handleOpenExplainDifferently('umask', 'simple')}
       />
 
       <div className="flex flex-1 w-full pt-16 md:pt-20">
         {/* Desktop Sidebar */}
-        <DesktopSidebar currentTab={currentTab} onTabChange={handleSelectTab} />
+        <DesktopSidebar
+          currentTab={currentTab}
+          onTabChange={handleSelectTab}
+          onOpenExplainDifferently={() => handleOpenExplainDifferently('umask', 'simple')}
+        />
 
         {/* Main Content Area */}
         <main key={`main-app-content-${dataResetKey}`} className="flex-1 px-4 md:px-8 py-6 md:pl-72 max-w-7xl mx-auto w-full transition-all duration-200">
@@ -328,6 +353,7 @@ export default function App() {
               <GlossaryView
                 onNavigate={handleSelectTab}
                 onOpenLearningTopic={handleOpenLearningTopic}
+                onExplainDifferently={(topic, context) => handleOpenExplainDifferently(topic, 'simple', context)}
               />
             )}
 
@@ -340,6 +366,9 @@ export default function App() {
                 onOpenLearning={handleOpenLearningTopic}
                 onUpdateTarget={handleUpdateTarget}
                 onOpenFlashcardsTopic={handleOpenFlashcards}
+                onOpenExplainDifferently={(topic, mode, context) =>
+                  handleOpenExplainDifferently(topic, mode || 'simple', context)
+                }
               />
             )}
 
@@ -392,6 +421,24 @@ export default function App() {
       <ExplanationModal
         question={activeExplanation}
         onClose={() => setActiveExplanation(null)}
+        onExplainDifferently={(topic, context) => {
+          setActiveExplanation(null);
+          handleOpenExplainDifferently(topic, 'simple', context);
+        }}
+      />
+
+      {/* Explain Differently Pedagogical Modal (5 Angles, Lab links, Quiz, Traps & Gemini AI) */}
+      <ExplainDifferentlyModal
+        isOpen={isExplainModalOpen}
+        onClose={() => setIsExplainModalOpen(false)}
+        initialTopic={explainTopic}
+        initialMode={explainMode}
+        contextSnippet={explainContext}
+        onNavigateTab={handleSelectTab}
+        onOpenTerminalLab={() => {
+          setIsExplainModalOpen(false);
+          handleSelectTab('training');
+        }}
       />
 
       {/* Settings & Updates Modal */}

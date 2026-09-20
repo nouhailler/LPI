@@ -1,6 +1,6 @@
 {
   "name": "LPI Certification Prep",
-  "description": "Interactive Linux Professional Institute (LPI) preparation platform featuring LPIC-1/2/3 learning paths, practice exams, hands-on Incident Response troubleshooting labs, and an automated Weakness Engine with targeted adaptive training.",
+  "description": "Interactive Linux Professional Institute (LPI) preparation platform featuring LPIC-1/2/3 learning paths, practice exams, hands-on Incident Response troubleshooting labs, an automated Weakness Engine, and the multi-angle 'Explique-moi autrement' pedagogical tutor.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

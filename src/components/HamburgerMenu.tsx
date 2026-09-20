@@ -49,6 +49,7 @@ interface HamburgerMenuProps {
   onOpenOnboarding?: () => void;
   userStats: UserStats;
   onOpenDiagnostic?: () => void;
+  onOpenExplainDifferently?: () => void;
 }
 
 interface MenuItem {
@@ -83,6 +84,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   onOpenOnboarding,
   userStats,
   onOpenDiagnostic,
+  onOpenExplainDifferently,
 }) => {
   const { t, isFrench } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -215,6 +217,22 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           tabTarget: 'flashcards',
           action: () => onSelectTab('flashcards'),
           keywords: ['flashcards', 'cards', 'recall', 'memory', 'flip', '101', '102', '107', '201', '202', '210', 'cartes', 'mémoire', 'révision'],
+        },
+        {
+          id: 'nav-thematic-paths',
+          title: isFrench ? 'Parcours Thématiques Métier (Learning Paths)' : 'Thematic Career Learning Paths',
+          subtitle: isFrench ? '🔵 Admin Linux, 🟢 Bash, 🟠 Réseau Linux — feuilles de route terrain sans certification' : '🔵 Linux Admin, 🟢 Bash, 🟠 Linux Networking — pragmatic production roadmaps',
+          icon: Sparkles,
+          badge: isFrench ? '3 Parcours' : '3 Paths',
+          badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
+          tabTarget: 'path',
+          action: () => {
+            try {
+              localStorage.setItem('cert_path_view_mode', 'thematic');
+            } catch {}
+            onSelectTab('path');
+          },
+          keywords: ['learning paths', 'parcours thématiques', 'admin linux', 'bash', 'networking', 'réseau', 'scripting', 'métier', 'roadmap', 'carrière'],
         },
         {
           id: 'nav-path',
@@ -545,6 +563,22 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           badge: isFrench ? 'Glossaire' : 'Search',
           action: () => onSelectTab('glossary'),
           keywords: ['glossary', 'commands', 'search', 'manual', 'config', 'commandes'],
+        },
+        {
+          id: 'tool-explain-differently',
+          title: isFrench ? 'Explique-moi autrement' : 'Explain Differently (5 angles)',
+          subtitle: isFrench
+            ? 'Métaphore enfantine, cas concret, nuance technique & pièges d\'examen'
+            : 'Child metaphor, real-world case, technical nuances & exam traps',
+          icon: Sparkles,
+          badge: isFrench ? '5 Angles' : 'Pedagogy',
+          badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
+          action: () => {
+            if (onOpenExplainDifferently) {
+              onOpenExplainDifferently();
+            }
+          },
+          keywords: ['explain', 'differently', 'autrement', 'pedagogy', 'metaphor', 'enfant', 'angles', 'pièges', 'vulgarisation'],
         },
       ],
     },

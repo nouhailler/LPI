@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library, Zap, Brain } from 'lucide-react';
+import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library, Zap, Brain, Sparkles } from 'lucide-react';
 import { TabType } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
@@ -9,6 +9,7 @@ import { flashcardsData } from '../data/lpiData';
 interface NavigationProps {
   currentTab: TabType;
   onTabChange: (tab: TabType) => void;
+  onOpenExplainDifferently?: () => void;
 }
 
 export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }) => {
@@ -75,8 +76,12 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentTab, onTabChange }
   );
 };
 
-export const DesktopSidebar: React.FC<NavigationProps> = ({ currentTab, onTabChange }) => {
-  const { t } = useLanguage();
+export const DesktopSidebar: React.FC<NavigationProps> = ({
+  currentTab,
+  onTabChange,
+  onOpenExplainDifferently,
+}) => {
+  const { t, isFrench } = useLanguage();
   const [dueTodayCount, setDueTodayCount] = useState<number>(() => {
     const records = loadSRSRecords(flashcardsData);
     return getCardsDueToday(flashcardsData, records).length;
@@ -149,6 +154,24 @@ export const DesktopSidebar: React.FC<NavigationProps> = ({ currentTab, onTabCha
           );
         })}
       </nav>
+
+      {onOpenExplainDifferently && (
+        <div className="pt-3">
+          <button
+            id="sidebar-explain-differently-btn"
+            onClick={onOpenExplainDifferently}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all bg-[#fff8f2] hover:bg-[#ebdcc8] text-[#785a00] border border-[#ffc20e]/60 cursor-pointer shadow-2xs group"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#ffc20e] fill-[#ffc20e] shrink-0 group-hover:scale-110 transition-transform" />
+              <span>{isFrench ? 'Explique-moi autrement' : 'Explain Differently'}</span>
+            </div>
+            <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-[#ffc20e] text-[#6d5100]">
+              5 angles
+            </span>
+          </button>
+        </div>
+      )}
 
       <div className="mt-auto mb-20 p-4 bg-[#f8ecdb] rounded-xl border border-[#d3c5ab]">
         <div className="text-xs font-bold uppercase text-[#785a00] tracking-wider mb-1">

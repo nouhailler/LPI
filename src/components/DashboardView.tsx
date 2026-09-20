@@ -30,6 +30,7 @@ import { LpiCertificationGuideModal } from './LpiCertificationGuideModal';
 import { getStoredDiagnosticResult } from '../data/diagnosticExamData';
 import { loadSRSRecords, computeSRSDeckSummary } from '../utils/srsEngine';
 import { WeaknessEngineWidget } from './weakness/WeaknessEngineWidget';
+import { thematicLearningPaths, getThematicPathProgress } from '../data/thematicLearningPathsData';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -820,6 +821,101 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* THEMATIC LEARNING PATHS (SANS CERTIFICATION) */}
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🚀</span>
+                <h3 className="text-xl font-bold text-[#201b11]">
+                  {isFrench ? 'Parcours Thématiques Métier' : 'Thematic Career Paths'}
+                </h3>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#ffc20e]/30 text-[#785a00] border border-[#ffc20e]/60 uppercase tracking-wider">
+                  {isFrench ? 'Indépendant LPI' : 'Career Roadmaps'}
+                </span>
+                <InfoTooltip
+                  title={isFrench ? "Parcours Thématiques" : "Thematic Skill Paths"}
+                  content={isFrench ? "Feuilles de route progressives axées sur le savoir-faire pratique (Admin, Bash, Réseau) sans obligation de passer une certification." : "Progressive roadmaps focused on practical hands-on mastery (Admin, Bash, Networking) independent of certification exams."}
+                />
+              </div>
+              <button
+                onClick={() => {
+                  try {
+                    localStorage.setItem('cert_path_view_mode', 'thematic');
+                  } catch {}
+                  onNavigate('path');
+                }}
+                className="text-xs font-bold text-[#785a00] hover:underline uppercase tracking-wider cursor-pointer"
+              >
+                {isFrench ? 'Voir les 3 parcours →' : 'View all 3 paths →'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {thematicLearningPaths.map((path) => {
+                const completedCount = getThematicPathProgress(path.id).length;
+                const totalCount = path.steps.length;
+                const pct = Math.round((completedCount / totalCount) * 100);
+
+                return (
+                  <div
+                    key={path.id}
+                    onClick={() => {
+                      try {
+                        localStorage.setItem('cert_path_view_mode', 'thematic');
+                      } catch {}
+                      onNavigate('path');
+                    }}
+                    className={`bg-[#ffffff] rounded-xl border ${path.borderColor} p-4 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group hover:border-[#ffc20e]`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{path.emoji}</span>
+                          <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded border ${path.badgeColor}`}>
+                            {isFrench ? path.difficultyFr : path.difficulty}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-extrabold text-[#785a00] bg-[#fff8f2] border border-[#d3c5ab] px-2 py-0.5 rounded">
+                          {pct}%
+                        </span>
+                      </div>
+
+                      <h4 className="font-extrabold text-[#201b11] text-base group-hover:text-[#785a00] transition-colors line-clamp-1">
+                        {isFrench ? path.titleFr : path.title}
+                      </h4>
+
+                      <p className="text-xs text-[#4f4632] mt-1 line-clamp-2 leading-relaxed">
+                        {isFrench ? path.descriptionFr : path.description}
+                      </p>
+
+                      {/* Step sequence preview */}
+                      <div className="mt-3 pt-2.5 border-t border-[#f0e4d2] text-[11px] text-[#6e634e] font-mono line-clamp-1">
+                        {path.steps.map((s) => s.title.split(':')[0]).join(' ↓ ')}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-[#f0e4d2] flex items-center justify-between text-xs">
+                      <div className="flex-1 mr-3">
+                        <div className="w-full h-1.5 bg-[#ece1d0] rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{ width: `${pct}%`, backgroundColor: path.accentHex }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-[#817660] mt-1 block">
+                          {completedCount} / {totalCount} {isFrench ? 'étapes validées' : 'steps completed'}
+                        </span>
+                      </div>
+                      <span className="font-bold text-[#785a00] group-hover:translate-x-0.5 transition-transform shrink-0 flex items-center gap-0.5">
+                        {isFrench ? 'Ouvrir' : 'Open'} →
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
