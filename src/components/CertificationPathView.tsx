@@ -366,8 +366,8 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
         <span className="text-xs text-[#817660] hidden lg:inline px-2">
           {viewMode === 'thematic'
             ? isFrench
-              ? '🎯 3 feuilles de route concrètes (Admin, Bash, Networking) axées sur la pratique réelle'
-              : '🎯 3 pragmatic real-world engineering roadmaps (Admin, Bash, Networking)'
+              ? '🎯 21 feuilles de route concrètes (Fondamentaux, Admin, Réseau, Sécurité, Pratique) axées sur le terrain'
+              : '🎯 21 pragmatic real-world engineering roadmaps (Fundamentals, Admin, Network, Security, DevOps)'
             : viewMode === 'map'
             ? isFrench
               ? '💡 Cliquez sur un nœud pour inspecter progression, flashcards et labs'
