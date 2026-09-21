@@ -384,6 +384,8 @@ export interface TranslationDictionary {
     studyStreak: string;
     myStats: string;
     languageTitle: string;
+    documentation: string;
+    documentationDesc: string;
   };
   updateBanner: {
     newVersion: string;

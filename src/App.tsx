@@ -16,6 +16,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { DiagnosticExamModal } from './components/DiagnosticExamModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { ExplainDifferentlyModal } from './components/ExplainDifferentlyModal';
+import { DocumentationModal } from './components/DocumentationModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
 import { PracticeQuestion, TabType, UserStats } from './types';
@@ -71,6 +72,15 @@ export default function App() {
   const handleOpenFlashcards = (topic: any = 'srs-daily') => {
     setSelectedFlashcardsTopic(topic);
     setCurrentTab('flashcards');
+  };
+
+  // Technical Documentation & ADR Viewer modal state
+  const [isDocumentationOpen, setIsDocumentationOpen] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | undefined>(undefined);
+
+  const handleOpenDocumentation = (docId?: string) => {
+    setSelectedDocId(docId);
+    setIsDocumentationOpen(true);
   };
 
   // Automatic Updates & Service Worker state
@@ -315,6 +325,7 @@ export default function App() {
         userStats={userStats}
         onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
         onOpenExplainDifferently={() => handleOpenExplainDifferently('umask', 'simple')}
+        onOpenDocumentation={handleOpenDocumentation}
       />
 
       <div className="flex flex-1 w-full pt-16 md:pt-20">
@@ -475,6 +486,13 @@ export default function App() {
         onNavigate={handleSelectTab}
         onStartExam={handleStartExam}
         onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
+      />
+
+      {/* Technical Documentation & ADR Interactive Viewer */}
+      <DocumentationModal
+        isOpen={isDocumentationOpen}
+        onClose={() => setIsDocumentationOpen(false)}
+        initialDocId={selectedDocId}
       />
 
       {/* Floating Automatic Update Notification Banner */}

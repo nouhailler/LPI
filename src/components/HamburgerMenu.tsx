@@ -50,6 +50,7 @@ interface HamburgerMenuProps {
   userStats: UserStats;
   onOpenDiagnostic?: () => void;
   onOpenExplainDifferently?: () => void;
+  onOpenDocumentation?: (docId?: string) => void;
 }
 
 interface MenuItem {
@@ -85,6 +86,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   userStats,
   onOpenDiagnostic,
   onOpenExplainDifferently,
+  onOpenDocumentation,
 }) => {
   const { t, isFrench } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -244,6 +246,40 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           tabTarget: 'path',
           action: () => onSelectTab('path'),
           keywords: ['roadmap', 'career', 'tiers', 'prerequisites', 'badges', 'parcours', 'carrière', 'échelons'],
+        },
+        {
+          id: 'nav-documentation',
+          title: isFrench ? 'Documentation Technique & Architecture' : 'Technical & Architecture Documentation',
+          subtitle: isFrench
+            ? '21 fiches : Modèle de données, Moteurs (SRS, Labs, Examens 200–800), PWA & 6 ADRs'
+            : '21 specs: Data model, Pedagogical engines (SRS, Labs, 200–800 Exam), PWA & 6 ADRs',
+          icon: BookOpen,
+          badge: isFrench ? '21 Docs & ADRs' : '21 Docs & ADRs',
+          badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
+          action: () => {
+            onClose();
+            if (onOpenDocumentation) {
+              onOpenDocumentation();
+            }
+          },
+          keywords: [
+            'documentation',
+            'docs',
+            'architecture',
+            'adr',
+            'spécifications',
+            'moteurs',
+            'srs',
+            'labs',
+            'pwa',
+            'roadmap',
+            'décisions',
+            'technique',
+            'specs',
+            'markdown',
+            'virtualfs',
+            'storage',
+          ],
         },
       ],
     },
@@ -651,6 +687,35 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           keywords: ['profile', 'stats', 'streak', 'user', 'settings', 'goal', 'profil', 'statistiques'],
         },
         {
+          id: 'item-documentation',
+          title: isFrench ? 'Documentation Technique & Registre ADR' : 'Technical Documentation & ADR Registry',
+          subtitle: isFrench
+            ? 'Consulter les 15 spécifications Markdown et les 6 décisions d\'architecture (ADR-001 à ADR-006)'
+            : 'Browse the 15 Markdown specifications and 6 Architecture Decision Records (ADR-001 to ADR-006)',
+          icon: FileCode,
+          badge: isFrench ? 'docs/' : 'docs/',
+          badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
+          action: () => {
+            onClose();
+            if (onOpenDocumentation) {
+              onOpenDocumentation();
+            }
+          },
+          keywords: [
+            'documentation',
+            'docs',
+            'adr',
+            'architecture',
+            'décisions',
+            'specs',
+            'modèle',
+            'markdown',
+            'technique',
+            'spécifications',
+            'système',
+          ],
+        },
+        {
           id: 'item-pwa',
           title: isFrench ? 'Installer comme application Bureau / Mobile (PWA)' : 'Install as Desktop / Mobile App (PWA)',
           subtitle: isFrench ? 'Installez l\'application pour réviser en plein écran même hors-ligne' : 'Learn how to install for full-screen standalone study',
@@ -668,7 +733,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         },
       ],
     },
-  ], [userStats, onSelectTab, onSelectLearningTopic, onStartExam, onOpenProfile, onOpenSettings, isFrench, t]);
+  ], [userStats, onSelectTab, onSelectLearningTopic, onStartExam, onOpenProfile, onOpenSettings, onOpenDocumentation, isFrench, t]);
 
   // Filter categories and items based on search
   const filteredCategories = useMemo(() => {
@@ -729,14 +794,31 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
             </div>
           </div>
 
-          <button
-            id="close-hamburger-menu-btn"
-            onClick={onClose}
-            aria-label={t.common.close}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#4f4632] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {onOpenDocumentation && (
+              <button
+                id="header-open-docs-btn"
+                onClick={() => {
+                  onClose();
+                  onOpenDocumentation();
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#ebdcc8] hover:bg-[#d3c5ab] text-[#785a00] text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title={isFrench ? 'Documentation & Architecture' : 'Technical Docs & Architecture'}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{isFrench ? 'Docs & ADRs' : 'Docs & ADRs'}</span>
+              </button>
+            )}
+
+            <button
+              id="close-hamburger-menu-btn"
+              onClick={onClose}
+              aria-label={t.common.close}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[#4f4632] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Search & Language Selector inside menu */}

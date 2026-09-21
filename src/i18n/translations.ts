@@ -384,6 +384,8 @@ export const enTranslations: TranslationDictionary = {
     studyStreak: 'Study Streak',
     myStats: 'My Stats',
     languageTitle: 'Language / Langue',
+    documentation: 'Technical & Architecture Docs',
+    documentationDesc: '21 Architecture specs, learning engines, PWA & ADRs',
   },
   updateBanner: {
     newVersion: 'New Update Available',
@@ -789,6 +791,8 @@ export const frTranslations: TranslationDictionary = {
     studyStreak: 'Série d\'étude',
     myStats: 'Mes stats',
     languageTitle: 'Langue / Language',
+    documentation: 'Documentation & Architecture',
+    documentationDesc: '21 Fiches d\'architecture, moteurs pédagogiques, PWA & ADRs',
   },
   updateBanner: {
     newVersion: 'Nouvelle mise à jour disponible',
