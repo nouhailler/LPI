@@ -1,6 +1,8 @@
 # 00 — Vue d'ensemble du Projet (Overview)
 
 > **LPI Certification Prep** — Plateforme web offline-first d'apprentissage, d'entraînement pratique et de préparation intensive aux certifications du **Linux Professional Institute** (Linux Essentials, LPIC-1, LPIC-2, LPIC-3).
+>
+> 🧭 **Documentation Fonctionnelle des Écrans** : Pour une description détaillée écran par écran avec toutes les fonctionnalités et interactions de chaque vue, consultez la fiche préalable : **[00 — Guide Fonctionnel des Écrans & Parcours Utilisateur](./00_FUNCTIONAL_GUIDE.md)**.
 
 ---
 

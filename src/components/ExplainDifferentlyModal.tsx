@@ -22,6 +22,7 @@ import {
 import { PedagogicalMode, PedagogicalTopic, PEDAGOGICAL_TOPICS } from '../data/pedagogicalExplanations';
 import { fetchPedagogicalExplanation, ExplanationResult } from '../services/explainDifferentlyService';
 import { useLanguage } from '../i18n/LanguageContext';
+import { MarkdownView } from './MarkdownView';
 
 interface ExplainDifferentlyModalProps {
   isOpen: boolean;
@@ -391,9 +392,7 @@ export const ExplainDifferentlyModal: React.FC<ExplainDifferentlyModalProps> = (
                       <BookOpen className="w-4 h-4" />
                       <span>{isFr ? 'Synthèse Droit au But' : 'Direct Core Synthesis'}</span>
                     </div>
-                    <div className="text-sm md:text-base text-[#201b11] leading-relaxed whitespace-pre-line font-normal">
-                      {data.content}
-                    </div>
+                    <MarkdownView content={data.content} />
                   </div>
 
                   {data.keyPoints && data.keyPoints.length > 0 && (
@@ -428,8 +427,8 @@ export const ExplainDifferentlyModal: React.FC<ExplainDifferentlyModalProps> = (
                         ? '« Rendre le concept intuitif en le reliant à un objet ou une situation du quotidien »'
                         : '"Making the concept intuitive using an everyday real-world object or situation"'}
                     </p>
-                    <div className="text-sm md:text-base text-[#78350f] leading-relaxed whitespace-pre-line bg-[#ffffff] p-4 rounded-xl border border-[#fef3c7]">
-                      {data.content}
+                    <div className="bg-[#ffffff] p-4 rounded-xl border border-[#fef3c7]">
+                      <MarkdownView content={data.content} />
                     </div>
                   </div>
 
@@ -450,9 +449,7 @@ export const ExplainDifferentlyModal: React.FC<ExplainDifferentlyModalProps> = (
               {/* Mode 3: Donne-moi un exemple (Hands-on Terminal) */}
               {activeMode === 'example' && (
                 <div className="space-y-4">
-                  <p className="text-sm text-[#4f4632]">
-                    {data.content}
-                  </p>
+                  <MarkdownView content={data.content} />
 
                   {data.terminalSnippet && (
                     <div className="space-y-2">
@@ -665,8 +662,8 @@ export const ExplainDifferentlyModal: React.FC<ExplainDifferentlyModalProps> = (
                       </span>
                     </div>
 
-                    <div className="text-sm md:text-base text-[#7f1d1d] leading-relaxed whitespace-pre-line bg-[#ffffff] p-4 rounded-xl border border-[#fee2e2]">
-                      {data.content}
+                    <div className="bg-[#ffffff] p-4 rounded-xl border border-[#fee2e2]">
+                      <MarkdownView content={data.content} />
                     </div>
                   </div>
 

@@ -20,9 +20,18 @@ const rawDocs = import.meta.glob<{ default: string }>('/docs/**/*.md', {
 // Fallback or mapped document definitions
 export const DOC_METADATA = [
   {
+    id: '00_FUNCTIONAL_GUIDE',
+    slug: '00-functional-guide',
+    title: "00 — Guide Fonctionnel des Écrans (Écran par Écran)",
+    phase: 'Phase 1 — Existant & Modèles',
+    category: 'core' as const,
+    summary: "Documentation fonctionnelle complète écran par écran : rôle, fonctionnalités clés, interactions et parcours utilisateur.",
+    path: '/docs/00_FUNCTIONAL_GUIDE.md',
+  },
+  {
     id: '00_OVERVIEW',
     slug: '00-overview',
-    title: "00 — Vue d'Ensemble & Cartographie",
+    title: "00b — Vue d'Ensemble & Cartographie Technique",
     phase: 'Phase 1 — Existant & Modèles',
     category: 'core' as const,
     summary: "Vision générale, stack technique, cartographie des composants et principes directeurs.",

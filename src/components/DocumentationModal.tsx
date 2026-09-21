@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import Markdown from 'react-markdown';
+import { MarkdownView } from './MarkdownView';
 import {
   X,
   Search,
@@ -363,109 +363,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
                 {/* Markdown Reader Pane */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 max-w-4xl mx-auto w-full">
                   <article className="prose prose-stone max-w-none text-[#201b11]">
-                    <div className="markdown-body">
-                      <Markdown
-                        components={{
-                          h1: ({ children }) => (
-                            <h1 className="text-xl sm:text-2xl font-bold text-[#201b11] pb-2 border-b border-[#d3c5ab] mb-4">
-                              {children}
-                            </h1>
-                          ),
-                          h2: ({ children }) => (
-                            <h2 className="text-lg sm:text-xl font-bold text-[#785a00] mt-6 mb-3 pb-1 border-b border-[#ebdcc8]">
-                              {children}
-                            </h2>
-                          ),
-                          h3: ({ children }) => (
-                            <h3 className="text-base font-bold text-[#201b11] mt-5 mb-2">
-                              {children}
-                            </h3>
-                          ),
-                          h4: ({ children }) => (
-                            <h4 className="text-sm font-bold text-[#4f4632] mt-4 mb-1">
-                              {children}
-                            </h4>
-                          ),
-                          p: ({ children }) => (
-                            <p className="text-xs sm:text-sm text-[#201b11] leading-relaxed mb-3">
-                              {children}
-                            </p>
-                          ),
-                          blockquote: ({ children }) => (
-                            <blockquote className="border-l-4 border-[#ffc20e] bg-[#f8ecdb]/60 pl-3.5 py-1.5 my-3 rounded-r-md text-xs sm:text-sm text-[#4f4632] italic">
-                              {children}
-                            </blockquote>
-                          ),
-                          ul: ({ children }) => (
-                            <ul className="list-disc pl-5 my-2.5 space-y-1 text-xs sm:text-sm text-[#201b11]">
-                              {children}
-                            </ul>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="list-decimal pl-5 my-2.5 space-y-1 text-xs sm:text-sm text-[#201b11]">
-                              {children}
-                            </ol>
-                          ),
-                          li: ({ children }) => (
-                            <li className="text-xs sm:text-sm text-[#201b11] leading-relaxed">
-                              {children}
-                            </li>
-                          ),
-                          code: ({ className, children }) => {
-                            const isBlock = className?.includes('language-') || String(children).includes('\n');
-                            if (isBlock) {
-                              return (
-                                <pre className="bg-[#201b11] text-[#f8ecdb] p-3 rounded-lg overflow-x-auto text-xs font-mono my-3 border border-[#4f4632]">
-                                  <code>{children}</code>
-                                </pre>
-                              );
-                            }
-                            return (
-                              <code className="bg-[#ebdcc8] text-[#6d5100] px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-mono font-semibold">
-                                {children}
-                              </code>
-                            );
-                          },
-                          table: ({ children }) => (
-                            <div className="overflow-x-auto my-4 rounded-lg border border-[#d3c5ab]">
-                              <table className="w-full text-left text-xs border-collapse">
-                                {children}
-                              </table>
-                            </div>
-                          ),
-                          thead: ({ children }) => (
-                            <thead className="bg-[#f8ecdb] text-[#785a00] font-bold border-b border-[#d3c5ab]">
-                              {children}
-                            </thead>
-                          ),
-                          tbody: ({ children }) => (
-                            <tbody className="divide-y divide-[#ebdcc8] bg-[#fff8f2]">
-                              {children}
-                            </tbody>
-                          ),
-                          tr: ({ children }) => (
-                            <tr className="hover:bg-[#f8ecdb]/40 transition-colors">
-                              {children}
-                            </tr>
-                          ),
-                          th: ({ children }) => (
-                            <th className="p-2.5 font-bold text-xs text-[#785a00]">
-                              {children}
-                            </th>
-                          ),
-                          td: ({ children }) => (
-                            <td className="p-2.5 text-xs text-[#201b11] align-top">
-                              {children}
-                            </td>
-                          ),
-                          hr: () => (
-                            <hr className="my-6 border-t border-[#d3c5ab]" />
-                          ),
-                        }}
-                      >
-                        {currentDoc.rawContent}
-                      </Markdown>
-                    </div>
+                    <MarkdownView content={currentDoc.rawContent} />
                   </article>
 
                   {/* Navigation footer at end of document */}

@@ -251,10 +251,10 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           id: 'nav-documentation',
           title: isFrench ? 'Documentation Technique & Architecture' : 'Technical & Architecture Documentation',
           subtitle: isFrench
-            ? '21 fiches : Modèle de données, Moteurs (SRS, Labs, Examens 200–800), PWA & 6 ADRs'
-            : '21 specs: Data model, Pedagogical engines (SRS, Labs, 200–800 Exam), PWA & 6 ADRs',
+            ? '22 fiches : Guide des écrans, Modèle de données, Moteurs (SRS, Labs, Examens), PWA & 6 ADRs'
+            : '22 specs: Functional screen guide, Data model, Pedagogical engines, PWA & 6 ADRs',
           icon: BookOpen,
-          badge: isFrench ? '21 Docs & ADRs' : '21 Docs & ADRs',
+          badge: isFrench ? '22 Docs & ADRs' : '22 Docs & ADRs',
           badgeColor: 'bg-[#ffc20e] text-[#6d5100]',
           action: () => {
             onClose();

@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Lightbulb, Terminal, BookOpen, CheckCircle, Sparkles } from 'lucide-react';
 import { PracticeQuestion } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
+import { MarkdownView } from './MarkdownView';
 
 interface ExplanationModalProps {
   question: PracticeQuestion | null;
@@ -70,9 +71,9 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
             <BookOpen className="w-4 h-4" />
             {t.explanation.conceptBreakdown}
           </div>
-          <p className="text-sm text-[#4f4632] leading-relaxed bg-[#ffffff] p-4 rounded-xl border border-[#d3c5ab]">
-            {question.explanation}
-          </p>
+          <div className="bg-[#ffffff] p-4 rounded-xl border border-[#d3c5ab]">
+            <MarkdownView content={question.explanation} />
+          </div>
         </div>
 
         {/* Terminal example if available */}
