@@ -8,9 +8,9 @@
   [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-  [![PWA 100% Offline](https://img.shields.io/badge/PWA-100%25_Offline-FFC20E?style=for-the-badge&logo=pwa&logoColor=black)](#-install-pwa)
-  [![Documentation](https://img.shields.io/badge/Docs-V1_Complete-blue?style=for-the-badge)](./docs/00_OVERVIEW.md)
-  [![License](https://img.shields.io/badge/License-MIT-28A745?style=for-the-badge)](#-license)
+  [![PWA 100% Offline](https://img.shields.io/badge/PWA-100%25_Offline-FFC20E?style=for-the-badge&logo=pwa&logoColor=black)](#-installation-pwa)
+  [![Documentation](https://img.shields.io/badge/Docs-22_Fiches_%26_ADRs-blue?style=for-the-badge)](./docs/00_FUNCTIONAL_GUIDE.md)
+  [![License](https://img.shields.io/badge/License-MIT-28A745?style=for-the-badge)](#-licence)
 
   <p align="center">
     <strong>Suite complète d'apprentissage interactif, de simulations d'examens chronométrés et de laboratoires avec terminal virtuel Linux simulé (VirtualFS).</strong>
@@ -30,13 +30,34 @@
 
 ## ✨ Fonctionnalités Principales
 
-- **🖥️ Terminal Virtuel & Labs Similés (VirtualFS)** : Interpréteur de commandes Linux 100 % in-memory et PWA (`chmod`, `chown`, `grep`, `tar`, `ps`, redirections) avec validation d'état réel du système de fichiers.
-- **📝 Examens Blancs Chronométrés** : Simulations fidèles aux conditions LPI (LPIC-1 101/102, LPIC-2 201/202, LPIC-3) avec tolérance de commandes et explications pédagogiques détaillées.
-- **🧠 Flashcards avec Algorithme SRS (2 000+ cartes)** : Moteur de répétition espacée (Leitner/SM-2) avec calcul des cartes dues du jour et paliers de rétention.
-- **🚨 Ateliers Hands-On Pratiques** : Simulation d'astreinte (*Incident Response*), saisie libre (*Fill-in-the-blank*), analyse de pannes (*Troubleshooting*) et ordonnancement chronologique (*Sequencing*).
-- **🎯 Weakness Engine & Matrice de Compétences** : Détection algorithmique des angles morts et des lacunes pour des révisions ultra-ciblées.
-- **📖 Glossaire & Index des Commandes** : Dictionnaire complet des utilitaires, fichiers de configuration FHS et pièges d'examen avec décomposition de la syntaxe.
-- **🌐 Expérience 100 % Bilingue** : Basculement instantané Français / Anglais sur toute l'application.
+- **🖥️ Terminal Virtuel & Labs Simulés (VirtualFS)** : Interpréteur de commandes Linux 100 % in-memory et PWA (`chmod`, `chown`, `grep`, `tar`, `ps`, redirections) avec validation d'état réel du système de fichiers virtuel.
+- **📝 Simulateur d'Examens Chronométrés (Barème 200–800)** : Simulations fidèles aux conditions Pearson VUE / LPI (LPIC-1 101/102, LPIC-2 201/202, LPIC-3) avec QCM et questions à saisie libre de commandes (*Fill-in-the-blank*), tolérance syntaxique intelligente et explications pédagogiques détaillées.
+- **🧠 Flashcards avec Algorithme SRS (2 000+ cartes)** : Moteur de répétition espacée (dérivé de Leitner / SM-2) avec cartes flip 3D, calcul des révisions dues du jour et paliers d'auto-évaluation déterministes.
+- **🚨 Ateliers Hands-On Pratiques** : Simulation d'astreinte (*Incident Response*), dépannage sur logs système (*Troubleshooting*), ordonnancement chronologique par glisser-déposer (*Sequencing*) et mini-jeux d'association.
+- **🎯 Weakness Engine & Matrice de Compétences** : Détection algorithmique des angles morts et des sous-objectifs les plus fragiles pour des entraînements ciblés en 1 clic.
+- **📖 Glossaire, Syntaxe & Graphe de Connaissances** : Dictionnaire complet des utilitaires Linux, décomposition anatomique des lignes de commandes, pièges d'examen et visualisation graphique des interconnexions (services, ports, fichiers FHS).
+- **💡 Module « Explique-moi Autrement »** : Vulgarisation adaptative en 5 angles (Synthèse rapide, Métaphore débutant ELI5, Exemple terminal guidé, Mini-quiz de validation, Piège classique d'examen) avec support d'enrichissement IA optionnel.
+- **📚 Lecteur de Documentation In-App & Bilingue (23 Fiches & ADRs en FR & EN)** : Visualiseur Markdown hors-ligne intégré accessible directement depuis le menu hamburger et l'en-tête, avec rendu typographique GFM complet (tableaux lisibles, listes de tâches, coloration de code monospace, filtres par phase) et basculement automatique FR / EN.
+- **🌐 Expérience 100 % Bilingue & Offline-First** : Basculement instantané Français / Anglais sur toute l'application et sa documentation technique, et fonctionnement autonome garanti sans connexion Internet.
+- **🔄 Gestion Dynamique des Versions & Profil Neutre** : Suivi des versions via `version.json` et `updateService`, réinitialisation propre du profil apprenant (statuts de certifications vierges par défaut).
+
+---
+
+## 🗺️ Cartographie Fonctionnelle des Écrans
+
+L'application est structurée en **7 écrans principaux** et plusieurs modules transverses :
+
+| Écran | Rôle Pédagogique Majeur | Fonctionnalités Clés |
+| :--- | :--- | :--- |
+| **Tableau de Bord** (`dashboard`) | Cockpit de pilotage & Diagnostic | Readiness Score (0-100%), Weakness Engine, calendrier de régularité (Daily Streak), métriques d'apprentissage et accès rapides. |
+| **Curriculum Officiel** (`learning`) | Référentiel complet LPI | Programmes LPIC-1 (101/102), LPIC-2 (201/202) et LPIC-3, coefficients officiels (Weights 1 à 5), fiches d'objectifs détaillées. |
+| **Parcours Thématiques** (`path`) | Approche transverse par métier | 5 piliers : Fichiers & Droits, Démarrage & Noyau, Stockage & FS, Réseau & Services, Sécurité & Chiffrement avec progression par étoiles. |
+| **Flashcards SRS** (`flashcards`) | Mémorisation active à long terme | Flip-cards 3D, 4 boutons d'auto-évaluation (*Again, Hard, Good, Easy*), files d'attente et index complet de recherche parmi 2 000+ cartes. |
+| **Simulateur d'Examens** (`practice`) | Immersion conditions réelles | 60 questions / 90 min, notation officielle 200–800 (seuil 500 pts), QCM et saisie libre de commandes, marquage pour revue et bilan complet. |
+| **Glossaire & Explorateur** (`glossary`) | Encyclopédie & Graphe conceptuel | Recherche textuelle, décomposition anatomique d'instructions (options, drapeaux, pipes), pièges fréquents et graphe relationnel interactif. |
+| **Hub d'Ateliers & Labs** (`training`) | Réflexes pratiques de terminal | Shell Unix interactif (VirtualFS), astreinte système (Incident Response), analyse de logs (`journalctl`), ordonnancement glisser-déposer. |
+
+> 👉 **Spécification détaillée écran par écran : [docs/00_FUNCTIONAL_GUIDE.md](./docs/00_FUNCTIONAL_GUIDE.md)**
 
 ---
 
@@ -60,11 +81,14 @@ $$\text{UI Components} \longrightarrow \text{Domain Logic (SRS, Weakness, Analyt
 
 ---
 
-## 📚 Documentation Technique (`docs/`)
+## 📚 Documentation Technique & Architecture (`docs/` & `docs/en/`)
 
-La documentation interne du projet est organisée dans le dossier `docs/` selon une séparation claire entre l'existant (**CURRENT**), les cibles architecturales (**TARGET**) et la feuille de route (**ROADMAP**) :
+La documentation interne du projet comprend **23 documents et ADRs complets**, disponibles en versions intégrales française (`docs/`) et anglaise (`docs/en/`), tous consultables en Markdown brut ou **directement dans l'application via le menu hamburger ou l'en-tête** avec rendu typographique GFM et basculement de langue automatique :
 
-### Phase 1 — Comprendre l'existant (Complète)
+> 🇬🇧 **English documentation is available in [`docs/en/`](./docs/en/00_FUNCTIONAL_GUIDE.md) and [`docs/en/adr/`](./docs/en/adr/README.md).**
+
+### Phase 1 — Spécifications Fonctionnelles & Modèles (Complète)
+- **[00_FUNCTIONAL_GUIDE.md](./docs/00_FUNCTIONAL_GUIDE.md)** : **Guide fonctionnel des écrans & parcours utilisateur (spécification complète écran par écran).**
 - **[00_OVERVIEW.md](./docs/00_OVERVIEW.md)** : Carte mentale du projet, flux d'interaction entre modules et parcours apprenant.
 - **[01_PRODUCT.md](./docs/01_PRODUCT.md)** : Positionnement, personas et matrice de maturité (Existant / Planifié / Expérimental).
 - **[02_ARCHITECTURE.md](./docs/02_ARCHITECTURE.md)** : Arborescence `src/`, modèle en couches et principes de découplage.

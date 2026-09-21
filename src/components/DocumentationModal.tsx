@@ -35,7 +35,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
   initialDocId,
 }) => {
   const { isFrench } = useLanguage();
-  const allDocs = useMemo(() => getAllDocs(), []);
+  const allDocs = useMemo(() => getAllDocs(isFrench ? 'fr' : 'en'), [isFrench]);
 
   const [selectedDocId, setSelectedDocId] = useState<string>(initialDocId || '00_OVERVIEW');
   const [searchQuery, setSearchQuery] = useState('');

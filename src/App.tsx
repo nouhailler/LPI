@@ -15,6 +15,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { SettingsModal } from './components/SettingsModal';
 import { DiagnosticExamModal } from './components/DiagnosticExamModal';
 import { OnboardingModal } from './components/OnboardingModal';
+import { LanguageSelectionModal } from './components/LanguageSelectionModal';
 import { ExplainDifferentlyModal } from './components/ExplainDifferentlyModal';
 import { DocumentationModal } from './components/DocumentationModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
@@ -22,6 +23,7 @@ import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions
 import { PracticeQuestion, TabType, UserStats } from './types';
 import { PedagogicalMode } from './data/pedagogicalExplanations';
 import { useLanguage } from './i18n/LanguageContext';
+import { Language } from './i18n/types';
 import { frenchCertificationTiers, frenchPracticeQuestions } from './i18n/frenchData';
 import { getStoredDiagnosticResult } from './data/diagnosticExamData';
 import {
@@ -46,10 +48,11 @@ export default function App() {
   const [selectedExamId, setSelectedExamId] = useState<string>('exam-101');
   const [dataResetKey, setDataResetKey] = useState(0);
 
-  // Diagnostic & Onboarding Modal state
+  // Diagnostic, Language Selection & Onboarding Modal state
   const [isDiagnosticOpen, setIsDiagnosticOpen] = useState(false);
   const [diagnosticMode, setDiagnosticMode] = useState<'intro' | 'test' | 'results'>('intro');
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isLanguageSelectionOpen, setIsLanguageSelectionOpen] = useState(false);
   const [selectedFlashcardsTopic, setSelectedFlashcardsTopic] = useState<any>('srs-daily');
 
   // Explain Differently Modal state (5 pedagogical angles & dynamic explanations)
@@ -88,11 +91,19 @@ export default function App() {
   const [latestVersionInfo, setLatestVersionInfo] = useState<VersionInfo | null>(null);
   const [showUpdateBanner, setShowUpdateBanner] = useState(false);
 
-  // First launch onboarding check (or after full reset)
+  // First launch language selection and onboarding check (or after full reset)
   useEffect(() => {
     try {
       const hasCompletedOnboarding = localStorage.getItem('lpi_onboarding_completed');
-      if (!hasCompletedOnboarding) {
+      const hasSelectedLanguage = localStorage.getItem('lpi_language_selected');
+
+      // Before onboarding appears on first launch, prompt user to choose language
+      if (!hasCompletedOnboarding && !hasSelectedLanguage) {
+        const timer = setTimeout(() => {
+          setIsLanguageSelectionOpen(true);
+        }, 300);
+        return () => clearTimeout(timer);
+      } else if (!hasCompletedOnboarding) {
         const timer = setTimeout(() => {
           setIsOnboardingOpen(true);
         }, 500);
@@ -112,6 +123,14 @@ export default function App() {
       }
     } catch {}
   }, []);
+
+  const handleLanguageConfirmed = (_selectedLang: Language) => {
+    setIsLanguageSelectionOpen(false);
+    // Open onboarding right after language selection in the user's chosen language
+    setTimeout(() => {
+      setIsOnboardingOpen(true);
+    }, 200);
+  };
 
   // Initialize service worker and update listener
   useEffect(() => {
@@ -264,6 +283,7 @@ export default function App() {
       localStorage.removeItem('lpi_diagnostic_result');
       localStorage.removeItem('lpi_diagnostic_seen');
       localStorage.removeItem('lpi_onboarding_completed');
+      localStorage.removeItem('lpi_language_selected');
       localStorage.removeItem('lpic_glossary_bookmarks');
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new CustomEvent('lpi_progress_reset'));
@@ -477,6 +497,12 @@ export default function App() {
         onNavigate={handleSelectTab}
         onStartExam={handleStartExam}
         initialMode={diagnosticMode}
+      />
+
+      {/* First-launch Language Selection Modal (before onboarding) */}
+      <LanguageSelectionModal
+        isOpen={isLanguageSelectionOpen}
+        onConfirm={handleLanguageConfirmed}
       />
 
       {/* Welcome & Interactive Onboarding Tour Modal */}

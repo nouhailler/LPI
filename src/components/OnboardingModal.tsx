@@ -38,7 +38,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   onStartExam,
   onOpenDiagnostic,
 }) => {
-  const { isFrench } = useLanguage();
+  const { isFrench, language, setLanguage } = useLanguage();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Reset to first step when modal opens
@@ -579,14 +579,46 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </div>
           </div>
 
-          <button
-            id="onboarding-close-btn"
-            onClick={handleComplete}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#817660] hover:text-[#201b11] hover:bg-[#ebdcc8] transition-colors cursor-pointer shrink-0"
-            title={isFrench ? 'Passer l\'introduction' : 'Skip onboarding'}
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Quick language toggle within onboarding */}
+            <div className="flex items-center bg-[#f2e2bb] p-0.5 rounded-lg border border-[#d3c5ab] text-xs font-bold">
+              <button
+                id="onboarding-lang-fr-btn"
+                type="button"
+                onClick={() => setLanguage('fr')}
+                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                  language === 'fr'
+                    ? 'bg-[#785a00] text-white shadow-2xs'
+                    : 'text-[#6d5100] hover:text-[#201b11]'
+                }`}
+                title="Passer en français"
+              >
+                FR
+              </button>
+              <button
+                id="onboarding-lang-en-btn"
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                  language === 'en'
+                    ? 'bg-[#785a00] text-white shadow-2xs'
+                    : 'text-[#6d5100] hover:text-[#201b11]'
+                }`}
+                title="Switch to English"
+              >
+                EN
+              </button>
+            </div>
+
+            <button
+              id="onboarding-close-btn"
+              onClick={handleComplete}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[#817660] hover:text-[#201b11] hover:bg-[#ebdcc8] transition-colors cursor-pointer shrink-0"
+              title={isFrench ? 'Passer l\'introduction' : 'Skip onboarding'}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Progress Bar */}
