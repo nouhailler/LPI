@@ -77,18 +77,62 @@ Au démarrage, l'arborescence injectée dans `initialFs.ts` contient :
 - **Navigation & Historique** : historique des commandes (touches Flèche Haut / Bas) et autocomplétion par touche **Tab**.
 
 ### Catalogue des Utilitaires Linux Implémentés :
-- **Navigation & Arborescence** : `pwd`, `cd`, `ls` (avec `-l`, `-a`, `-h`, `-i`), `mkdir`, `rmdir`, `touch`, `cp`, `mv`, `rm`.
-- **Visualisation & Recherche** : `cat`, `head`, `tail`, `grep` (avec `-i`, `-v`, `-n`, `-c`), `find` (par nom ou type), `wc`.
-- **Droits & Propriétaires** : `chmod` (notation octale `755` et symbolique `u+x`), `chown`, `chgrp`, `umask`.
-- **Archivage & Compression** : `tar` (création `-cvf`, extraction `-xvf`, listage `-tvf`).
-- **Gestion des Processus** : `ps` (avec `aux`, `-ef`), `kill`, `killall`, `top`, `uptime`, `free`, `df`.
-- **Informations Système** : `uname`, `whoami`, `id`, `groups`, `date`, `hostname`.
+- **Navigation & Arborescence** : `pwd`, `cd`, `ls` (avec `-l`, `-a`, `-h`, `-i`), `mkdir`, `rmdir`, `touch`, `cp`, `mv`, `rm`, `ln` (liens symboliques `-s` et durs).
+- **Visualisation & Recherche** : `cat`, `head`, `tail`, `grep` (avec `-i`, `-v`, `-n`, `-c`, regex), `find` (par nom, type `f`/`d`, permissions octales `-perm`), `echo`, `which`.
+- **Filtrage Avancé & Traitement de Flux** :
+  - `sed` : éditeur de flux pour substitutions regex (`sed "s/foo/bar/g"`), suppressions (`sed "/motif/d"`) et sélection de lignes (`-n "1,5p"`).
+  - `awk` : traitement textuel colonne par colonne (`$1, $2...`), conditions logiques (`$4 == "active"`), délimiteurs configurables via `-F` (`awk -F: '{print $1, $7}' /etc/passwd`).
+  - `cut` : découpage par délimiteur (`-d:`, `-d,`) et sélection de champs (`-f1`, `-f1,3`) ou de caractères (`-c1-10`).
+  - `sort` : tri alphabétique et numérique (`-n`), inverse (`-r`), déduplication (`-u`), tri par clé (`-k2`).
+  - `uniq` : détection et comptage de lignes consécutives répétées (`-c`), lignes uniques (`-u`), doublons (`-d`).
+  - `wc` : comptage de lignes (`-l`), de mots (`-w`), d'octets (`-c`) et de caractères (`-m`).
+  - `tee` : duplication de flux vers la sortie standard et des fichiers simultanés (`-a` pour mode ajout).
+- **Gestionnaire de Services & Journaux Systemd (`ServicesManager`)** :
+  - `systemctl` : pilotage du cycle de vie des unités de services (`status`, `start`, `stop`, `restart`, `enable`, `disable`, `is-active`, `list-units`). Modélisation fidèle des unités critiques (`nginx.service`, `ssh.service`, `cron.service`, `rsyslog.service`) avec PID virtuel, temps de démarrage et logs récents.
+  - `journalctl` : consultation du journal système structuré avec filtrage par unité (`-u nginx`), nombre de lignes (`-n 15`), ordre chronologique inversé (`-r`), niveau de priorité (`-p err`, `-p warning`) et saut en fin de journal (`-xe`, `-e`).
+- **Simulation Réseau & Routage (`NetworkSimulator`)** :
+  - `ip addr` : affichage des interfaces boucle locale (`lo`) et Ethernet (`eth0`), adresses IPv4/IPv6 CIDR (`192.168.1.50/24`), adresses MAC réelles et états (`UP`, `LOWER_UP`).
+  - `ip route` : consultation de la passerelle par défaut (`default via 192.168.1.1 dev eth0`) et des routes directes de sous-réseau.
+  - `ping` : émission de requêtes ICMP ECHO_REQUEST avec limitation de paquets (`-c 3`), calcul de latence RTT réaliste (min/avg/max/mdev), gestion des cibles joignables (passerelle locale, DNS public `8.8.8.8`) et des hôtes injoignables avec timeout.
+- **Stockage, Partitions & Points de Montage (`StorageSimulator`)** :
+  - `mount` : rattachement de systèmes de fichiers sur un point de montage (`mount /dev/sdc1 /mnt`), options (`-o rw,ro,noatime`), types (`-t ext4,vfat`), et exécution automatique de `/etc/fstab` avec `mount -a`.
+  - `umount` : libération et démontage propre de points de montage ou périphériques blocs (`umount /mnt/backup`).
+  - `/etc/fstab` : fichier statique de description des systèmes de fichiers permanents (`<device> <mountpoint> <type> <options> <dump> <pass>`), supportant les montages automatiques `mount -a` et la persistance.
+  - `fdisk` : inspection détaillée des tables de partitions MBR/GPT (`sudo fdisk -l /dev/sda`, `sudo fdisk -l /dev/sdc`) avec modélisation des cylindres, secteurs, tailles et identifiants de disques (GUID).
+  - `lsblk` : visualisation arborescente des périphériques de blocs avec métadonnées (`lsblk -f`) incluant `NAME`, `FSTYPE`, `LABEL`, `UUID`, `FSAVAIL`, `FSUSE%` et `MOUNTPOINT`.
+- **Droits & Propriétaires** : `chmod` (notation octale `750`, `644`, `700` et symbolique `u+x`, `g-w`), `chown` (utilisateur et groupe `student:developers`), `chgrp`, `umask`.
+- **Archivage & Compression** : `tar` (création `-czvf`, extraction `-xvf`, listage `-tvf`).
+- **Gestion des Processus & Ressources** : `ps` (`aux`, `-ef`), `kill` (SIGTERM, SIGKILL `-9`), `uptime`, `free` (`-m`), `df` (`-h`), `uname` (`-a`, `-r`).
+- **Environnement & Identité** : `export`, `env`, `which`, `whoami`, `id`, `date`, `sudo`.
+- **Aide Intégrée & Documentation** :
+  - `help` : catalogue complet de toutes les commandes disponibles classées par catégorie.
+  - `help <commande>` ou `<commande> --help` : affichage synthétique et contextuel des arguments, options et exemples de la commande ciblée.
+  - `man <commande>` : pages de manuel UNIX complètes (NAME, SYNOPSIS, DESCRIPTION, OPTIONS, EXAMPLES) pour tous les utilitaires du catalogue.
 
 ---
 
 ## 4. Validation Microscopique des Scénarios de Lab
 
 Contrairement aux plateformes d'apprentissage qui comparent bêtement la chaîne de commande saisie par l'utilisateur à une expression régulière rigide, le moteur de lab évalue **l'état du système de fichiers après exécution**.
+
+### Scénarios Déployés dans le Moteur (`simulatedLabScenarios`) :
+
+1. **`lab-chmod-backup`** : Permissions d'exécution pour `backup.sh` (octal `750`, `rwxr-x---`).
+2. **`lab-grep-auth`** : Analyse forensique et extraction d'échecs d'authentification (`grep "Failed password" /var/log/auth.log > /tmp/failed_attempts.txt`).
+3. **`lab-tar-archive`** : Création d'archive tarball compressée gzip (`tar -czvf /tmp/projects_backup.tar.gz /home/student/projects`).
+4. **`lab-chown-ownership`** : Changement d'appartenance utilisateur et groupe sur l'application web (`sudo chown -R student:developers /home/student/projects/webapp`).
+5. **`lab-symlink-creation`** : Création de liens symboliques relatifs et absolus (`ln -s /etc/nginx/nginx.conf /home/student/scripts/nginx_symlink.conf`).
+6. **`lab-kill-process`** : Interruption d'un processus zombie ou rebelle consommant des ressources (`kill -9 <PID>`).
+7. **`lab-find-and-clean`** : Recherche multicritères de fichiers volumineux et nettoyage temporaire (`find /tmp -type f -name "*.tmp"`).
+8. **`lab-security-shadow`** : Verrouillage strict du fichier sensible des empreintes de mots de passe (`sudo chmod 600 /etc/shadow`).
+9. **`lab-text-filter-pipeline`** : Pipeline d'extraction et de tri alphabétique des comptes (`cut -d: -f1 /etc/passwd | sort > /tmp/sorted_users.txt`).
+10. **`lab-systemd-service`** : Supervision de service et diagnostic par les journaux (`systemctl status nginx`, `journalctl -u nginx`).
+11. **`lab-network-ping-diag`** : Diagnostic d'interfaces et test ICMP de passerelle (`ip addr show eth0`, `ip route`, `ping -c 3 192.168.1.1`).
+12. **`lab-storage-mount-disk`** : Inspection et montage immédiat d'un système de fichiers (`lsblk -f`, `sudo mount /dev/sdc1 /mnt`).
+13. **`lab-fstab-mount-umount`** : Persistance `/etc/fstab`, démontage et partitionnement (`sudo fdisk -l`, déclaration dans `/etc/fstab`, `sudo mount -a`, `sudo umount /mnt/backup`).
+14. **`lab-text-filter-sed-awk`** : Filtrage et transformation de flux avancés (`sed "s/staging/preprod/g"`, `awk '$4 == "active"'`, `wc -l`).
+
+---
 
 ### Exemple de Scénario (`SimulatedLabScenario`) :
 *« Restreindre l'accès au script `/home/student/backup.sh` pour que seul le propriétaire puisse le modifier, et le groupe `developers` puisse l'exécuter. »*

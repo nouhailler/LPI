@@ -1,5 +1,9 @@
 import { VirtualFs } from './VirtualFs';
 import { CommandExecutionResult, VfsNode, VfsProcess } from './types';
+import { executeAwk, executeCut, executeSed, executeSort, executeUniq, executeWc } from './textFilters';
+import { ServicesManager } from './servicesManager';
+import { NetworkSimulator } from './networkSimulator';
+import { StorageSimulator } from './storageSimulator';
 
 export class ShellInterpreter {
   public fs: VirtualFs;
@@ -26,8 +30,16 @@ export class ShellInterpreter {
     { pid: 1450, user: 'student', cpu: 0.0, mem: 0.3, vsz: 24120, rss: 6800, tty: 'pts/0', stat: 'Ss', start: '10:14', time: '0:00', command: '-bash' },
   ];
 
+  public servicesManager: ServicesManager = new ServicesManager();
+  public networkSimulator: NetworkSimulator = new NetworkSimulator();
+  public storageSimulator: StorageSimulator = new StorageSimulator();
+
   constructor(fs?: VirtualFs) {
     this.fs = fs || new VirtualFs();
+  }
+
+  private readFileContent(path: string): string | null {
+    return this.fs.readFile(path, this.cwd);
   }
 
   public getPrompt(): string {
@@ -173,6 +185,14 @@ export class ShellInterpreter {
     }
 
     const effectiveUser = isSudo ? 'root' : this.user;
+
+    // Handle universal --help or -h flag
+    if (args.includes('--help') || (args.includes('-h') && !['ls', 'df', 'free', 'tar', 'ps'].includes(cmd))) {
+      const page = this.getManualPage(cmd);
+      if (!page.startsWith('No manual entry')) {
+        return { output: page, exitCode: 0 };
+      }
+    }
 
     switch (cmd) {
       case 'pwd':
@@ -710,17 +730,94 @@ export class ShellInterpreter {
           grep: '/bin/grep',
           ps: '/bin/ps',
           kill: '/bin/kill',
+          sed: '/bin/sed',
+          awk: '/bin/awk',
+          cut: '/bin/cut',
+          sort: '/bin/sort',
+          uniq: '/bin/uniq',
+          wc: '/bin/wc',
+          mount: '/bin/mount',
+          umount: '/bin/umount',
+          ping: '/bin/ping',
+          ip: '/bin/ip',
           find: '/usr/bin/find',
           less: '/usr/bin/less',
           which: '/usr/bin/which',
           man: '/usr/bin/man',
           env: '/usr/bin/env',
+          systemctl: '/usr/bin/systemctl',
+          journalctl: '/usr/bin/journalctl',
+          fdisk: '/usr/bin/fdisk',
+          lsblk: '/usr/bin/lsblk',
+          tee: '/usr/bin/tee',
         };
         if (known[binaryName]) {
           return { output: known[binaryName], exitCode: 0 };
         }
         return { output: `${binaryName} not found in ${this.env.PATH}`, exitCode: 1 };
       }
+
+      // Filtering & Text processing
+      case 'sed':
+        return executeSed(args, stdinText, (p) => this.readFileContent(p), this.fs, this.cwd, effectiveUser);
+
+      case 'awk':
+        return executeAwk(args, stdinText, (p) => this.readFileContent(p));
+
+      case 'cut':
+        return executeCut(args, stdinText, (p) => this.readFileContent(p));
+
+      case 'sort':
+        return executeSort(args, stdinText, (p) => this.readFileContent(p));
+
+      case 'uniq':
+        return executeUniq(args, stdinText, (p) => this.readFileContent(p));
+
+      case 'wc':
+        return executeWc(args, stdinText, (p) => this.readFileContent(p));
+
+      case 'tee': {
+        let isAppend = false;
+        const targetFiles: string[] = [];
+        for (const a of args) {
+          if (a === '-a' || a === '--append') {
+            isAppend = true;
+          } else if (!a.startsWith('-')) {
+            targetFiles.push(a);
+          }
+        }
+        for (const f of targetFiles) {
+          this.fs.writeFile(f, stdinText + '\n', isAppend, this.cwd, effectiveUser, effectiveUser);
+        }
+        return { output: stdinText, exitCode: 0 };
+      }
+
+      // Systemd services and journal simulation
+      case 'systemctl':
+        return this.servicesManager.executeSystemctl(args, effectiveUser === 'root');
+
+      case 'journalctl':
+        return this.servicesManager.executeJournalctl(args);
+
+      // Network simulation
+      case 'ip':
+        return this.networkSimulator.executeIp(args);
+
+      case 'ping':
+        return this.networkSimulator.executePing(args);
+
+      // Storage, mounts, and partition simulation
+      case 'mount':
+        return this.storageSimulator.executeMount(args, effectiveUser === 'root', this.fs, this.cwd);
+
+      case 'umount':
+        return this.storageSimulator.executeUmount(args, effectiveUser === 'root', this.fs, this.cwd);
+
+      case 'lsblk':
+        return this.storageSimulator.executeLsblk(args);
+
+      case 'fdisk':
+        return this.storageSimulator.executeFdisk(args, effectiveUser === 'root');
 
       case 'whoami':
         return { output: effectiveUser, exitCode: 0 };
@@ -775,21 +872,36 @@ export class ShellInterpreter {
         return { output: this.getManualPage(topic), exitCode: 0 };
       }
 
-      case 'help':
+      case 'help': {
+        const topic = args[0];
+        if (topic) {
+          const page = this.getManualPage(topic);
+          if (!page.startsWith('No manual entry')) {
+            return { output: page, exitCode: 0 };
+          }
+        }
+
         return {
           output:
             '=== LPI Virtual Terminal Engine (100% PWA & Offline) ===\n' +
-            'Available commands:\n' +
-            '  Navigation & Files : pwd, cd, ls, mkdir, touch, cp, mv, rm, ln\n' +
-            '  Text & Search      : cat, less, more, head, tail, grep, find, echo\n' +
-            '  Permissions & Own  : chmod (e.g. 750, 644, +x), chown (e.g. student:developers)\n' +
-            '  Archives           : tar (-czvf, -xvf, -tvf)\n' +
-            '  Processes & System : ps (aux), kill (-9), uptime, df (-h), free (-m), uname (-a)\n' +
-            '  Environment & User : export, env, which, whoami, id, date, sudo\n' +
-            '  Shell Features     : Pipes (|), Redirections (> and >>), Chaining (&&, ;)\n' +
-            '  Documentation      : man <command>, help, history, clear',
+            'Available commands by category:\n' +
+            '  • Navigation & Fichiers   : pwd, cd, ls, mkdir, touch, cp, mv, rm, ln\n' +
+            '  • Recherche & Affichage   : cat, less, more, head, tail, grep, find, echo\n' +
+            '  • Filtrage & Pipelines    : sed, awk, cut, sort, uniq, wc, tee\n' +
+            '  • Services & Systemd      : systemctl (status, start, stop, restart, enable, disable)\n' +
+            '                              journalctl (-u, -xe, -n, -p)\n' +
+            '  • Réseau & Routage        : ip (addr, link, route), ping (-c)\n' +
+            '  • Disques & Partitions    : mount (-a, -o), umount, /etc/fstab, fdisk (-l), lsblk (-f)\n' +
+            '  • Droits & Propriétaires  : chmod (octal 750, symbolique +x), chown (user:group), chgrp, umask\n' +
+            '  • Archivage & Compression : tar (-czvf, -xvf, -tvf)\n' +
+            '  • Processus & Ressources  : ps (aux, -ef), kill (-9), uptime, df (-h), free (-m), uname (-a)\n' +
+            '  • Environnement & Droits  : export, env, which, whoami, id, date, sudo\n' +
+            '  • Syntaxe Shell & Flux    : Tubes (|), Redirections (> et >>), Enchaînements (&&, ;)\n' +
+            '  • Aide & Documentation    : man <commande>, help [commande], <cmd> --help, history, clear\n\n' +
+            'Astuce : Tapez "help <commande>" ou "man <commande>" (ex: "help sed", "help systemctl", "help mount") pour la documentation détaillée.',
           exitCode: 0,
         };
+      }
 
       default:
         return {
@@ -867,7 +979,41 @@ export class ShellInterpreter {
         'NAME\n  find - search for files in a directory hierarchy\n\nSYNOPSIS\n  find [-H] [-L] [-P] [path...] [expression]\n\nOPTIONS\n  -name pattern   Base of file name matches pattern\n  -type f|d       File is of type f (regular file) or d (directory)\n  -perm mode      File bits match mode exactly (e.g. -perm 750)',
       ps:
         'NAME\n  ps - report a snapshot of the current processes\n\nSYNOPSIS\n  ps [options]\n\nDESCRIPTION\n  ps displays information about a selection of the active processes.\n  ps aux shows processes for all users in BSD syntax.',
+      sed:
+        'NAME\n  sed - stream editor for filtering and transforming text\n\nSYNOPSIS\n  sed [OPTION]... {script-only-if-no-other-script} [input-file]...\n\nOPTIONS\n  -e script  Add script to the commands to be executed\n  -i         Edit files in place\n  -n         Suppress automatic printing of pattern space\n\nEXAMPLES\n  sed "s/foo/bar/g" file.txt\n  sed "/#.*/d" /etc/hosts\n  sed -n "1,5p" access.log',
+      awk:
+        'NAME\n  awk - pattern scanning and processing language\n\nSYNOPSIS\n  awk [options] "script" [var=value...] [file...]\n\nOPTIONS\n  -F fs      Define input field separator (e.g. -F: or -F,)\n\nEXAMPLES\n  awk "{print $1}" /etc/passwd\n  awk -F: "{print $1, $7}" /etc/passwd\n  awk -F: "$3 >= 1000 {print $1}" /etc/passwd',
+      cut:
+        'NAME\n  cut - remove sections from each line of files\n\nSYNOPSIS\n  cut OPTION... [FILE]...\n\nOPTIONS\n  -d delim   Use delim instead of TAB for field delimiter\n  -f list    Select only these fields\n  -c list    Select only these characters\n\nEXAMPLES\n  cut -d: -f1,7 /etc/passwd\n  cut -d, -f2 data.csv\n  cut -c1-10 server.log',
+      sort:
+        'NAME\n  sort - sort lines of text files\n\nSYNOPSIS\n  sort [OPTION]... [FILE]...\n\nOPTIONS\n  -r         Reverse the result of comparisons\n  -n         Compare according to string numerical value\n  -u         Output only the first of an equal run (unique)\n  -k keydef  Sort via a key (e.g. -k2, -k3n)\n  -t char    Use char as field separator',
+      uniq:
+        'NAME\n  uniq - report or omit repeated lines\n\nSYNOPSIS\n  uniq [OPTION]... [INPUT [OUTPUT]]\n\nOPTIONS\n  -c         Prefix lines by the number of occurrences\n  -d         Only print duplicate lines\n  -u         Only print unique lines\n  -i         Ignore differences in case when comparing',
+      wc:
+        'NAME\n  wc - print newline, word, and byte counts for each file\n\nSYNOPSIS\n  wc [OPTION]... [FILE]...\n\nOPTIONS\n  -l         Print the newline counts\n  -w         Print the word counts\n  -c         Print the byte counts\n  -m         Print the character counts',
+      systemctl:
+        'NAME\n  systemctl - Control the systemd system and service manager\n\nSYNOPSIS\n  systemctl [OPTIONS...] COMMAND [UNIT...]\n\nCOMMANDS\n  status [PATTERN...]   Show terse runtime status about one or more units\n  start UNIT...         Start (activate) one or more units\n  stop UNIT...          Stop (deactivate) one or more units\n  restart UNIT...       Start or restart one or more units\n  enable UNIT...        Enable one or more unit files\n  disable UNIT...       Disable one or more unit files\n  list-units            List units in memory\n  is-active UNIT        Check whether unit is active',
+      journalctl:
+        'NAME\n  journalctl - Query the systemd journal\n\nSYNOPSIS\n  journalctl [OPTIONS...]\n\nOPTIONS\n  -u UNIT        Show messages for the specified systemd unit\n  -n [ROWS]      Number of journal entries to show (default: 10)\n  -r, --reverse  Show the newest entries first\n  -p, --priority Filter output by message priority (err, warning, notice, info)\n  -e, --pager-end Jump to the end of the journal',
+      ip:
+        'NAME\n  ip - show / manipulate routing, network devices, interfaces and tunnels\n\nSYNOPSIS\n  ip [ OPTIONS ] OBJECT { COMMAND | help }\n  OBJECT := { address | link | route | neigh }\n\nCOMMANDS\n  ip addr show [dev IFNAME]\n  ip link show [dev IFNAME]\n  ip route show',
+      ping:
+        'NAME\n  ping - send ICMP ECHO_REQUEST to network hosts\n\nSYNOPSIS\n  ping [options] destination\n\nOPTIONS\n  -c count       Stop after sending count ECHO_REQUEST packets\n  -W timeout     Time to wait for a response, in seconds',
+      mount:
+        'NAME\n  mount - mount a filesystem\n\nSYNOPSIS\n  mount [-lhV]\n  mount -a [-fFnrsvw] [-t vfstype] [-O optlist]\n  mount [-fnrsvw] [-o options] device|dir\n  mount [-fnrsvw] [-t vfstype] [-o options] device dir\n\nOPTIONS\n  -a             Mount all filesystems mentioned in fstab\n  -t type        Specify filesystem type (ext4, vfat, xfs, nfs...)\n  -o options     Mount options (ro, rw, noexec, nodev, defaults)',
+      umount:
+        'NAME\n  umount - unmount file systems\n\nSYNOPSIS\n  umount [-hV]\n  umount [-f] device|directory...\n\nDESCRIPTION\n  Detaches the mentioned filesystem(s) from the file hierarchy.',
+      fdisk:
+        'NAME\n  fdisk - manipulate disk partition table\n\nSYNOPSIS\n  fdisk [options] device...\n  fdisk -l [device...]\n\nOPTIONS\n  -l             List the partition tables for the specified devices and then exit',
+      lsblk:
+        'NAME\n  lsblk - list block devices\n\nSYNOPSIS\n  lsblk [options] [device...]\n\nOPTIONS\n  -a, --all      Print all devices\n  -f, --fs       Output info about filesystems (TYPE, FSTYPE, FSVER, LABEL, UUID, FSAVAIL, FSUSE%)\n  -m, --perms    Output info about device permissions and owners',
+      tee:
+        'NAME\n  tee - read from standard input and write to standard output and files\n\nSYNOPSIS\n  tee [OPTION]... [FILE]...\n\nOPTIONS\n  -a, --append   Append to the given FILEs, do not overwrite\n\nEXAMPLES\n  echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolv.conf\n  cat app.log | tee backup.log',
+      fstab:
+        'NAME\n  /etc/fstab - static information about the filesystems\n\nDESCRIPTION\n  The file /etc/fstab contains descriptive information about the filesystems the system can mount.\n  Format:\n    <file system> <mount point> <type> <options> <dump> <pass>\n  Example:\n    UUID=4a8f9c12 / ext4 defaults 0 1\n    /dev/sdc1 /mnt/backup ext4 defaults 0 2\n\nCOMMANDS\n  mount -a       Mount all filesystems described in /etc/fstab\n  umount <dir>   Unmount the filesystem',
+      '/etc/fstab':
+        'NAME\n  /etc/fstab - static information about the filesystems\n\nDESCRIPTION\n  The file /etc/fstab contains descriptive information about the filesystems the system can mount.\n  Format:\n    <file system> <mount point> <type> <options> <dump> <pass>\n  Example:\n    UUID=4a8f9c12 / ext4 defaults 0 1\n    /dev/sdc1 /mnt/backup ext4 defaults 0 2\n\nCOMMANDS\n  mount -a       Mount all filesystems described in /etc/fstab\n  umount <dir>   Unmount the filesystem',
     };
-    return manuals[cmd] || `No manual entry for ${cmd}. Supported manuals: chmod, chown, ls, grep, tar, find, ps.`;
+    return manuals[cmd] || `No manual entry for ${cmd}. Supported manuals: chmod, chown, ls, grep, tar, find, ps, sed, awk, cut, sort, uniq, wc, tee, systemctl, journalctl, ip, ping, mount, umount, fdisk, lsblk, fstab.`;
   }
 }

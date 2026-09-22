@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Terminal,
   AlertTriangle,
@@ -12,7 +12,8 @@ import {
   HelpCircle,
   ShieldAlert,
   Flame,
-  ArrowRight
+  ArrowRight,
+  Layers
 } from 'lucide-react';
 import { TrainingModeType } from '../../types';
 import {
@@ -30,9 +31,12 @@ import { MatchingModule } from './MatchingModule';
 import { GuidedMiniLabsModule } from './GuidedMiniLabsModule';
 import { IncidentResponseModule } from './IncidentResponseModule';
 import { VirtualTerminalModule } from './VirtualTerminalModule';
+import { LinuxLabVisualMap } from './LinuxLabVisualMap';
 import { WeaknessTrainingModal } from '../weakness/WeaknessTrainingModal';
 import { getWeaknessReport } from '../../utils/weaknessEngine';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { getCompletedLabIds, LAB_COMPLETION_EVENT } from '../../services/virtualFs/labProgress';
+import { simulatedLabScenarios } from '../../services/virtualFs/labScenarios';
 
 interface Props {
   initialMode?: TrainingModeType;
@@ -46,7 +50,25 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
   const [currentMode, setCurrentMode] = useState<TrainingModeType>(initialMode);
   const [totalScore, setTotalScore] = useState(0);
   const [isWeaknessModalOpen, setIsWeaknessModalOpen] = useState(false);
+  const [selectedLabScenarioId, setSelectedLabScenarioId] = useState<string | undefined>(undefined);
+  const [completedLabCount, setCompletedLabCount] = useState<number>(() => getCompletedLabIds().length);
   const report = getWeaknessReport();
+
+  useEffect(() => {
+    const handleLabUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ allCompleted?: string[] }>;
+      if (customEvent.detail?.allCompleted) {
+        setCompletedLabCount(customEvent.detail.allCompleted.length);
+      } else {
+        setCompletedLabCount(getCompletedLabIds().length);
+      }
+    };
+
+    window.addEventListener(LAB_COMPLETION_EVENT, handleLabUpdate);
+    return () => {
+      window.removeEventListener(LAB_COMPLETION_EVENT, handleLabUpdate);
+    };
+  }, []);
 
   const handleScoreUpdate = (points: number) => {
     setTotalScore((prev) => prev + points);
@@ -61,6 +83,15 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
     description: string;
     descriptionFr: string;
   }[] = [
+    {
+      id: 'lab_map',
+      label: 'Labs Visual Map',
+      labelFr: '🗺️ Carte des Labs',
+      badge: `${completedLabCount}/${simulatedLabScenarios.length} ${isFr ? 'validés' : 'done'}`,
+      icon: Layers,
+      description: 'Interactive roadmap of simulated Linux scenarios. Track completed vs pending skills, inspect criteria, and launch labs.',
+      descriptionFr: 'Arborescence visuelle des ateliers pratiques. Visualisez les acquis, filtres par domaine et lancez les labs.',
+    },
     {
       id: 'virtual_terminal',
       label: 'Virtual Terminal & Labs',
@@ -146,13 +177,30 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xs px-4 py-3 rounded-xl border border-white/10">
-            <Award className="w-6 h-6 text-[#ffc20e]" />
-            <div>
-              <div className="text-[10px] uppercase font-bold text-white/70">
-                {isFr ? 'Score Session Pratique' : 'Practice Score'}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCurrentMode('lab_map')}
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                currentMode === 'lab_map'
+                  ? 'bg-[#ffc20e] text-[#4f3c00] border-[#ffc20e]'
+                  : 'bg-white/10 hover:bg-white/15 text-[#f7f4ea] border-white/15'
+              }`}
+            >
+              <Layers className="w-4 h-4 text-[#ffc20e]" />
+              <div className="text-left">
+                <div className="text-[10px] text-white/70 uppercase">{isFr ? 'Carte des Labs' : 'Lab Map'}</div>
+                <div className="text-xs">{completedLabCount} / {simulatedLabScenarios.length} {isFr ? 'validés' : 'done'}</div>
               </div>
-              <div className="text-lg font-bold text-[#ffc20e]">{totalScore} pts</div>
+            </button>
+
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xs px-4 py-3 rounded-xl border border-white/10">
+              <Award className="w-6 h-6 text-[#ffc20e]" />
+              <div>
+                <div className="text-[10px] uppercase font-bold text-white/70">
+                  {isFr ? 'Score Session Pratique' : 'Practice Score'}
+                </div>
+                <div className="text-lg font-bold text-[#ffc20e]">{totalScore} pts</div>
+              </div>
             </div>
           </div>
         </div>
@@ -192,7 +240,7 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
       </div>
 
       {/* Mode Navigation Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-2.5">
         {trainingModes.map((mode) => {
           const Icon = mode.icon;
           const isActive = currentMode === mode.id;
@@ -201,22 +249,22 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
             <button
               key={mode.id}
               onClick={() => setCurrentMode(mode.id)}
-              className={`p-3.5 rounded-xl border text-left transition-all duration-150 flex flex-col justify-between cursor-pointer ${
+              className={`p-3 rounded-xl border text-left transition-all duration-150 flex flex-col justify-between cursor-pointer ${
                 isActive
                   ? 'bg-[#ffc20e] border-[#785a00] text-[#6d5100] shadow-sm ring-1 ring-[#785a00]'
                   : 'bg-white border-[#d3c5ab] text-[#4f4632] hover:bg-[#fffcf7] hover:border-[#b5a790]'
               }`}
             >
-              <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center justify-between gap-1.5 mb-2">
                 <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                     isActive ? 'bg-[#6d5100]/20 text-[#6d5100]' : 'bg-[#f8ecdb] text-[#785a00]'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
                 </div>
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                  className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded truncate max-w-[85px] ${
                     isActive ? 'bg-[#6d5100] text-[#ffc20e]' : 'bg-[#ebdcc8] text-[#785a00]'
                   }`}
                 >
@@ -224,11 +272,11 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
                 </span>
               </div>
               <div>
-                <div className="text-xs font-bold leading-tight">
+                <div className="text-xs font-bold leading-tight line-clamp-1">
                   {isFr ? mode.labelFr : mode.label}
                 </div>
                 <div
-                  className={`text-[10.5px] line-clamp-1 mt-0.5 ${
+                  className={`text-[10px] line-clamp-1 mt-0.5 ${
                     isActive ? 'text-[#6d5100]/80' : 'text-[#817660]'
                   }`}
                 >
@@ -242,9 +290,20 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
 
       {/* Render Selected Module */}
       <div className="transition-all">
+        {currentMode === 'lab_map' && (
+          <LinuxLabVisualMap
+            onSelectScenario={(scenarioId) => {
+              setSelectedLabScenarioId(scenarioId);
+              setCurrentMode('virtual_terminal');
+            }}
+          />
+        )}
+
         {currentMode === 'virtual_terminal' && (
           <VirtualTerminalModule
+            initialScenarioId={selectedLabScenarioId}
             onScoreUpdate={handleScoreUpdate}
+            onOpenLabMap={() => setCurrentMode('lab_map')}
           />
         )}
 

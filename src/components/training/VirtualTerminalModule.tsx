@@ -25,10 +25,16 @@ import { SimulatedLabScenario, LabScenarioValidation, VfsNode } from '../../serv
 import { VirtualFs } from '../../services/virtualFs/VirtualFs';
 import { ShellInterpreter } from '../../services/virtualFs/ShellInterpreter';
 import { useLanguage } from '../../i18n/LanguageContext';
+import {
+  getCompletedLabIds,
+  markLabCompleted,
+  LAB_COMPLETION_EVENT,
+} from '../../services/virtualFs/labProgress';
 
 interface Props {
   onScoreUpdate?: (points: number) => void;
   initialScenarioId?: string;
+  onOpenLabMap?: () => void;
 }
 
 interface TerminalHistoryItem {
@@ -38,7 +44,11 @@ interface TerminalHistoryItem {
   exitCode: number;
 }
 
-export const VirtualTerminalModule: React.FC<Props> = ({ onScoreUpdate, initialScenarioId }) => {
+export const VirtualTerminalModule: React.FC<Props> = ({
+  onScoreUpdate,
+  initialScenarioId,
+  onOpenLabMap,
+}) => {
   const { isFrench } = useLanguage();
   const isFr = isFrench;
 
@@ -46,6 +56,13 @@ export const VirtualTerminalModule: React.FC<Props> = ({ onScoreUpdate, initialS
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>(
     initialScenarioId || simulatedLabScenarios[0]?.id || 'sandbox'
   );
+
+  // Update selected scenario when initialScenarioId prop changes
+  useEffect(() => {
+    if (initialScenarioId) {
+      setSelectedScenarioId(initialScenarioId);
+    }
+  }, [initialScenarioId]);
 
   const activeScenario = useMemo(() => {
     return simulatedLabScenarios.find((s) => s.id === selectedScenarioId) || null;
@@ -62,7 +79,26 @@ export const VirtualTerminalModule: React.FC<Props> = ({ onScoreUpdate, initialS
   const [validationResult, setValidationResult] = useState<LabScenarioValidation | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [completedLabs, setCompletedLabs] = useState<Set<string>>(new Set());
+  const [completedLabs, setCompletedLabs] = useState<Set<string>>(
+    () => new Set(getCompletedLabIds())
+  );
+
+  // Listen to cross-component lab completions
+  useEffect(() => {
+    const handleStorageUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ allCompleted: string[] }>;
+      if (customEvent.detail?.allCompleted) {
+        setCompletedLabs(new Set(customEvent.detail.allCompleted));
+      } else {
+        setCompletedLabs(new Set(getCompletedLabIds()));
+      }
+    };
+
+    window.addEventListener(LAB_COMPLETION_EVENT, handleStorageUpdate);
+    return () => {
+      window.removeEventListener(LAB_COMPLETION_EVENT, handleStorageUpdate);
+    };
+  }, []);
   const [selectedTreePath, setSelectedTreePath] = useState<string>('/home/student/scripts/backup.sh');
   const [treeExpanded, setTreeExpanded] = useState<Record<string, boolean>>({
     '/': true,
@@ -166,10 +202,13 @@ export const VirtualTerminalModule: React.FC<Props> = ({ onScoreUpdate, initialS
     if (activeScenario) {
       const val = activeScenario.validate(interp.fs, interp);
       setValidationResult(val);
-      if (val.isComplete && !completedLabs.has(activeScenario.id)) {
-        setCompletedLabs((prev) => new Set([...prev, activeScenario.id]));
-        if (onScoreUpdate) {
-          onScoreUpdate(val.score);
+      if (val.isComplete) {
+        markLabCompleted(activeScenario.id);
+        if (!completedLabs.has(activeScenario.id)) {
+          setCompletedLabs((prev) => new Set([...prev, activeScenario.id]));
+          if (onScoreUpdate) {
+            onScoreUpdate(val.score);
+          }
         }
       }
     }
@@ -180,10 +219,13 @@ export const VirtualTerminalModule: React.FC<Props> = ({ onScoreUpdate, initialS
     const interp = interpreterRef.current;
     const val = activeScenario.validate(interp.fs, interp);
     setValidationResult(val);
-    if (val.isComplete && !completedLabs.has(activeScenario.id)) {
-      setCompletedLabs((prev) => new Set([...prev, activeScenario.id]));
-      if (onScoreUpdate) {
-        onScoreUpdate(val.score);
+    if (val.isComplete) {
+      markLabCompleted(activeScenario.id);
+      if (!completedLabs.has(activeScenario.id)) {
+        setCompletedLabs((prev) => new Set([...prev, activeScenario.id]));
+        if (onScoreUpdate) {
+          onScoreUpdate(val.score);
+        }
       }
     }
   };
@@ -218,19 +260,45 @@ export const VirtualTerminalModule: React.FC<Props> = ({ onScoreUpdate, initialS
   const handleTabCompletion = () => {
     const interp = interpreterRef.current;
     const currentVal = inputVal;
+    const tokens = currentVal.trimStart().split(/\s+/);
     const lastWord = currentVal.split(' ').pop() || '';
     if (!lastWord) return;
 
+    // Check if user is typing the initial command or command after sudo/pipe/help/man
+    const isCommandPosition =
+      tokens.length === 1 ||
+      (tokens.length === 2 && ['sudo', 'man', 'help', 'which'].includes(tokens[0])) ||
+      currentVal.trimEnd().endsWith('| ' + lastWord);
+
+    const allCommands = [
+      'pwd', 'cd', 'ls', 'mkdir', 'touch', 'cp', 'mv', 'rm', 'ln',
+      'cat', 'less', 'more', 'head', 'tail', 'grep', 'find', 'echo',
+      'sed', 'awk', 'cut', 'sort', 'uniq', 'wc', 'tee',
+      'systemctl', 'journalctl', 'ip', 'ping',
+      'mount', 'umount', 'fdisk', 'lsblk',
+      'chmod', 'chown', 'chgrp', 'umask', 'tar',
+      'ps', 'kill', 'uptime', 'df', 'free', 'uname',
+      'export', 'env', 'which', 'whoami', 'id', 'date', 'sudo',
+      'man', 'help', 'history', 'clear'
+    ];
+
     // List items in current directory
     const dirItems = interp.fs.listDir(interp.cwd, true, interp.cwd) || [];
-    const candidates = dirItems
+    const fileCandidates = dirItems
       .map((it) => it.name)
       .filter((name) => name.startsWith(lastWord) && name !== '.' && name !== '..');
+
+    const cmdCandidates = isCommandPosition
+      ? allCommands.filter((c) => c.startsWith(lastWord))
+      : [];
+
+    const candidates = Array.from(new Set([...fileCandidates, ...cmdCandidates]));
 
     if (candidates.length === 1) {
       const match = candidates[0];
       const prefix = currentVal.slice(0, currentVal.length - lastWord.length);
-      setInputVal(prefix + match);
+      const isCmd = cmdCandidates.includes(match);
+      setInputVal(prefix + match + (isCmd ? ' ' : ''));
     }
   };
 
@@ -349,9 +417,20 @@ export const VirtualTerminalModule: React.FC<Props> = ({ onScoreUpdate, initialS
               </optgroup>
             </select>
 
+            {onOpenLabMap && (
+              <button
+                onClick={onOpenLabMap}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#ffc20e]/15 hover:bg-[#ffc20e]/25 text-[#ffc20e] border border-[#ffc20e]/40 text-xs font-semibold transition-colors cursor-pointer"
+                title={isFr ? 'Ouvrir la carte visuelle des labs' : 'Open labs visual map'}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>{isFr ? 'Carte des Labs' : 'Lab Map'}</span>
+              </button>
+            )}
+
             <button
               onClick={() => initScenario(activeScenario)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#d3c5ab] hover:text-white border border-white/10 text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#d3c5ab] hover:text-white border border-white/10 text-xs font-medium transition-colors cursor-pointer"
               title={isFr ? 'Réinitialiser le lab' : 'Reset lab'}
             >
               <RotateCcw className="w-3.5 h-3.5" />

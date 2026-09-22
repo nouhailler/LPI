@@ -530,4 +530,446 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
       };
     },
   },
+  {
+    id: 'lab-text-filter-pipeline',
+    title: 'Pipeline de filtrage de texte (cut, sort, wc)',
+    titleFr: 'Pipeline de filtrage de texte (cut, sort, wc)',
+    certification: 'lpic-1',
+    category: 'files',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 6,
+    goal: 'Extraire le premier champ (nom d\'utilisateur) de /etc/passwd avec cut, trier la liste par ordre alphabétique avec sort, et enregistrer le résultat dans /tmp/sorted_users.txt.',
+    goalFr: 'Extraire le premier champ (nom d\'utilisateur) de /etc/passwd avec cut, trier la liste par ordre alphabétique avec sort, et enregistrer le résultat dans /tmp/sorted_users.txt.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Visualisez le format de /etc/passwd avec cat /etc/passwd ou head -n 5 /etc/passwd',
+      'Testez l\'extraction du 1er champ séparé par ":" : cut -d: -f1 /etc/passwd',
+      'Enchaînez avec le tri et la redirection : cut -d: -f1 /etc/passwd | sort > /tmp/sorted_users.txt',
+      'Vérifiez le contenu de /tmp/sorted_users.txt et comptez les lignes avec wc -l /tmp/sorted_users.txt',
+    ],
+    instructionsFr: [
+      'Visualisez le format de /etc/passwd avec cat /etc/passwd ou head -n 5 /etc/passwd',
+      'Testez l\'extraction du 1er champ séparé par ":" : cut -d: -f1 /etc/passwd',
+      'Enchaînez avec le tri et la redirection : cut -d: -f1 /etc/passwd | sort > /tmp/sorted_users.txt',
+      'Vérifiez le contenu de /tmp/sorted_users.txt et comptez les lignes avec wc -l /tmp/sorted_users.txt',
+    ],
+    hints: [
+      'Le délimiteur est le double-point -d: et le champ recherché est -f1.',
+      'Utilisez le tube | pour acheminer la sortie de cut vers sort, puis > vers /tmp/sorted_users.txt.',
+      'Commande complète : cut -d: -f1 /etc/passwd | sort > /tmp/sorted_users.txt',
+    ],
+    hintsFr: [
+      'Le délimiteur est le double-point -d: et le champ recherché est -f1.',
+      'Utilisez le tube | pour acheminer la sortie de cut vers sort, puis > vers /tmp/sorted_users.txt.',
+      'Commande complète : cut -d: -f1 /etc/passwd | sort > /tmp/sorted_users.txt',
+    ],
+    solutionCommands: [
+      'cut -d: -f1 /etc/passwd | sort > /tmp/sorted_users.txt',
+      'cat /tmp/sorted_users.txt',
+      'wc -l /tmp/sorted_users.txt',
+    ],
+    solutionExplanation: 'La commande cut extrait le premier champ à l\'aide du délimiteur ":", sort classe alphabétiquement les comptes système et la redirection > enregistre le résultat dans le fichier cible.',
+    solutionExplanationFr: 'La commande cut extrait le premier champ à l\'aide du délimiteur ":", sort classe alphabétiquement les comptes système et la redirection > enregistre le résultat dans le fichier cible.',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/tmp/sorted_users.txt');
+      if (!node || !node.content) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'Le fichier /tmp/sorted_users.txt n\'a pas encore été créé.',
+          feedbackFr: 'Le fichier /tmp/sorted_users.txt n\'a pas encore été créé.',
+          unmetCriteria: ['Fichier /tmp/sorted_users.txt manquant'],
+          unmetCriteriaFr: ['Fichier /tmp/sorted_users.txt manquant'],
+        };
+      }
+      const lines = node.content.trim().split('\n').map((l) => l.trim());
+      const hasRoot = lines.includes('root');
+      const hasStudent = lines.includes('student');
+      const isSorted = [...lines].sort().join('\n') === lines.join('\n');
+
+      if (hasRoot && hasStudent && isSorted && lines.length >= 5) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Excellent ! Les utilisateurs ont été correctement extraits et triés par ordre alphabétique.',
+          feedbackFr: 'Excellent ! Les utilisateurs ont été correctement extraits et triés par ordre alphabétique.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 40,
+        feedback: 'Le contenu de /tmp/sorted_users.txt ne correspond pas aux utilisateurs triés attendus.',
+        feedbackFr: 'Le contenu de /tmp/sorted_users.txt ne correspond pas aux utilisateurs triés attendus.',
+        unmetCriteria: ['Liste d\'utilisateurs incorrecte ou non triée'],
+        unmetCriteriaFr: ['Liste d\'utilisateurs incorrecte ou non triée'],
+      };
+    },
+  },
+  {
+    id: 'lab-systemd-service',
+    title: 'Supervision et statut de service (systemctl & journalctl)',
+    titleFr: 'Supervision et statut de service (systemctl & journalctl)',
+    certification: 'lpic-1',
+    category: 'processes',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 5,
+    goal: 'Interroger l\'état du service web nginx avec systemctl, consulter ses journaux d\'événements avec journalctl, et rediriger le rapport d\'état dans /tmp/nginx_status.txt.',
+    goalFr: 'Interroger l\'état du service web nginx avec systemctl, consulter ses journaux d\'événements avec journalctl, et rediriger le rapport d\'état dans /tmp/nginx_status.txt.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Affichez l\'état actuel du service : systemctl status nginx',
+      'Inspectez les journaux récents de ce service : journalctl -u nginx',
+      'Redirigez le statut dans le fichier demandé : systemctl status nginx > /tmp/nginx_status.txt',
+      'Vérifiez la présence du fichier avec cat /tmp/nginx_status.txt',
+    ],
+    instructionsFr: [
+      'Affichez l\'état actuel du service : systemctl status nginx',
+      'Inspectez les journaux récents de ce service : journalctl -u nginx',
+      'Redirigez le statut dans le fichier demandé : systemctl status nginx > /tmp/nginx_status.txt',
+      'Vérifiez la présence du fichier avec cat /tmp/nginx_status.txt',
+    ],
+    hints: [
+      'La commande systemctl status nginx affiche l\'état chargé, actif et les derniers logs.',
+      'Utilisez > pour enregistrer la sortie : systemctl status nginx > /tmp/nginx_status.txt',
+    ],
+    hintsFr: [
+      'La commande systemctl status nginx affiche l\'état chargé, actif et les derniers logs.',
+      'Utilisez > pour enregistrer la sortie : systemctl status nginx > /tmp/nginx_status.txt',
+    ],
+    solutionCommands: [
+      'systemctl status nginx',
+      'journalctl -u nginx',
+      'systemctl status nginx > /tmp/nginx_status.txt',
+    ],
+    solutionExplanation: 'systemctl permet de contrôler et superviser les démons système gérés par systemd, tandis que journalctl interroge les journaux binaires du journald.',
+    solutionExplanationFr: 'systemctl permet de contrôler et superviser les démons système gérés par systemd, tandis que journalctl interroge les journaux binaires du journald.',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/tmp/nginx_status.txt');
+      if (!node || !node.content) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'Le fichier /tmp/nginx_status.txt n\'existe pas encore.',
+          feedbackFr: 'Le fichier /tmp/nginx_status.txt n\'existe pas encore.',
+          unmetCriteria: ['Fichier /tmp/nginx_status.txt manquant'],
+          unmetCriteriaFr: ['Fichier /tmp/nginx_status.txt manquant'],
+        };
+      }
+      if (node.content.includes('nginx.service') && (node.content.includes('Active: active') || node.content.includes('Loaded: loaded'))) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Bravo ! Le rapport d\'état systemctl pour nginx a été capturé avec succès.',
+          feedbackFr: 'Bravo ! Le rapport d\'état systemctl pour nginx a été capturé avec succès.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 30,
+        feedback: 'Le fichier /tmp/nginx_status.txt ne contient pas les données attendues de systemctl status nginx.',
+        feedbackFr: 'Le fichier /tmp/nginx_status.txt ne contient pas les données attendues de systemctl status nginx.',
+        unmetCriteria: ['Contenu de statut systemd non reconnu'],
+        unmetCriteriaFr: ['Contenu de statut systemd non reconnu'],
+      };
+    },
+  },
+  {
+    id: 'lab-network-ping-diag',
+    title: 'Diagnostic réseau et connectivité (ip & ping)',
+    titleFr: 'Diagnostic réseau et connectivité (ip & ping)',
+    certification: 'lpic-1',
+    category: 'network',
+    difficulty: 'Beginner',
+    difficultyFr: 'Débutant',
+    estimatedMinutes: 5,
+    goal: 'Inspecter les interfaces réseau avec ip addr, puis vérifier la connectivité vers la passerelle locale (192.168.1.1) avec ping -c 3 en sauvegardant le résultat dans /tmp/ping_gateway.txt.',
+    goalFr: 'Inspecter les adresses réseau avec ip addr, puis vérifier la connectivité vers la passerelle locale (192.168.1.1) avec ping -c 3 en sauvegardant le résultat dans /tmp/ping_gateway.txt.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Affichez l\'adresse IP de l\'interface eth0 : ip addr show eth0',
+      'Vérifiez la table de routage par défaut : ip route show',
+      'Testez la connectivité vers la passerelle : ping -c 3 192.168.1.1 > /tmp/ping_gateway.txt',
+      'Affichez le fichier de rapport avec cat /tmp/ping_gateway.txt',
+    ],
+    instructionsFr: [
+      'Affichez l\'adresse IP de l\'interface eth0 : ip addr show eth0',
+      'Vérifiez la table de routage par défaut : ip route show',
+      'Testez la connectivité vers la passerelle : ping -c 3 192.168.1.1 > /tmp/ping_gateway.txt',
+      'Affichez le fichier de rapport avec cat /tmp/ping_gateway.txt',
+    ],
+    hints: [
+      'L\'option -c 3 limite le nombre de paquets ICMP transmis à 3.',
+      'Tapez : ping -c 3 192.168.1.1 > /tmp/ping_gateway.txt',
+    ],
+    hintsFr: [
+      'L\'option -c 3 limite le nombre de paquets ICMP transmis à 3.',
+      'Tapez : ping -c 3 192.168.1.1 > /tmp/ping_gateway.txt',
+    ],
+    solutionCommands: [
+      'ip addr show eth0',
+      'ip route show',
+      'ping -c 3 192.168.1.1 > /tmp/ping_gateway.txt',
+      'cat /tmp/ping_gateway.txt',
+    ],
+    solutionExplanation: 'La suite iproute2 (ip addr, ip route) est le standard moderne sous Linux pour gérer le réseau, remplaçant ifconfig et route.',
+    solutionExplanationFr: 'La suite iproute2 (ip addr, ip route) est le standard moderne sous Linux pour gérer le réseau, remplaçant ifconfig et route.',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const node = fs.getNode('/tmp/ping_gateway.txt');
+      if (!node || !node.content) {
+        return {
+          isComplete: false,
+          score: 0,
+          feedback: 'Le fichier /tmp/ping_gateway.txt est manquant.',
+          feedbackFr: 'Le fichier /tmp/ping_gateway.txt est manquant.',
+          unmetCriteria: ['Fichier /tmp/ping_gateway.txt manquant'],
+          unmetCriteriaFr: ['Fichier /tmp/ping_gateway.txt manquant'],
+        };
+      }
+      if (node.content.includes('PING 192.168.1.1') || node.content.includes('bytes from 192.168.1.1')) {
+        return {
+          isComplete: true,
+          score: 100,
+          feedback: 'Connectivité réseau vérifiée avec succès ! Le rapport ping est complet.',
+          feedbackFr: 'Connectivité réseau vérifiée avec succès ! Le rapport ping est complet.',
+          unmetCriteria: [],
+          unmetCriteriaFr: [],
+        };
+      }
+      return {
+        isComplete: false,
+        score: 30,
+        feedback: 'Le fichier de rapport ne contient pas la sortie attendue de la commande ping.',
+        feedbackFr: 'Le fichier de rapport ne contient pas la sortie attendue de la commande ping.',
+        unmetCriteria: ['Sortie ping non conforme'],
+        unmetCriteriaFr: ['Sortie ping non conforme'],
+      };
+    },
+  },
+  {
+    id: 'lab-storage-mount-disk',
+    title: 'Inspection et montage de système de fichiers (lsblk & mount)',
+    titleFr: 'Inspection et montage de système de fichiers (lsblk & mount)',
+    certification: 'lpic-1',
+    category: 'storage',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 6,
+    goal: 'Inspecter les périphériques de stockage bloc avec lsblk -f, puis monter la partition /dev/sdc1 sur le répertoire /mnt en utilisant les privilèges root (sudo mount).',
+    goalFr: 'Inspecter les périphériques de stockage bloc avec lsblk -f, puis monter la partition /dev/sdc1 sur le répertoire /mnt en utilisant les privilèges root (sudo mount).',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Identifiez les disques et partitions disponibles : lsblk -f',
+      'Observez que /dev/sdc1 est de type ext4 et n\'a pas de point de montage',
+      'Montez la partition sur /mnt avec les privilèges root : sudo mount /dev/sdc1 /mnt',
+      'Vérifiez la liste des montages actifs en exécutant la commande mount ou lsblk',
+    ],
+    instructionsFr: [
+      'Identifiez les disques et partitions disponibles : lsblk -f',
+      'Observez que /dev/sdc1 est de type ext4 et n\'a pas de point de montage',
+      'Montez la partition sur /mnt avec les privilèges root : sudo mount /dev/sdc1 /mnt',
+      'Vérifiez la liste des montages actifs en exécutant la commande mount ou lsblk',
+    ],
+    hints: [
+      'Le montage d\'un périphérique requiert les privilèges super-utilisateur : préfixez par sudo.',
+      'Tapez : sudo mount /dev/sdc1 /mnt',
+    ],
+    hintsFr: [
+      'Le montage d\'un périphérique requiert les privilèges super-utilisateur : préfixez par sudo.',
+      'Tapez : sudo mount /dev/sdc1 /mnt',
+    ],
+    solutionCommands: [
+      'lsblk -f',
+      'sudo mount /dev/sdc1 /mnt',
+      'mount',
+    ],
+    solutionExplanation: 'La commande mount rattache le système de fichiers situé sur un périphérique bloc (ex. /dev/sdc1) à une arborescence de répertoires existante (/mnt).',
+    solutionExplanationFr: 'La commande mount rattache le système de fichiers situé sur un périphérique bloc (ex. /dev/sdc1) à une arborescence de répertoires existante (/mnt).',
+    validate: (fs: VirtualFs, interpreter?: ShellInterpreter): LabScenarioValidation => {
+      if (interpreter && interpreter.storageSimulator) {
+        const isMounted = interpreter.storageSimulator.isMountActive('/mnt') || interpreter.storageSimulator.isMountActive('/dev/sdc1');
+        if (isMounted) {
+          return {
+            isComplete: true,
+            score: 100,
+            feedback: 'Montage validé ! Le volume /dev/sdc1 est correctement rattaché à /mnt.',
+            feedbackFr: 'Montage validé ! Le volume /dev/sdc1 est correctement rattaché à /mnt.',
+            unmetCriteria: [],
+            unmetCriteriaFr: [],
+          };
+        }
+      }
+      return {
+        isComplete: false,
+        score: 0,
+        feedback: 'Le point de montage /mnt n\'est pas encore actif. Exécutez : sudo mount /dev/sdc1 /mnt',
+        feedbackFr: 'Le point de montage /mnt n\'est pas encore actif. Exécutez : sudo mount /dev/sdc1 /mnt',
+        unmetCriteria: ['/dev/sdc1 non monté sur /mnt'],
+        unmetCriteriaFr: ['/dev/sdc1 non monté sur /mnt'],
+      };
+    },
+  },
+  {
+    id: 'lab-fstab-mount-umount',
+    title: 'Persistance /etc/fstab, Tables de Partitions et Démontage (fdisk, umount, mount -a)',
+    titleFr: 'Persistance /etc/fstab, Tables de Partitions et Démontage (fdisk, umount, mount -a)',
+    certification: 'lpic-1',
+    category: 'storage',
+    difficulty: 'Advanced',
+    difficultyFr: 'Avancé',
+    estimatedMinutes: 7,
+    goal: 'Inspecter les partitions avec fdisk -l, créer le point de montage /mnt/backup, déclarer /dev/sdc1 de manière permanente dans /etc/fstab, appliquer le montage avec mount -a, puis tester la commande umount.',
+    goalFr: 'Inspecter les partitions avec fdisk -l, créer le point de montage /mnt/backup, déclarer /dev/sdc1 de manière permanente dans /etc/fstab, appliquer le montage avec mount -a, puis tester la commande umount.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Listez les partitions avec : sudo fdisk -l /dev/sdc (ou lsblk -f)',
+      'Créez le répertoire de destination : sudo mkdir -p /mnt/backup',
+      'Ajoutez l\'entrée dans /etc/fstab : /dev/sdc1 /mnt/backup ext4 defaults 0 2 (utilisez echo ... | sudo tee -a /etc/fstab)',
+      'Montez automatiquement tous les systèmes de fichiers déclarés : sudo mount -a',
+      'Vérifiez la table des montages actifs : mount | grep sdc1 ou lsblk -f',
+      'Démontez le système de fichiers pour valider le cycle : sudo umount /mnt/backup',
+    ],
+    instructionsFr: [
+      'Listez les partitions avec : sudo fdisk -l /dev/sdc (ou lsblk -f)',
+      'Créez le répertoire de destination : sudo mkdir -p /mnt/backup',
+      'Ajoutez l\'entrée dans /etc/fstab : /dev/sdc1 /mnt/backup ext4 defaults 0 2 (utilisez echo ... | sudo tee -a /etc/fstab)',
+      'Montez automatiquement tous les systèmes de fichiers déclarés : sudo mount -a',
+      'Vérifiez la table des montages actifs : mount | grep sdc1 ou lsblk -f',
+      'Démontez le système de fichiers pour valider le cycle : sudo umount /mnt/backup',
+    ],
+    hints: [
+      'Pour fdisk en mode non-interactif : sudo fdisk -l /dev/sdc.',
+      'Pour ajouter à /etc/fstab : echo "/dev/sdc1 /mnt/backup ext4 defaults 0 2" | sudo tee -a /etc/fstab',
+      'sudo mount -a lit /etc/fstab et monte les entrées non encore montées.',
+    ],
+    hintsFr: [
+      'Pour fdisk en mode non-interactif : sudo fdisk -l /dev/sdc.',
+      'Pour ajouter à /etc/fstab : echo "/dev/sdc1 /mnt/backup ext4 defaults 0 2" | sudo tee -a /etc/fstab',
+      'sudo mount -a lit /etc/fstab et monte les entrées non encore montées.',
+    ],
+    solutionCommands: [
+      'sudo fdisk -l /dev/sdc',
+      'sudo mkdir -p /mnt/backup',
+      'echo "/dev/sdc1 /mnt/backup ext4 defaults 0 2" | sudo tee -a /etc/fstab',
+      'sudo mount -a',
+      'mount | grep sdc1',
+      'sudo umount /mnt/backup',
+    ],
+    solutionExplanation: 'Le fichier /etc/fstab enregistre la configuration des systèmes de fichiers permanents. La commande mount -a permet d\'éprouver la syntaxe de fstab immédiatement, et umount libère le point de montage.',
+    solutionExplanationFr: 'Le fichier /etc/fstab enregistre la configuration des systèmes de fichiers permanents. La commande mount -a permet d\'éprouver la syntaxe de fstab immédiatement, et umount libère le point de montage.',
+    validate: (fs: VirtualFs, interpreter?: ShellInterpreter): LabScenarioValidation => {
+      const fstabNode = fs.getNode('/etc/fstab');
+      const backupDir = fs.getNode('/mnt/backup');
+      const unmet: string[] = [];
+
+      if (!backupDir || backupDir.type !== 'directory') {
+        unmet.push('Le répertoire /mnt/backup doit être créé (sudo mkdir -p /mnt/backup).');
+      }
+
+      if (!fstabNode || !fstabNode.content || !fstabNode.content.includes('/dev/sdc1') || !fstabNode.content.includes('/mnt/backup')) {
+        unmet.push('L\'entrée /dev/sdc1 /mnt/backup ext4 defaults 0 2 doit figurer dans /etc/fstab.');
+      }
+
+      const historyStr = interpreter ? interpreter.history.join(' ') : '';
+      const testedMountOrUmount =
+        historyStr.includes('mount -a') ||
+        historyStr.includes('umount') ||
+        (interpreter?.storageSimulator?.isMountActive('/mnt/backup') ?? false);
+
+      if (!testedMountOrUmount) {
+        unmet.push('Exécutez sudo mount -a (et sudo umount /mnt/backup) pour tester le montage.');
+      }
+
+      const isComplete = unmet.length === 0;
+      return {
+        isComplete,
+        score: isComplete ? 100 : Math.max(0, 100 - unmet.length * 35),
+        feedback: isComplete
+          ? 'Configuration et cycle de montage /etc/fstab validés avec succès !'
+          : 'La persistance fstab ou le test de montage est incomplet.',
+        feedbackFr: isComplete
+          ? 'Configuration et cycle de montage /etc/fstab validés avec succès !'
+          : 'La persistance fstab ou le test de montage est incomplet.',
+        unmetCriteria: unmet,
+        unmetCriteriaFr: unmet,
+      };
+    },
+  },
+  {
+    id: 'lab-text-filter-sed-awk',
+    title: 'Filtrage et Transformation de Flux Avancés (sed, awk & wc)',
+    titleFr: 'Filtrage et Transformation de Flux Avancés (sed, awk & wc)',
+    certification: 'lpic-1',
+    category: 'files',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    estimatedMinutes: 6,
+    goal: 'Transformer les données de serveurs avec sed pour standardiser les environnements "staging" en "preprod" dans /tmp/servers_mod.txt, puis utiliser awk pour filtrer les serveurs actifs vers /tmp/active_servers.txt et compter les lignes avec wc -l.',
+    goalFr: 'Transformer les données de serveurs avec sed pour standardiser les environnements "staging" en "preprod" dans /tmp/servers_mod.txt, puis utiliser awk pour filtrer les serveurs actifs vers /tmp/active_servers.txt et compter les lignes avec wc -l.',
+    initialDirectory: '/home/student',
+    instructions: [
+      'Affichez le fichier source : cat servers.txt',
+      'Remplacez le mot "staging" par "preprod" avec sed et enregistrez la sortie : sed "s/staging/preprod/g" servers.txt > /tmp/servers_mod.txt',
+      'Filtrez avec awk pour extraire les serveurs dont le statut ($4) est "active" : awk \'$4 == "active" {print $1, $2}\' servers.txt > /tmp/active_servers.txt',
+      'Comptez le nombre de serveurs actifs avec wc -l /tmp/active_servers.txt',
+    ],
+    instructionsFr: [
+      'Affichez le fichier source : cat servers.txt',
+      'Remplacez le mot "staging" par "preprod" avec sed et enregistrez la sortie : sed "s/staging/preprod/g" servers.txt > /tmp/servers_mod.txt',
+      'Filtrez avec awk pour extraire les serveurs dont le statut ($4) est "active" : awk \'$4 == "active" {print $1, $2}\' servers.txt > /tmp/active_servers.txt',
+      'Comptez le nombre de serveurs actifs avec wc -l /tmp/active_servers.txt',
+    ],
+    hints: [
+      'sed utilise la syntaxe sed "s/chercher/remplacer/g" fichier > cible',
+      'awk teste les colonnes par $1, $2, $3, $4. Exemple : awk \'$4 == "active" {print $1, $2}\'',
+    ],
+    hintsFr: [
+      'sed utilise la syntaxe sed "s/chercher/remplacer/g" fichier > cible',
+      'awk teste les colonnes par $1, $2, $3, $4. Exemple : awk \'$4 == "active" {print $1, $2}\'',
+    ],
+    solutionCommands: [
+      'cat servers.txt',
+      'sed "s/staging/preprod/g" servers.txt > /tmp/servers_mod.txt',
+      'awk \'$4 == "active" {print $1, $2}\' servers.txt > /tmp/active_servers.txt',
+      'wc -l /tmp/active_servers.txt',
+    ],
+    solutionExplanation: 'sed permet des substitutions rapides de motifs par expressions régulières, tandis qu\'awk traite chaque ligne comme un enregistrement découpé en colonnes ($1, $2, etc.).',
+    solutionExplanationFr: 'sed permet des substitutions rapides de motifs par expressions régulières, tandis qu\'awk traite chaque ligne comme un enregistrement découpé en colonnes ($1, $2, etc.).',
+    validate: (fs: VirtualFs): LabScenarioValidation => {
+      const modNode = fs.getNode('/tmp/servers_mod.txt');
+      const activeNode = fs.getNode('/tmp/active_servers.txt');
+      const unmet: string[] = [];
+
+      if (!modNode || !modNode.content) {
+        unmet.push('Le fichier /tmp/servers_mod.txt est manquant (utilisez sed "s/staging/preprod/g" servers.txt > /tmp/servers_mod.txt).');
+      } else if (!modNode.content.includes('preprod') || modNode.content.includes('staging')) {
+        unmet.push('Le fichier /tmp/servers_mod.txt doit contenir "preprod" au lieu de "staging".');
+      }
+
+      if (!activeNode || !activeNode.content) {
+        unmet.push('Le fichier /tmp/active_servers.txt est manquant (utilisez awk).');
+      } else if (!activeNode.content.includes('web1') || !activeNode.content.includes('192.168.1.10')) {
+        unmet.push('/tmp/active_servers.txt doit contenir les serveurs actifs extraits par awk.');
+      }
+
+      const isComplete = unmet.length === 0;
+      return {
+        isComplete,
+        score: isComplete ? 100 : Math.max(0, 100 - unmet.length * 50),
+        feedback: isComplete
+          ? 'Magnifique ! Traitement de flux maîtrisé avec sed, awk et redirection.'
+          : 'Filtrage incomplet.',
+        feedbackFr: isComplete
+          ? 'Magnifique ! Traitement de flux maîtrisé avec sed, awk et redirection.'
+          : 'Filtrage incomplet.',
+        unmetCriteria: unmet,
+        unmetCriteriaFr: unmet,
+      };
+    },
+  },
 ];
