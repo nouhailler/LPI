@@ -30,7 +30,13 @@
 
 ## ✨ Fonctionnalités Principales
 
-- **🖥️ Terminal Virtuel & Labs Simulés (VirtualFS)** : Interpréteur de commandes Linux 100 % in-memory et PWA (`chmod`, `chown`, `grep`, `tar`, `ps`, redirections) avec validation d'état réel du système de fichiers virtuel.
+- **🖥️ Terminal Virtuel & Labs Simulés (VirtualFS)** : Interpréteur de commandes Linux 100 % in-memory et PWA avec autocomplétion Tab, pages de manuel UNIX complètes (`man`, `help`, `--help`), et 14 scénarios d'ateliers pratiques évalués par analyse microscopique de l'état du système de fichiers virtuel :
+  - *Filtrage & Flux* : `sed`, `awk`, `cut`, `sort`, `uniq`, `wc`, `tee`, pipes (`|`), redirections (`>`, `>>`).
+  - *Services & Journaux Systemd* : `systemctl` (`status`, `start`, `stop`, `restart`, `enable`, `disable`), `journalctl` (`-u`, `-n`, `-r`, `-p`, `-xe`).
+  - *Réseau & Routage* : `ip addr`, `ip link`, `ip route`, `ping` avec simulation de latence RTT réaliste et détection de connectivité.
+  - *Stockage & Persistance* : `mount` (`-a`, `-o`), `umount`, `/etc/fstab`, inspection des partitions `fdisk` (`-l`) et arborescence bloc `lsblk` (`-f`).
+  - *Droits, Processus & Système* : `chmod` (octal & symbolique), `chown`, `chgrp`, `umask`, `tar` (`-czvf`, `-xvf`), `ps` (`aux`, `-ef`), `kill` (`-9`), `uptime`, `free`, `df`.
+- **🗺️ Carte Visuelle Interactive des Labs (`LinuxLabVisualMap`)** : Arborescence et roadmap interactive de tous les ateliers pratiques, avec suivi visuel en temps réel des acquis, filtrage par niveau et lancement direct des labs.
 - **📝 Simulateur d'Examens Chronométrés (Barème 200–800)** : Simulations fidèles aux conditions Pearson VUE / LPI (LPIC-1 101/102, LPIC-2 201/202, LPIC-3) avec QCM et questions à saisie libre de commandes (*Fill-in-the-blank*), tolérance syntaxique intelligente et explications pédagogiques détaillées.
 - **🧠 Flashcards avec Algorithme SRS (2 000+ cartes)** : Moteur de répétition espacée (dérivé de Leitner / SM-2) avec cartes flip 3D, calcul des révisions dues du jour et paliers d'auto-évaluation déterministes.
 - **🚨 Ateliers Hands-On Pratiques** : Simulation d'astreinte (*Incident Response*), dépannage sur logs système (*Troubleshooting*), ordonnancement chronologique par glisser-déposer (*Sequencing*) et mini-jeux d'association.
@@ -55,7 +61,7 @@ L'application est structurée en **7 écrans principaux** et plusieurs modules t
 | **Flashcards SRS** (`flashcards`) | Mémorisation active à long terme | Flip-cards 3D, 4 boutons d'auto-évaluation (*Again, Hard, Good, Easy*), files d'attente et index complet de recherche parmi 2 000+ cartes. |
 | **Simulateur d'Examens** (`practice`) | Immersion conditions réelles | 60 questions / 90 min, notation officielle 200–800 (seuil 500 pts), QCM et saisie libre de commandes, marquage pour revue et bilan complet. |
 | **Glossaire & Explorateur** (`glossary`) | Encyclopédie & Graphe conceptuel | Recherche textuelle, décomposition anatomique d'instructions (options, drapeaux, pipes), pièges fréquents et graphe relationnel interactif. |
-| **Hub d'Ateliers & Labs** (`training`) | Réflexes pratiques de terminal | Shell Unix interactif (VirtualFS), astreinte système (Incident Response), analyse de logs (`journalctl`), ordonnancement glisser-déposer. |
+| **Hub d'Ateliers & Labs** (`training`) | Réflexes pratiques & Administration système | Shell Unix interactif (VirtualFS), 14 labs guidés avec carte visuelle interactive (`LinuxLabVisualMap`), astreinte d'urgence (*Incident Response*), dépannage sur logs (`journalctl`), ordonnancement chronologique (*Sequencing*), saisie de commandes (*Fill-in-the-blank*) et jeux d'association (*Matching*). |
 
 > 👉 **Spécification détaillée écran par écran : [docs/00_FUNCTIONAL_GUIDE.md](./docs/00_FUNCTIONAL_GUIDE.md)**
 
@@ -98,7 +104,7 @@ La documentation interne du projet comprend **23 documents et ADRs complets**, d
 - **[06_LEARNING_ENGINE.md](./docs/06_LEARNING_ENGINE.md)** : Boucle pédagogique adaptative, diagnostic initial et parcours thématiques.
 - **[07_SRS_ENGINE.md](./docs/07_SRS_ENGINE.md)** : Algorithme de répétition espacée, paliers déterministes et machine à états.
 - **[08_WEAKNESS_ENGINE.md](./docs/08_WEAKNESS_ENGINE.md)** : Détection heuristique des lacunes, 7 domaines LPI et entraînements ciblés.
-- **[09_LABS_ENGINE.md](./docs/09_LABS_ENGINE.md)** : Terminal virtuel Bash 5.2, arborescence POSIX/FHS in-memory et validation d'état microscopique.
+- **[09_LABS_ENGINE.md](./docs/09_LABS_ENGINE.md)** : Moteur de labs pratiques, terminal virtuel (VirtualFS), modélisation Systemd, stockage/fstab, réseau ICMP, et validation d'état microscopique des 14 scénarios.
 - **[10_EXAM_ENGINE.md](./docs/10_EXAM_ENGINE.md)** : Échelle officielle 200–800, pondération, tolérance syntaxique aux commandes et analytics comportementales.
 
 ### Phase 3 — Infrastructure & PWA (Complète)
