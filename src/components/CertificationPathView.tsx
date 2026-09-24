@@ -21,18 +21,20 @@ import { allLpicTopicsData } from '../data/lpicObjectivesData';
 import { getLearningMapNodes } from './learningMap/learningMapData';
 import { LearningMapTree } from './learningMap/LearningMapTree';
 import { ThematicLearningPathsView } from './ThematicLearningPathsView';
+import { MyPersonalizedPathView } from './MyPersonalizedPathView';
 import { ErrorBoundary } from './ErrorBoundary';
 
 interface CertificationPathViewProps {
   userStats: UserStats;
   tiers: ExamTier[];
   onStartExam: (examId: string) => void;
-  onNavigate: (tab: TabType) => void;
+  onNavigate: (tab: TabType, payload?: any) => void;
   onOpenLearning?: (topicId?: string) => void;
   onUpdateTarget?: (target: string) => void;
   onOpenFlashcardsTopic?: (topicId: string) => void;
   onOpenExplainDifferently?: (topic: string, mode?: any, context?: string) => void;
-  initialViewMode?: 'thematic' | 'map' | 'detailed';
+  onOpenDiagnostic?: () => void;
+  initialViewMode?: 'personalized' | 'thematic' | 'map' | 'detailed';
 }
 
 export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
@@ -44,23 +46,24 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
   onUpdateTarget,
   onOpenFlashcardsTopic,
   onOpenExplainDifferently,
+  onOpenDiagnostic,
   initialViewMode,
 }) => {
   const { t, isFrench } = useLanguage();
 
-  // View mode: 'thematic' (Independent Career Skill Paths) | 'map' (Learning Map interactive tree) | 'detailed' (Curriculum tiers list)
-  const [viewMode, setViewMode] = useState<'thematic' | 'map' | 'detailed'>(() => {
+  // View mode: 'personalized' (Mon parcours LPIC) | 'thematic' (Independent Career Skill Paths) | 'map' (Learning Map) | 'detailed' (Curriculum tiers)
+  const [viewMode, setViewMode] = useState<'personalized' | 'thematic' | 'map' | 'detailed'>(() => {
     if (initialViewMode) return initialViewMode;
     try {
       const saved = localStorage.getItem('cert_path_view_mode');
-      if (saved === 'thematic' || saved === 'map' || saved === 'detailed') {
+      if (saved === 'personalized' || saved === 'thematic' || saved === 'map' || saved === 'detailed') {
         return saved;
       }
     } catch {}
-    return 'thematic';
+    return 'personalized';
   });
 
-  const handleSetViewMode = (mode: 'thematic' | 'map' | 'detailed') => {
+  const handleSetViewMode = (mode: 'personalized' | 'thematic' | 'map' | 'detailed') => {
     setViewMode(mode);
     try {
       localStorage.setItem('cert_path_view_mode', mode);
@@ -318,9 +321,26 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
         </div>
       </div>
 
-      {/* View Switcher: Thematic Career Paths vs Interactive Learning Map vs Detailed Curriculum */}
+      {/* View Switcher: Mon parcours LPIC vs Thematic Career Paths vs Interactive Learning Map vs Detailed Curriculum */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-[#ffffff] border border-[#d3c5ab] rounded-xl p-2 md:p-2.5 shadow-xs">
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <button
+            onClick={() => handleSetViewMode('personalized')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewMode === 'personalized'
+                ? 'bg-[#ffc20e] text-[#6d5100] shadow-xs'
+                : 'text-[#4f4632] hover:bg-[#f8ecdb]'
+            }`}
+          >
+            <Target className="w-4 h-4 text-[#785a00]" />
+            <span>{isFrench ? '🎯 Mon parcours LPIC' : '🎯 My LPIC Path'}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+              viewMode === 'personalized' ? 'bg-[#6d5100] text-[#ffc20e]' : 'bg-[#ebdcc8] text-[#785a00]'
+            }`}>
+              {isFrench ? 'Sur mesure' : 'Custom'}
+            </span>
+          </button>
+
           <button
             onClick={() => handleSetViewMode('thematic')}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -364,7 +384,11 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
         </div>
 
         <span className="text-xs text-[#817660] hidden lg:inline px-2">
-          {viewMode === 'thematic'
+          {viewMode === 'personalized'
+            ? isFrench
+              ? '🎯 Objectif → diagnostic → parcours personnalisé → entraînement quotidien → examens blancs'
+              : '🎯 Goal → diagnostic → custom path → daily training → mock exams'
+            : viewMode === 'thematic'
             ? isFrench
               ? '🎯 21 feuilles de route concrètes (Fondamentaux, Admin, Réseau, Sécurité, Pratique) axées sur le terrain'
               : '🎯 21 pragmatic real-world engineering roadmaps (Fundamentals, Admin, Network, Security, DevOps)'
@@ -379,7 +403,17 @@ export const CertificationPathView: React.FC<CertificationPathViewProps> = ({
       </div>
 
       {/* VIEW SELECTION */}
-      {viewMode === 'thematic' ? (
+      {viewMode === 'personalized' ? (
+        <ErrorBoundary fallbackTitle={isFrench ? "Erreur d'affichage de Mon Parcours LPIC" : "My LPIC Path Display Error"}>
+          <MyPersonalizedPathView
+            userStats={userStats}
+            onNavigate={onNavigate}
+            onStartExam={onStartExam}
+            onOpenDiagnostic={onOpenDiagnostic}
+            onOpenExplainDifferently={onOpenExplainDifferently}
+          />
+        </ErrorBoundary>
+      ) : viewMode === 'thematic' ? (
         <ErrorBoundary fallbackTitle={isFrench ? "Erreur d'affichage des Parcours Métier" : "Career Paths Display Error"}>
           <ThematicLearningPathsView
             onNavigate={onNavigate}

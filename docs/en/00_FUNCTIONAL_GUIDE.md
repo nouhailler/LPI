@@ -81,20 +81,27 @@ This screen maps the entire official **Linux Professional Institute** syllabus i
 
 ---
 
-## 4. Screen 3: Cross-Functional Thematic Paths (`path`)
+## 4. Screen 3: My LPIC Path & Certification Roadmap (`path`)
 
 ### 4.1. Role and Objective
-Unlike the strict linear numbering of official exam chapters, this screen reorganizes skills around **major real-world Linux system administration pillars**, facilitating progressive milestone-driven learning.
+This screen houses the **adaptive goal-driven study engine** of the platform. It gives immediate purpose and cohesion to all existing capabilities (Curriculum, SRS Flashcards, VirtualFS labs, Mock exams). Users define their certification target and time constraints, and the engine generates a personalized daily training syllabus.
 
 ### 4.2. Key Features
-- **5 Core Transverse Domains**:
-  1. *Files, Permissions & Command Line* (Navigation, octal modes, hard/symbolic links, I/O streams).
-  2. *Boot, Kernel & System Services* (BIOS/UEFI, GRUB2, Systemd, SysVinit, kernel module compilation).
-  3. *Storage, Partitions & Filesystems* (MBR/GPT, ext4, XFS, swap, LVM, mounting, quotas).
-  4. *Local Networking & Internet Services* (IP addressing, routing, BIND DNS, gateways, firewalls).
-  5. *Security, Encryption & User Accounts* (PAM, shadow, sudoers, OpenSSH, SSL/TLS certificates).
-- **Visual Milestone Progression**: Dedicated progress bars with multi-tier star achievements per thematic pillar.
-- **Contextual Lab Triggers**: Direct shortcuts to interactive exercises and flashcard subsets linked to the chosen path.
+- **🎯 Personalized Learning Engine ("My LPIC Path")**:
+  - **Structured 5-Step Workflow**:
+    $$\text{Target Objective} \longrightarrow \text{Diagnostic} \longrightarrow \text{Custom Path} \longrightarrow \text{Daily Training} \longrightarrow \text{Mock Exam}$$
+  - **Target Certification Selection**: Choose between LPIC-1 (101-500, 102-500, or complete 101+102), LPIC-2 (201, 202, or complete), LPIC-3 (Specialties 300, 303, 305, 306), or Linux Essentials.
+  - **Initial Diagnostic Baseline Calibration**: 6-domain skills assessment (Architecture, Commands, Filesystems, Bash, Networking, Security) establishing current mastery (e.g., 63%).
+  - **Pacing & Time Constraints**: Available daily study time (15, 30, 45, 60 minutes) and target exam deadline.
+  - **Daily Quad-Task Syllabus ("Today")**:
+    - 📚 **Topic Review**: Focused official syllabus objective (e.g., *101.2 — BIOS/UEFI & Boot Sequence*).
+    - 🧠 **12 Targeted SRS Flashcards**: Memory anchoring and essential command flags.
+    - 💻 **1 Hands-on Mini-Lab**: Interactive terminal scenario with real-time file-state validation.
+    - 📝 **10 Targeted Practice Questions**: Assessment quiz verifying conceptual and syntax retention.
+  - **Progress & Readiness Metrics**: Estimated readiness percentage (%), days remaining, mastered objectives count, and status badge (*Intensive Training*, *On Track*, *Ready for Exam*).
+- **Thematic Skill Paths (21 Career Roadmaps)**: Cross-functional tracks focused on job readiness (Files, Boot, Storage, Network, Security) with star ratings.
+- **Interactive Learning Map**: Node-based tree visualizer mapping syllabus dependencies and live objective mastery.
+- **LPI Rules & Prerequisites**: Clear guidelines on certification requirements and official weights.
 
 ---
 

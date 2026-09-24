@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library, Zap, Brain, Sparkles } from 'lucide-react';
+import { LayoutGrid, GraduationCap, HelpCircle, Layers, BookOpen, Library, Zap, Brain, Sparkles, Target } from 'lucide-react';
 import { TabType } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
@@ -105,7 +105,7 @@ export const DesktopSidebar: React.FC<NavigationProps> = ({
     { id: 'learning', label: t.nav.learning, icon: BookOpen, badge: t.nav.learningBadge },
     { id: 'training', label: t.nav.training, icon: Zap, badge: t.nav.trainingBadge },
     { id: 'glossary', label: t.nav.glossary, icon: Library, badge: t.nav.glossaryBadge },
-    { id: 'path', label: t.nav.path, icon: GraduationCap },
+    { id: 'path', label: t.nav.path, icon: Target, badge: t.nav.pathBadge || '🎯 Sur mesure', badgeColor: 'bg-[#ffc20e] text-[#6d5100]' },
     { id: 'practice', label: t.nav.practice, icon: HelpCircle },
     {
       id: 'flashcards',

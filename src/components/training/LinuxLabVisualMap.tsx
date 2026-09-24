@@ -81,7 +81,7 @@ const STAGES: StageGroup[] = [
     titleFr: 'Niveau 3 : Processus, Services & Pipelines Textuels',
     description: 'Signal handling, systemd service management, and pipe manipulation.',
     descriptionFr: 'Gestion des signaux, supervision systemd et traitement de flux.',
-    scenarioIds: ['lab-kill-process', 'lab-systemd-service', 'lab-text-filter-pipeline'],
+    scenarioIds: ['lab-kill-process', 'lab-systemd-service', 'lab-text-filter-pipeline', 'lab-text-filter-sed-awk'],
   },
   {
     id: 'stage-4',
@@ -90,7 +90,7 @@ const STAGES: StageGroup[] = [
     titleFr: 'Niveau 4 : Durcissement, Réseau & Disques',
     description: 'Protect sensitive files, test network routes, and mount storage devices.',
     descriptionFr: 'Sécuriser /etc/shadow, diagnostiquer le réseau et monter des disques.',
-    scenarioIds: ['lab-security-shadow', 'lab-network-ping-diag', 'lab-storage-mount-disk'],
+    scenarioIds: ['lab-security-shadow', 'lab-network-ping-diag', 'lab-storage-mount-disk', 'lab-fstab-mount-umount'],
   },
 ];
 
@@ -432,7 +432,7 @@ export const LinuxLabVisualMap: React.FC<Props> = ({ onSelectScenario, className
                 </div>
 
                 {/* Connected Cards Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 relative">
                   {stageScenarios.map((scenario, index) => {
                     const isVisible = filteredInStage.some((s) => s.id === scenario.id);
                     const isCompleted = completedIds.includes(scenario.id);

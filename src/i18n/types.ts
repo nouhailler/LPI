@@ -50,6 +50,7 @@ export interface TranslationDictionary {
     glossary: string;
     glossaryBadge: string;
     path: string;
+    pathBadge?: string;
     practice: string;
     flashcards: string;
     flashcardsBadge: string;

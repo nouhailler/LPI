@@ -567,4 +567,83 @@ export interface WeaknessEngineReport {
   lastUpdated: string;
 }
 
+// ----------------------------------------------------
+// 🎯 MON PARCOURS LPIC (Personalized Adaptive Learning Path)
+// ----------------------------------------------------
+
+export type CertificationGoal =
+  | 'lpic-1-101'
+  | 'lpic-1-102'
+  | 'lpic-1'
+  | 'lpic-2-201'
+  | 'lpic-2-202'
+  | 'lpic-2'
+  | 'lpic-3-300'
+  | 'lpic-3-303'
+  | 'lpic-3-305'
+  | 'lpic-3-306'
+  | 'essentials';
+
+export interface DailyTrainingItem {
+  id: string;
+  type: 'concept' | 'flashcards' | 'lab' | 'questions' | 'exam_sim';
+  title: string;
+  titleFr: string;
+  subtitle: string;
+  subtitleFr: string;
+  targetObjectiveId: string;
+  targetTopicNumber: number;
+  estimatedMinutes: number;
+  count?: number; // e.g. 12 flashcards, 10 questions
+  completed: boolean;
+  navTarget: TabType;
+  navPayload?: {
+    topicId?: string;
+    scenarioId?: string;
+    examId?: string;
+  };
+}
+
+export interface PersonalizedPathConfig {
+  goal: CertificationGoal;
+  goalTitle: string;
+  goalTitleFr: string;
+  targetExamId: string;
+  dailyMinutes: number; // e.g. 15, 30, 45, 60
+  targetDate: string; // YYYY-MM-DD
+  initialDiagnosticScore: number; // 0 - 100%
+  hasTakenDiagnostic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DayStepSummary {
+  date: string;
+  dayNumber: number;
+  objectiveId: string;
+  objectiveTitle: string;
+  items: DailyTrainingItem[];
+  isCurrentDay: boolean;
+  isCompleted: boolean;
+}
+
+export interface PersonalizedLearningPathState {
+  config: PersonalizedPathConfig;
+  estimatedProgressPct: number; // e.g. 47%
+  masteredObjectivesCount: number;
+  totalObjectivesCount: number;
+  daysRemaining: number;
+  todayPlan: {
+    objectiveId: string;
+    objectiveTitle: string;
+    objectiveWeight: number;
+    tasks: DailyTrainingItem[];
+    allDone: boolean;
+  };
+  upcomingDays: DayStepSummary[];
+  recommendedExamDate: string;
+  readinessStatus: 'not_started' | 'needs_work' | 'on_track' | 'ready';
+}
+
+
 

@@ -81,20 +81,27 @@ Cet écran transpose l'intégralité du programme officiel du **Linux Profession
 
 ---
 
-## 4. Écran 3 : Parcours Thématiques Transverses (`path`)
+## 4. Écran 3 : Mon parcours LPIC & Roadmap de Certification (`path`)
 
 ### 4.1. Rôle et Objectif
-À l'opposé du découpage linéaire par numéros d'examen, cet écran regroupe les compétences par **grands piliers métier de l'administration Linux**. Il permet une progression par paliers fonctionnels cohérents.
+Cet écran constitue le véritable **moteur d'entraînement guidé et personnalisé** de l'application. Il donne du sens et un fil conducteur direct à toutes les fonctionnalités existantes (Syllabus, Flashcards SRS, Labs virtuels, Simulateur d'examens). L'utilisateur n'est plus livré à lui-même : il définit son cap et l'application calcule sa feuille de route journalière adaptative.
 
 ### 4.2. Fonctionnalités Clés
-- **5 Domaines Transverses Fondamentaux** :
-  1. *Fichiers, Droits & Ligne de Commande* (Navigation, permissions octales, liens durs/symboliques, redirection de flux).
-  2. *Démarrage, Noyau & Services Système* (BIOS/UEFI, GRUB2, Systemd, SysVinit, compilation modules noyau).
-  3. *Stockage, Partitions & Systèmes de Fichiers* (MBR/GPT, ext4, XFS, swap, LVM, montage et quotas).
-  4. *Réseau Local & Services Internet* (Adressage IP, routage, DNS BIND, passerelles, pare-feu).
-  5. *Sécurité, Chiffrement & Comptes Utilisateurs* (PAM, shadow, sudoers, OpenSSH, certificats SSL/TLS).
-- **Paliers de Maîtrise Visuels** : Barre de progression spécifique par thématique avec jauge d'avancement par étoiles.
-- **Déclenchement d'Ateliers Contextuels** : Passerelles directes vers les exercices et flashcards rattachés à la thématique choisie.
+- **🎯 Moteur Personnalisé (« Mon parcours LPIC »)** :
+  - **Flux structuré en 5 étapes** :
+    $$\text{Objectif} \longrightarrow \text{Diagnostic} \longrightarrow \text{Parcours personnalisé} \longrightarrow \text{Entraînement quotidien} \longrightarrow \text{Examens blancs}$$
+  - **Sélection de l'Objectif de Certification** : Choix libre parmi LPIC-1 (101-500, 102-500 ou cursus complet 101+102), LPIC-2 (201, 202 ou cursus complet), LPIC-3 (Spécialités 300, 303, 305, 306) et Linux Essentials.
+  - **Diagnostic & Étalonnage du Niveau Initial** : Matrice de compétences sur 6 domaines (Architecture, Commandes, Filesystems, Bash, Réseau, Sécurité) pondérant le niveau de départ (ex: 63 %).
+  - **Contraintes de Rythme Personnalisées** : Choix du temps disponible par jour (15 min, 30 min, 45 min, 60 min) et de la date cible de passage d'examen (échéance calendaire).
+  - **Programme Quotidien en 4 Micro-Tâches Calibrées (« Aujourd'hui »)** :
+    - 📚 **Révision ciblée** d'un objectif prioritaire (ex: *101.2 — BIOS/UEFI & Boot Sequence*).
+    - 🧠 **12 Flashcards SRS ciblées** sur le thème pour ancrage mnémotechnique.
+    - 💻 **1 Mini-lab pratique** en terminal virtuel avec validation de scénario en temps réel.
+    - 📝 **10 Questions ciblées** de validation pour évaluer l'assimilation.
+  - **Indicateurs & Paliers de Maturité** : Progression globale estimée (%), jours restants, objectifs acquis et badge d'état (*Intensive Training*, *On Track*, *Ready for Exam*).
+- **Parcours Métier Thématiques (21 Roadmaps transverses)** : Approche par métier (Fichiers & Droits, Démarrage & Noyau, Stockage & FS, Réseau & Services, Sécurité & Chiffrement) avec étoiles de maîtrise.
+- **Learning Map Interactive** : Arborescence complète des nœuds du cursus LPI avec visualisation graphique de la progression.
+- **Paliers & Règles Officielles LPI** : Documentation des prérequis (ex: obtention de LPIC-1 avant délivrance du titre LPIC-2) et pondérations des topics.
 
 ---
 

@@ -397,6 +397,7 @@ export default function App() {
                 onOpenLearning={handleOpenLearningTopic}
                 onUpdateTarget={handleUpdateTarget}
                 onOpenFlashcardsTopic={handleOpenFlashcards}
+                onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
                 onOpenExplainDifferently={(topic, mode, context) =>
                   handleOpenExplainDifferently(topic, mode || 'simple', context)
                 }

@@ -31,6 +31,12 @@ import { getStoredDiagnosticResult } from '../data/diagnosticExamData';
 import { loadSRSRecords, computeSRSDeckSummary } from '../utils/srsEngine';
 import { WeaknessEngineWidget } from './weakness/WeaknessEngineWidget';
 import { thematicLearningPaths, getThematicPathProgress } from '../data/thematicLearningPathsData';
+import {
+  getStoredPersonalizedPathConfig,
+  getCompletedTaskIds,
+  calculatePersonalizedLearningPath,
+  CERTIFICATION_GOALS,
+} from '../services/personalizedPathEngine';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -282,6 +288,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     { id: 'topic-301', number: 301, title: 'Samba Basics (smb.conf, TDB/LDB, RPC)', exam: 'LPIC-3 (300)', weight: 11 },
   ];
 
+  // Personalized Path State for Dashboard Widget
+  const [personalizedConfig, setPersonalizedConfig] = useState(() => getStoredPersonalizedPathConfig());
+  const [completedPathTaskIds, setCompletedPathTaskIds] = useState(() => getCompletedTaskIds());
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setPersonalizedConfig(getStoredPersonalizedPathConfig());
+      setCompletedPathTaskIds(getCompletedTaskIds());
+    };
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('lpic_path_updated', handleUpdate);
+    window.addEventListener('lpic_task_completed', handleUpdate);
+    return () => {
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('lpic_path_updated', handleUpdate);
+      window.removeEventListener('lpic_task_completed', handleUpdate);
+    };
+  }, []);
+
+  const personalizedPathState = useMemo(() => {
+    return calculatePersonalizedLearningPath(
+      personalizedConfig,
+      masteredObjectiveIds,
+      diagnosticResult,
+      completedPathTaskIds
+    );
+  }, [personalizedConfig, masteredObjectiveIds, diagnosticResult, completedPathTaskIds]);
+
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-10">
       {/* Certification Guide Modal */}
@@ -387,6 +421,118 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* 🎯 MON PARCOURS LPIC — Dynamic Goal & Daily Training Engine Widget */}
+      <div className="bg-gradient-to-br from-[#ffffff] via-[#fffdfa] to-[#fef2e1] border-2 border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#ffc20e]/10 rounded-full blur-2xl pointer-events-none -mr-16 -mt-16" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-[#ebdcc8]">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-[#ffc20e] text-[#6d5100] flex items-center justify-center font-bold shrink-0 shadow-2xs">
+              <Target className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#ffc20e] text-[#6d5100]">
+                  🎯 {isFrench ? 'Mon parcours LPIC' : 'My LPIC Path'}
+                </span>
+                <span className="text-xs font-mono font-bold text-[#785a00]">
+                  {CERTIFICATION_GOALS.find((g) => g.id === personalizedConfig.goal)?.examCode || '101-500'}
+                </span>
+              </div>
+              <h3 className="text-lg md:text-xl font-black text-[#201b11] mt-0.5">
+                {isFrench ? personalizedConfig.goalTitleFr : personalizedConfig.goalTitle}
+              </h3>
+            </div>
+          </div>
+
+          <button
+            onClick={() => onNavigate('path')}
+            className="w-full lg:w-auto px-4 py-2.5 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#6d5100] font-bold text-xs uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+          >
+            <span>{isFrench ? 'Ouvrir mon parcours complet' : 'Open Full Roadmap'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 4 Metrics Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-4 relative z-10">
+          <div className="bg-white/90 p-2.5 rounded-xl border border-[#d3c5ab]/60">
+            <span className="text-[10px] font-bold text-[#817660] uppercase tracking-wider block">
+              {isFrench ? 'Niveau initial' : 'Starting Level'}
+            </span>
+            <span className="text-lg font-black text-[#201b11]">
+              {personalizedConfig.hasTakenDiagnostic ? `${personalizedConfig.initialDiagnosticScore} %` : '60 %'}
+            </span>
+          </div>
+          <div className="bg-white/90 p-2.5 rounded-xl border border-[#d3c5ab]/60">
+            <span className="text-[10px] font-bold text-[#817660] uppercase tracking-wider block">
+              {isFrench ? 'Temps / jour' : 'Time / day'}
+            </span>
+            <span className="text-lg font-black text-[#201b11]">
+              {personalizedConfig.dailyMinutes} min
+            </span>
+          </div>
+          <div className="bg-white/90 p-2.5 rounded-xl border border-[#d3c5ab]/60">
+            <span className="text-[10px] font-bold text-[#817660] uppercase tracking-wider block">
+              {isFrench ? 'Date cible' : 'Target Date'}
+            </span>
+            <span className="text-base font-black text-[#201b11] truncate block">
+              {new Date(personalizedConfig.targetDate).toLocaleDateString(isFrench ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short' })}
+            </span>
+          </div>
+          <div className="bg-white/90 p-2.5 rounded-xl border border-[#d3c5ab]/60">
+            <span className="text-[10px] font-bold text-[#817660] uppercase tracking-wider block">
+              {isFrench ? 'Progression estimée' : 'Est. Progress'}
+            </span>
+            <span className="text-lg font-black text-[#0061a4]">
+              {personalizedPathState.estimatedProgressPct} %
+            </span>
+          </div>
+        </div>
+
+        {/* Today's 4 Tasks Quick Bar */}
+        <div className="pt-3 border-t border-[#ebdcc8] relative z-10">
+          <div className="flex items-center justify-between text-xs font-bold text-[#201b11] mb-2.5">
+            <span className="uppercase tracking-wider text-[#785a00] flex items-center gap-1.5">
+              <span>📅</span>
+              <span>{isFrench ? 'Aujourd\'hui : 4 micro-tâches calibrées' : 'Today: 4 calibrated micro-tasks'}</span>
+            </span>
+            <span className="text-[#817660]">
+              {personalizedPathState.todayPlan.tasks.filter((t) => t.completed).length} / 4 {isFrench ? 'faits' : 'done'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {personalizedPathState.todayPlan.tasks.map((task) => (
+              <button
+                key={task.id}
+                onClick={() => onNavigate('path')}
+                className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                  task.completed
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                    : 'bg-white border-[#d3c5ab] hover:border-[#ffc20e]'
+                }`}
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 text-xs font-bold truncate">
+                    <span>
+                      {task.type === 'concept' ? '📚' : task.type === 'flashcards' ? '🧠' : task.type === 'lab' ? '💻' : '📝'}
+                    </span>
+                    <span className="truncate">{isFrench ? task.titleFr : task.title}</span>
+                  </div>
+                  <span className="text-[10px] text-[#817660] block mt-0.5">
+                    ~{task.estimatedMinutes} min
+                  </span>
+                </div>
+                {task.completed && (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Recommended Next Step Banner (Action directe 1-clic) */}
       <div className="bg-[#fff8f2] border border-[#ffc20e] rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">

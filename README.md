@@ -30,6 +30,9 @@
 
 ## ✨ Fonctionnalités Principales
 
+- **🎯 Moteur de Parcours Personnalisé (« Mon parcours LPIC »)** : Système complet d'apprentissage sur-mesure orienté vers un objectif précis de certification :
+  - *Flux d'entraînement complet* : **Objectif** (LPIC-1 101/102, LPIC-2, LPIC-3, Linux Essentials) $\longrightarrow$ **Diagnostic** (matrice 6 domaines) $\longrightarrow$ **Parcours personnalisé** (temps disponible/jour, date cible) $\longrightarrow$ **Entraînement quotidien** (4 micro-tâches calibrées : révision syllabus, flashcards ciblées, mini-lab terminal, quiz questions ciblées) $\longrightarrow$ **Examens blancs chronométrés**.
+  - *Indicateurs de progression en temps réel* : Niveau initial calculé, progression estimée (%), jours restants jusqu'à l'examen et jauge de maturité (*Ready, On Track, Intensive Training*).
 - **🖥️ Terminal Virtuel & Labs Simulés (VirtualFS)** : Interpréteur de commandes Linux 100 % in-memory et PWA avec autocomplétion Tab, pages de manuel UNIX complètes (`man`, `help`, `--help`), et 14 scénarios d'ateliers pratiques évalués par analyse microscopique de l'état du système de fichiers virtuel :
   - *Filtrage & Flux* : `sed`, `awk`, `cut`, `sort`, `uniq`, `wc`, `tee`, pipes (`|`), redirections (`>`, `>>`).
   - *Services & Journaux Systemd* : `systemctl` (`status`, `start`, `stop`, `restart`, `enable`, `disable`), `journalctl` (`-u`, `-n`, `-r`, `-p`, `-xe`).
@@ -57,7 +60,7 @@ L'application est structurée en **7 écrans principaux** et plusieurs modules t
 | :--- | :--- | :--- |
 | **Tableau de Bord** (`dashboard`) | Cockpit de pilotage & Diagnostic | Readiness Score (0-100%), Weakness Engine, calendrier de régularité (Daily Streak), métriques d'apprentissage et accès rapides. |
 | **Curriculum Officiel** (`learning`) | Référentiel complet LPI | Programmes LPIC-1 (101/102), LPIC-2 (201/202) et LPIC-3, coefficients officiels (Weights 1 à 5), fiches d'objectifs détaillées. |
-| **Parcours Thématiques** (`path`) | Approche transverse par métier | 5 piliers : Fichiers & Droits, Démarrage & Noyau, Stockage & FS, Réseau & Services, Sécurité & Chiffrement avec progression par étoiles. |
+| **Mon parcours LPIC & Roadmap** (`path`) | Cursus sur-mesure & Progression | Moteur d'entraînement dynamique personnalisé (Objectif $\rightarrow$ Diagnostic $\rightarrow$ 4 micro-tâches du jour $\rightarrow$ Blancs), Parcours Métier thématiques (21 roadmaps) et Learning Map interactive. |
 | **Flashcards SRS** (`flashcards`) | Mémorisation active à long terme | Flip-cards 3D, 4 boutons d'auto-évaluation (*Again, Hard, Good, Easy*), files d'attente et index complet de recherche parmi 2 000+ cartes. |
 | **Simulateur d'Examens** (`practice`) | Immersion conditions réelles | 60 questions / 90 min, notation officielle 200–800 (seuil 500 pts), QCM et saisie libre de commandes, marquage pour revue et bilan complet. |
 | **Glossaire & Explorateur** (`glossary`) | Encyclopédie & Graphe conceptuel | Recherche textuelle, décomposition anatomique d'instructions (options, drapeaux, pipes), pièges fréquents et graphe relationnel interactif. |
