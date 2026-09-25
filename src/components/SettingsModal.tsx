@@ -27,6 +27,7 @@ import {
 import { UserStats } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
+import { FirebaseAuthProfileSection } from './FirebaseAuthProfileSection';
 import {
   CURRENT_APP_VERSION,
   CURRENT_RELEASE_DATE,
@@ -460,6 +461,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Cloud Sync & Firebase Auth Section */}
+              <FirebaseAuthProfileSection userStats={userStats} />
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-3">

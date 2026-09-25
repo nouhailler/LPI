@@ -1,6 +1,8 @@
 import React from 'react';
-import { X, User, Flame, Award, ShieldCheck, CheckCircle2, RotateCcw } from 'lucide-react';
+import { X, User, Flame, Award, ShieldCheck, RotateCcw } from 'lucide-react';
 import { UserStats } from '../types';
+import { useAuth } from '../firebase/AuthContext';
+import { FirebaseAuthProfileSection } from './FirebaseAuthProfileSection';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -15,19 +17,34 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   userStats,
   onResetStats,
 }) => {
+  const { user } = useAuth();
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-[#fff8f2] border border-[#d3c5ab] rounded-2xl max-w-md w-full p-6 shadow-xl flex flex-col gap-5">
+      <div className="bg-[#fff8f2] border border-[#d3c5ab] rounded-2xl max-w-md w-full p-6 shadow-xl flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-[#ffc20e] flex items-center justify-center text-[#6d5100] font-bold text-lg shadow-xs">
-              <User className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg text-[#201b11]">{userStats.name}</h3>
-              <p className="text-xs text-[#4f4632]">{userStats.role}</p>
+            {user?.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt={user.displayName || 'Learner'}
+                referrerPolicy="no-referrer"
+                className="w-12 h-12 rounded-full border-2 border-[#ffc20e] object-cover shadow-xs shrink-0"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-[#ffc20e] flex items-center justify-center text-[#6d5100] font-bold text-lg shadow-xs shrink-0">
+                <User className="w-6 h-6" />
+              </div>
+            )}
+            <div className="min-w-0">
+              <h3 className="font-bold text-lg text-[#201b11] truncate">
+                {user ? user.displayName || user.email?.split('@')[0] : userStats.name}
+              </h3>
+              <p className="text-xs text-[#4f4632] truncate">
+                {user ? user.email : userStats.role}
+              </p>
             </div>
           </div>
           <button
@@ -37,6 +54,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Cloud Sync & Firebase Google Auth Section */}
+        <FirebaseAuthProfileSection userStats={userStats} />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">

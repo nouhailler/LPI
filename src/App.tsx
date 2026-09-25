@@ -23,6 +23,8 @@ import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions
 import { PracticeQuestion, TabType, UserStats } from './types';
 import { PedagogicalMode } from './data/pedagogicalExplanations';
 import { useLanguage } from './i18n/LanguageContext';
+import { useAuth } from './firebase/AuthContext';
+import { saveExamSessionToCloud } from './firebase/firestoreService';
 import { Language } from './i18n/types';
 import { frenchCertificationTiers, frenchPracticeQuestions } from './i18n/frenchData';
 import { getStoredDiagnosticResult } from './data/diagnosticExamData';
@@ -35,6 +37,7 @@ import {
 
 export default function App() {
   const { isFrench } = useLanguage();
+  const { user, triggerSync } = useAuth();
   const [currentTab, setCurrentTab] = useState<TabType>('dashboard');
   const [userStats, setUserStats] = useState<UserStats>(initialUserStats);
   const [examTimerSeconds, setExamTimerSeconds] = useState(45 * 60 + 10); // 45:10
@@ -261,8 +264,31 @@ export default function App() {
       localStorage.setItem('lpi_exam_history', JSON.stringify(updatedHistory));
       // Trigger local storage event for reactive UI in Dashboard
       window.dispatchEvent(new Event('storage'));
+
+      // If authenticated with Firebase, save session & progress to Firestore
+      if (user) {
+        saveExamSessionToCloud(user.uid, historyRecord).catch((err) => {
+          console.warn('Failed to save exam session to Firestore:', err);
+        });
+        triggerSync().catch((err) => {
+          console.warn('Failed to sync progress to Firestore:', err);
+        });
+      }
     } catch {}
   };
+
+  // Sync state when loaded from Cloud Firestore
+  useEffect(() => {
+    const handleStatsUpdate = (event: any) => {
+      if (event.detail) {
+        setUserStats((prev) => ({ ...prev, ...event.detail }));
+      }
+    };
+    window.addEventListener('lpi_user_stats_updated', handleStatsUpdate);
+    return () => {
+      window.removeEventListener('lpi_user_stats_updated', handleStatsUpdate);
+    };
+  }, []);
 
   const handleResetStats = () => {
     setUserStats(initialUserStats);
@@ -287,6 +313,11 @@ export default function App() {
       localStorage.removeItem('lpic_glossary_bookmarks');
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new CustomEvent('lpi_progress_reset'));
+
+      // Sync reset to Firestore
+      if (user) {
+        triggerSync(initialUserStats).catch(console.warn);
+      }
     } catch (e) {
       console.error('Failed to reset localStorage progress', e);
     }
@@ -316,7 +347,7 @@ export default function App() {
         onTabChange={handleSelectTab}
         examTimer={formatTimer(examTimerSeconds)}
         isExamTimerLow={examTimerSeconds < 300}
-        onOpenProfile={() => handleOpenSettings('profile')}
+        onOpenProfile={() => setIsProfileOpen(true)}
         onOpenSettings={() => handleOpenSettings('updates')}
         hasUpdateAvailable={hasUpdateAvailable}
         onOpenDiagnostic={() => handleOpenDiagnostic('intro')}
@@ -339,7 +370,7 @@ export default function App() {
         onSelectTab={handleSelectTab}
         onSelectLearningTopic={handleOpenLearningTopic}
         onStartExam={handleStartExam}
-        onOpenProfile={() => handleOpenSettings('profile')}
+        onOpenProfile={() => setIsProfileOpen(true)}
         onOpenSettings={(tab) => handleOpenSettings(tab || 'updates')}
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
         userStats={userStats}

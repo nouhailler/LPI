@@ -1,0 +1,127 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection test probe rule for testConnection() startup verification
+    match /test/connection {
+      allow get: if true;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email'])
+        && data.keys().hasOnly([
+          'uid', 'email', 'displayName', 'photoURL', 'currentTarget',
+          'streakDays', 'questionsDoneToday', 'dailyGoal',
+          'systemArchitectureProgress', 'linuxInstallationProgress',
+          'pathCompletionPct', 'createdAt', 'updatedAt'
+        ])
+        && data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 320
+        && (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100))
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 1024))
+        && (!('currentTarget' in data) || (data.currentTarget is string && data.currentTarget.size() <= 50))
+        && (!('streakDays' in data) || data.streakDays is number)
+        && (!('questionsDoneToday' in data) || data.questionsDoneToday is number)
+        && (!('dailyGoal' in data) || data.dailyGoal is number)
+        && (!('systemArchitectureProgress' in data) || data.systemArchitectureProgress is number)
+        && (!('linuxInstallationProgress' in data) || data.linuxInstallationProgress is number)
+        && (!('pathCompletionPct' in data) || data.pathCompletionPct is number);
+    }
+
+    function isValidUserProgress(data) {
+      return data.keys().hasAll(['userId'])
+        && data.keys().hasOnly([
+          'userId', 'masteredObjectives', 'starredCardIds', 'completedLabIds',
+          'srsRecordsJson', 'diagnosticResultJson', 'weaknessReportJson', 'updatedAt'
+        ])
+        && data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128
+        && (!('masteredObjectives' in data) || (data.masteredObjectives is list && data.masteredObjectives.size() <= 500))
+        && (!('starredCardIds' in data) || (data.starredCardIds is list && data.starredCardIds.size() <= 1000))
+        && (!('completedLabIds' in data) || (data.completedLabIds is list && data.completedLabIds.size() <= 500))
+        && (!('srsRecordsJson' in data) || (data.srsRecordsJson is string && data.srsRecordsJson.size() <= 100000))
+        && (!('diagnosticResultJson' in data) || (data.diagnosticResultJson is string && data.diagnosticResultJson.size() <= 50000))
+        && (!('weaknessReportJson' in data) || (data.weaknessReportJson is string && data.weaknessReportJson.size() <= 50000));
+    }
+
+    function isValidExamSession(data) {
+      return data.keys().hasAll(['id', 'userId', 'examId', 'score', 'passed'])
+        && data.keys().hasOnly([
+          'id', 'userId', 'examId', 'examCode', 'examName',
+          'score', 'correctCount', 'totalQuestions', 'passed',
+          'date', 'createdAt'
+        ])
+        && data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128
+        && data.examId is string && data.examId.size() > 0 && data.examId.size() <= 64
+        && data.score is number
+        && data.passed is bool
+        && (!('examCode' in data) || (data.examCode is string && data.examCode.size() <= 64))
+        && (!('examName' in data) || (data.examName is string && data.examName.size() <= 100))
+        && (!('correctCount' in data) || data.correctCount is number)
+        && (!('totalQuestions' in data) || data.totalQuestions is number)
+        && (!('date' in data) || (data.date is string && data.date.size() <= 64));
+    }
+
+    // User Profile Document
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId)
+        && isValidUserProfile(incoming())
+        && incoming().uid == request.auth.uid;
+      allow update: if isOwner(userId) && isValidId(userId)
+        && isValidUserProfile(incoming())
+        && incoming().uid == existing().uid;
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // User Progress sub-document (current snapshot)
+      match /progress/{progressId} {
+        allow get: if isOwner(userId) && isValidId(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(progressId)
+          && isValidUserProgress(incoming())
+          && incoming().userId == request.auth.uid;
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(progressId)
+          && isValidUserProgress(incoming())
+          && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(progressId);
+      }
+
+      // User Exam History subcollection
+      match /examHistory/{sessionId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(sessionId)
+          && isValidExamSession(incoming())
+          && incoming().userId == request.auth.uid;
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(sessionId)
+          && isValidExamSession(incoming())
+          && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(sessionId);
+      }
+    }
+  }
+}

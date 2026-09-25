@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "userProfile": {
+      "title": "UserProfile",
+      "description": "Public and private profile data for authenticated learners",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 320 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 1024 },
+        "currentTarget": { "type": "string", "maxLength": 50 },
+        "streakDays": { "type": "number" },
+        "questionsDoneToday": { "type": "number" },
+        "dailyGoal": { "type": "number" },
+        "systemArchitectureProgress": { "type": "number" },
+        "linuxInstallationProgress": { "type": "number" },
+        "pathCompletionPct": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "userProgress": {
+      "title": "UserProgress",
+      "description": "Consolidated learning progress, mastered objectives, SRS flashcard states, and lab completions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "masteredObjectives": { "type": "array" },
+        "starredCardIds": { "type": "array" },
+        "completedLabIds": { "type": "array" },
+        "srsRecordsJson": { "type": "string", "maxLength": 100000 },
+        "diagnosticResultJson": { "type": "string", "maxLength": 50000 },
+        "weaknessReportJson": { "type": "string", "maxLength": 50000 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId"]
+    },
+    "examSession": {
+      "title": "ExamSession",
+      "description": "Completed practice exam results and score logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "examId": { "type": "string", "maxLength": 64 },
+        "examCode": { "type": "string", "maxLength": 64 },
+        "examName": { "type": "string", "maxLength": 100 },
+        "score": { "type": "number" },
+        "correctCount": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "passed": { "type": "boolean" },
+        "date": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "examId", "score", "passed"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/userProfile" },
+      "description": "Stores user profile data accessible only by the authenticated owner"
+    },
+    "/users/{userId}/progress/current": {
+      "schema": { "$ref": "#/entities/userProgress" },
+      "description": "Stores synchronized learning progress, SRS review deck data, and lab milestones for the owner"
+    },
+    "/users/{userId}/examHistory/{sessionId}": {
+      "schema": { "$ref": "#/entities/examSession" },
+      "description": "Stores practice test sessions taken by the learner"
+    }
+  }
+}

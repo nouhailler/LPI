@@ -1,8 +1,9 @@
 import React from 'react';
-import { User, X, Timer, MoreVertical, Menu, Settings, Sparkles } from 'lucide-react';
+import { User, X, Timer, MoreVertical, Menu, Settings, Sparkles, Cloud, RefreshCw } from 'lucide-react';
 import { TabType } from '../types';
 import { CURRENT_APP_VERSION } from '../utils/updateService';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useAuth } from '../firebase/AuthContext';
 import { LanguageSelector } from './LanguageSelector';
 
 interface HeaderProps {
@@ -37,6 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenExplainDifferently,
 }) => {
   const { t, isFrench } = useLanguage();
+  const { user, isSyncing } = useAuth();
 
   if (currentTab === 'practice') {
     return (
@@ -210,11 +212,34 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           id="profile-button"
           onClick={onOpenProfile}
-          aria-label={t.header.profileAndStats}
-          title={t.header.profileAndStats}
-          className="w-9 h-9 rounded-full flex items-center justify-center text-[#785a00] hover:bg-[#f2e7d6] transition-colors cursor-pointer"
+          aria-label={user ? `${user.displayName || user.email} (${t.header.profileAndStats})` : t.header.profileAndStats}
+          title={user ? `${user.displayName || user.email} - Cloud Synced` : t.header.profileAndStats}
+          className="relative h-9 px-2 rounded-full flex items-center gap-1.5 text-[#785a00] hover:bg-[#f2e7d6] border border-[#d3c5ab] transition-colors cursor-pointer"
         >
-          <User className="w-5 h-5 md:w-6 md:h-6" />
+          {user?.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt={user.displayName || 'User'}
+              referrerPolicy="no-referrer"
+              className="w-6 h-6 rounded-full object-cover border border-[#ffc20e]"
+            />
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-[#ffc20e] flex items-center justify-center text-[#6d5100] text-xs font-bold">
+              {user ? (user.displayName?.[0] || user.email?.[0] || 'U').toUpperCase() : <User className="w-3.5 h-3.5" />}
+            </div>
+          )}
+
+          {user && (
+            <span className="hidden md:inline-block text-xs font-semibold text-[#201b11] max-w-[90px] truncate">
+              {user.displayName?.split(' ')[0] || user.email?.split('@')[0]}
+            </span>
+          )}
+
+          {isSyncing ? (
+            <RefreshCw className="w-3.5 h-3.5 text-[#E67E22] animate-spin" />
+          ) : user ? (
+            <Cloud className="w-3.5 h-3.5 text-[#28A745]" />
+          ) : null}
         </button>
       </div>
     </header>
