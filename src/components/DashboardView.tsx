@@ -37,6 +37,7 @@ import {
   calculatePersonalizedLearningPath,
   CERTIFICATION_GOALS,
 } from '../services/personalizedPathEngine';
+import { TopicKnowledgeMap } from './dashboard/TopicKnowledgeMap';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -141,6 +142,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
+
+  const handleToggleMasteredObjective = (objId: string) => {
+    setMasteredObjectiveIds((prev) => {
+      const next = prev.includes(objId) ? prev.filter((id) => id !== objId) : [...prev, objId];
+      try {
+        localStorage.setItem('lpic_mastered_objectives', JSON.stringify(next));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+      return next;
+    });
+  };
 
   // Compute Next Recommended Step dynamically
   // If diagnostic exists, target the highest-weight unmastered objective inside Top Priority #1 (or #2/#3)
@@ -1228,6 +1240,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 4. Visual Topic Knowledge Map (Recharts powered: Radar, Dependency Graph, Weight Bars, Treemap) */}
+      <TopicKnowledgeMap
+        masteredObjectiveIds={masteredObjectiveIds}
+        onToggleMasteredObjective={handleToggleMasteredObjective}
+        onOpenLearning={onOpenLearning}
+        onStartExam={onStartExam}
+        onNavigateToTraining={() => onNavigate('training')}
+      />
 
       {/* Recent Practice Exam Performance Widget (Dernières performances d'entraînement) */}
       <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-2xl p-5 md:p-6 shadow-xs space-y-4">

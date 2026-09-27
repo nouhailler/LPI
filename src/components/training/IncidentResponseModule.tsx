@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { IncidentScenario, IncidentDiagnosticCommand } from '../../types';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { getResolvedIncidents, markIncidentResolved } from '../../services/adaptivePathEngine';
 
 interface Props {
   scenarios: IncidentScenario[];
@@ -61,7 +62,9 @@ export const IncidentResponseModule: React.FC<Props> = ({ scenarios, onScoreUpda
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
 
   // Incident resolved tracking
-  const [resolvedIncidentIds, setResolvedIncidentIds] = useState<Set<string>>(new Set());
+  const [resolvedIncidentIds, setResolvedIncidentIds] = useState<Set<string>>(
+    () => new Set(getResolvedIncidents())
+  );
 
   // Filter scenarios by certification track
   const [certFilter, setCertFilter] = useState<'all' | 'lpic-1' | 'lpic-2' | 'lpic-3'>('all');
@@ -204,6 +207,7 @@ export const IncidentResponseModule: React.FC<Props> = ({ scenarios, onScoreUpda
         const nextSet = new Set(resolvedIncidentIds);
         nextSet.add(currentScenario.id);
         setResolvedIncidentIds(nextSet);
+        markIncidentResolved(currentScenario.id);
         setIsTimerRunning(false);
 
         // Calculate score bonus (50 base pts + time bonus - hint penalty)

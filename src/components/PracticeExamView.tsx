@@ -34,6 +34,7 @@ import {
   ExamSessionAnalytics,
 } from '../utils/examAnalytics';
 import { ExamPostAnalysis } from './practice/ExamPostAnalysis';
+import { markObjectiveMastered, markQuizTopicMastered } from '../services/adaptivePathEngine';
 
 interface PracticeExamViewProps {
   initialExamId?: string;
@@ -265,19 +266,40 @@ export const PracticeExamView: React.FC<PracticeExamViewProps> = ({
     activeQuestions.forEach((q) => {
       const isAnswered = userAnswers[q.id] !== undefined;
       const isCorrect = isAnswered && userAnswers[q.id] === q.correctIndex;
-      try {
-        recordQuestionInteraction({
-          questionId: q.id,
-          questionText: q.question,
-          category: q.category,
-          isCorrect,
-          timeSpentSeconds: questionTimes[q.id] || 45,
-          wasFlagged: !!flaggedQuestions[q.id],
-          wasSkipped: !isAnswered,
-          correctAnswer: q.options[q.correctIndex],
-          explanation: q.explanation,
-        });
-      } catch {}
+      if (isCorrect) {
+        // Automatically progress learning paths from practice exam achievements
+        if (q.category) {
+          markQuizTopicMastered(q.category);
+          if (q.category.includes('Devices, Linux Filesystems') || q.question.toLowerCase().includes('chmod') || q.question.toLowerCase().includes('permission')) {
+            markObjectiveMastered('104.5');
+            markQuizTopicMastered('chmod');
+            markQuizTopicMastered('permissions');
+          }
+          if (q.category.includes('GNU and Unix Commands')) {
+            markObjectiveMastered('103.1');
+            markObjectiveMastered('103.2');
+          }
+          if (q.category.includes('System Architecture')) {
+            markObjectiveMastered('101.1');
+            markObjectiveMastered('101.2');
+          }
+          if (q.category.includes('Shells and Shell Scripting')) {
+            markObjectiveMastered('105.1');
+            markObjectiveMastered('105.2');
+            markQuizTopicMastered('bash');
+          }
+          if (q.category.includes('Networking')) {
+            markObjectiveMastered('109.1');
+            markObjectiveMastered('109.2');
+            markQuizTopicMastered('networking');
+          }
+          if (q.category.includes('Security')) {
+            markObjectiveMastered('110.1');
+            markObjectiveMastered('110.2');
+            markQuizTopicMastered('security');
+          }
+        }
+      }
     });
 
     onCompleteSession(analytics.correctCount, activeQuestions.length, activeExamId);

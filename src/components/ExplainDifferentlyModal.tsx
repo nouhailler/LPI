@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { PedagogicalMode, PedagogicalTopic, PEDAGOGICAL_TOPICS } from '../data/pedagogicalExplanations';
 import { fetchPedagogicalExplanation, ExplanationResult } from '../services/explainDifferentlyService';
+import { markTopicExplained } from '../services/adaptivePathEngine';
 import { useLanguage } from '../i18n/LanguageContext';
 import { MarkdownView } from './MarkdownView';
 
@@ -61,6 +62,7 @@ export const ExplainDifferentlyModal: React.FC<ExplainDifferentlyModalProps> = (
   // Sync initial topic when modal opens
   useEffect(() => {
     if (isOpen) {
+      const topicToLoad = initialTopic || currentTopic || 'umask';
       if (initialTopic) {
         setCurrentTopic(initialTopic);
       }
@@ -70,6 +72,7 @@ export const ExplainDifferentlyModal: React.FC<ExplainDifferentlyModalProps> = (
       setSelectedQuizAnswer(null);
       setHasSubmittedQuiz(false);
       setAiErrorMessage(null);
+      markTopicExplained(topicToLoad);
     }
   }, [isOpen, initialTopic, initialMode]);
 

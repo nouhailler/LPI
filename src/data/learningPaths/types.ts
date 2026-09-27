@@ -107,6 +107,15 @@ export interface PathModule {
   shortDesc: string;
   shortDescFr: string;
 
+  // Adaptive competency orchestration:
+  activeActivityTypes?: ('theory' | 'flashcards' | 'quiz' | 'lab' | 'explain' | 'troubleshoot')[];
+  activityLabels?: Partial<
+    Record<
+      'theory' | 'flashcards' | 'quiz' | 'lab' | 'explain' | 'troubleshoot',
+      { label: string; labelFr: string }
+    >
+  >;
+
   // Pedagogical orchestration dimensions:
   theory: ModuleTheory;
   flashcards: ModuleFlashcard[];
@@ -156,6 +165,11 @@ export interface FinalEvaluation {
   validationCriteria: string[];
   validationCriteriaFr: string[];
   finalQuiz?: ModulePracticeQuestion[];
+  capstoneLab?: {
+    id: string;
+    title: string;
+    titleFr: string;
+  };
 }
 
 export interface LearningPath {

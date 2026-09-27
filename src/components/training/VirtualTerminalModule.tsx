@@ -30,6 +30,7 @@ import {
   markLabCompleted,
   LAB_COMPLETION_EVENT,
 } from '../../services/virtualFs/labProgress';
+import { recordExecutedCommand } from '../../services/adaptivePathEngine';
 
 interface Props {
   onScoreUpdate?: (points: number) => void;
@@ -179,6 +180,7 @@ export const VirtualTerminalModule: React.FC<Props> = ({
     const currentPrompt = interp.getPrompt();
 
     const result = interp.execute(cmd);
+    recordExecutedCommand(cmd);
 
     if (result.cleared) {
       setTerminalHistory([]);

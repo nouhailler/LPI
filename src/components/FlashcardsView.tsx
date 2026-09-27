@@ -945,6 +945,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       const cardId = currentCard.id;
       const { updatedRecord, allRecords } = applySRSRating(cardId, rating, srsRecords);
       setSrsRecords(allRecords);
+      window.dispatchEvent(new CustomEvent('srs_updated', { detail: { cardId, rating } }));
+      window.dispatchEvent(new Event('storage'));
 
       // Keep legacy lists synced
       if (rating === 'mastered' || updatedRecord.state === 'mastered') {
