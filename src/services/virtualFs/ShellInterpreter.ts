@@ -806,6 +806,69 @@ export class ShellInterpreter {
       case 'ping':
         return this.networkSimulator.executePing(args);
 
+      case 'ss':
+        return this.executeSs(args);
+
+      case 'netstat':
+        return this.executeNetstat(args);
+
+      case 'nc':
+      case 'netcat':
+        return this.networkSimulator.executeNc(args);
+
+      case 'traceroute':
+      case 'tracepath':
+        return this.networkSimulator.executeTraceroute(args);
+
+      case 'host':
+        return this.networkSimulator.executeDns('host', args);
+
+      case 'nslookup':
+        return this.networkSimulator.executeDns('nslookup', args);
+
+      case 'dig':
+        return this.networkSimulator.executeDns('dig', args);
+
+      case 'getent':
+        if (args[0] === 'hosts') {
+          return this.networkSimulator.executeDns('getent', args);
+        }
+        return { output: `${args[1] || ''} database entry lookup`, exitCode: 0 };
+
+      case 'ssh':
+        return this.networkSimulator.executeRemoteSsh(args);
+
+      case 'telnet':
+        return this.networkSimulator.executeTelnet(args);
+
+      case 'psql':
+        return this.networkSimulator.executePsql(args);
+
+      case 'curl':
+        return this.executeCurl(args);
+
+      case 'nginx':
+        return this.executeNginx(args);
+
+      case 'lsof':
+        return this.executeLsof(args);
+
+      case 'nano':
+      case 'vim':
+      case 'vi': {
+        const file = args.find((a) => !a.startsWith('-'));
+        if (!file) {
+          return { output: `${cmd}: missing filename argument`, exitCode: 1 };
+        }
+        const fullPath = this.fs.resolvePath(file, this.cwd);
+        const content = this.fs.readFile(fullPath) || '';
+        return {
+          output: `[NANO/EDITOR] ${fullPath} (${content.split('\n').length} lines). Use the in-terminal editor panel or 'cat'/'echo'/'sed' to update files.`,
+          exitCode: 0,
+          openEditor: fullPath,
+        };
+      }
+
       // Storage, mounts, and partition simulation
       case 'mount':
         return this.storageSimulator.executeMount(args, effectiveUser === 'root', this.fs, this.cwd);
@@ -960,6 +1023,169 @@ export class ShellInterpreter {
       tokens.push(current);
     }
     return tokens;
+  }
+
+  private executeSs(args: string[]): CommandExecutionResult {
+    const lines: string[] = [
+      'Netid  State   Recv-Q  Send-Q     Local Address:Port      Peer Address:Port  Process'
+    ];
+
+    const nginxSvc = this.servicesManager.getService('nginx');
+    const sshdSvc = this.servicesManager.getService('sshd');
+    const mariadbSvc = this.servicesManager.getService('mariadb');
+    const apacheSvc = this.servicesManager.getService('apache2');
+
+    if (sshdSvc?.activeState === 'active') {
+      lines.push('tcp    LISTEN  0       128           0.0.0.0:22              0.0.0.0:*      users:(("sshd",pid=820,fd=3))');
+      lines.push('tcp    LISTEN  0       128              [::]:22                 [::]:*      users:(("sshd",pid=820,fd=4))');
+    }
+    if (apacheSvc?.activeState === 'active') {
+      lines.push('tcp    LISTEN  0       511           0.0.0.0:80              0.0.0.0:*      users:(("apache2",pid=1120,fd=4))');
+    } else if (nginxSvc?.activeState === 'active') {
+      lines.push('tcp    LISTEN  0       511           0.0.0.0:80              0.0.0.0:*      users:(("nginx",pid=1040,fd=6),("nginx",pid=1041,fd=6))');
+    }
+    if (mariadbSvc?.activeState === 'active') {
+      lines.push('tcp    LISTEN  0       128         127.0.0.1:3306            0.0.0.0:*      users:(("mariadbd",pid=900,fd=10))');
+    }
+
+    return { output: lines.join('\n'), exitCode: 0 };
+  }
+
+  private executeNetstat(args: string[]): CommandExecutionResult {
+    const lines: string[] = [
+      'Active Internet connections (only servers)',
+      'Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name'
+    ];
+    const nginxSvc = this.servicesManager.getService('nginx');
+    const sshdSvc = this.servicesManager.getService('sshd');
+    const mariadbSvc = this.servicesManager.getService('mariadb');
+    const apacheSvc = this.servicesManager.getService('apache2');
+
+    if (sshdSvc?.activeState === 'active') {
+      lines.push('tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      820/sshd');
+    }
+    if (apacheSvc?.activeState === 'active') {
+      lines.push('tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      1120/apache2');
+    } else if (nginxSvc?.activeState === 'active') {
+      lines.push('tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      1040/nginx: master');
+    }
+    if (mariadbSvc?.activeState === 'active') {
+      lines.push('tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      900/mariadbd');
+    }
+    return { output: lines.join('\n'), exitCode: 0 };
+  }
+
+  private executeCurl(args: string[]): CommandExecutionResult {
+    const url = args.find((a) => !a.startsWith('-')) || '';
+    if (!url) {
+      return { output: "curl: try 'curl --help' for more information", exitCode: 2 };
+    }
+    const isHead = args.includes('-I') || args.includes('--head');
+    const nginxSvc = this.servicesManager.getService('nginx');
+    const apacheSvc = this.servicesManager.getService('apache2');
+
+    if (
+      url.includes('localhost') ||
+      url.includes('127.0.0.1') ||
+      url.includes('192.168.1.50') ||
+      url === 'http://localhost' ||
+      url === 'http://127.0.0.1'
+    ) {
+      if (apacheSvc?.activeState === 'active') {
+        if (isHead) {
+          return {
+            output: 'HTTP/1.1 200 OK\nDate: Mon, 20 Sep 2026 10:15:00 GMT\nServer: Apache/2.4.56 (Debian)\nContent-Type: text/html',
+            exitCode: 0,
+          };
+        }
+        return {
+          output: '<!DOCTYPE html>\n<html><body><h1>Apache2 Default Page (Conflict!)</h1><p>It works! (Rogue service active on port 80)</p></body></html>',
+          exitCode: 0,
+        };
+      }
+
+      if (!nginxSvc || nginxSvc.activeState !== 'active') {
+        return { output: 'curl: (7) Failed to connect to localhost port 80: Connection refused', exitCode: 7 };
+      }
+
+      const htmlFile = this.fs.getNode('/var/www/html/index.html');
+      const htmlDir = this.fs.getNode('/var/www/html');
+      if (
+        (htmlDir && htmlDir.mode === 0) ||
+        (htmlFile && htmlFile.mode === 0)
+      ) {
+        if (isHead) {
+          return { output: 'HTTP/1.1 403 Forbidden\nServer: nginx/1.22.1\nContent-Type: text/html', exitCode: 0 };
+        }
+        return {
+          output: '<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n<hr><center>nginx/1.22.1</center>\r\n</body>\r\n</html>',
+          exitCode: 0,
+        };
+      }
+
+      const content =
+        this.fs.readFile('/var/www/html/index.html') ||
+        '<!DOCTYPE html>\n<html><head><title>Production Web Portal</title></head><body><h1>Production Web Service: OK</h1><p>Status: Healthy | Service: Nginx</p></body></html>';
+      if (isHead) {
+        return {
+          output: `HTTP/1.1 200 OK\nServer: nginx/1.22.1\nContent-Type: text/html\nContent-Length: ${content.length}`,
+          exitCode: 0,
+        };
+      }
+      return { output: content, exitCode: 0 };
+    }
+
+    // Delegate external network hosts & virtual topology ports to networkSimulator
+    return this.networkSimulator.executeVirtualCurl(args);
+  }
+
+  private executeNginx(args: string[]): CommandExecutionResult {
+    if (args.includes('-t')) {
+      const conf = this.fs.readFile('/etc/nginx/nginx.conf') || '';
+      const apacheSvc = this.servicesManager.getService('apache2');
+      if (conf.includes('SYNTAX_ERROR') || (conf.includes('worker_processes 4') && !conf.includes('worker_processes 4;'))) {
+        return {
+          output: 'nginx: [emerg] unexpected "}" in /etc/nginx/nginx.conf:14\nnginx: configuration file /etc/nginx/nginx.conf test failed',
+          exitCode: 1,
+        };
+      }
+      if (apacheSvc?.activeState === 'active') {
+        return {
+          output: 'nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)\nnginx: configuration file /etc/nginx/nginx.conf test failed',
+          exitCode: 1,
+        };
+      }
+      return {
+        output: 'nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: configuration file /etc/nginx/nginx.conf test is successful',
+        exitCode: 0,
+      };
+    }
+    if (args.includes('-v') || args.includes('-V')) {
+      return { output: 'nginx version: nginx/1.22.1 (Debian)', exitCode: 0 };
+    }
+    if (args.includes('-s') && args.includes('reload')) {
+      return { output: 'nginx: [notice] signal process started', exitCode: 0 };
+    }
+    return { output: 'nginx: must specify -t, -v, or manage via systemctl [start|stop|restart] nginx', exitCode: 0 };
+  }
+
+  private executeLsof(args: string[]): CommandExecutionResult {
+    const lines = [
+      'COMMAND    PID     USER   FD   TYPE DEVICE SIZE/OFF NODE NAME',
+      'systemd      1     root  cwd    DIR    8,1     4096    2 /',
+      'sshd       820     root    3u  IPv4  18920      0t0  TCP *:22 (LISTEN)',
+      'sshd       820     root    4u  IPv6  18922      0t0  TCP *:22 (LISTEN)',
+    ];
+    const apacheSvc = this.servicesManager.getService('apache2');
+    const nginxSvc = this.servicesManager.getService('nginx');
+    if (apacheSvc?.activeState === 'active') {
+      lines.push('apache2   1120     root    4u  IPv4  24150      0t0  TCP *:80 (LISTEN)');
+      lines.push('apache2   1121 www-data    4u  IPv4  24150      0t0  TCP *:80 (LISTEN)');
+    } else if (nginxSvc?.activeState === 'active') {
+      lines.push('nginx     1040     root    6u  IPv4  24890      0t0  TCP *:80 (LISTEN)');
+      lines.push('nginx     1041 www-data    6u  IPv4  24890      0t0  TCP *:80 (LISTEN)');
+    }
+    return { output: lines.join('\n'), exitCode: 0 };
   }
 
   private getManualPage(cmd?: string): string {

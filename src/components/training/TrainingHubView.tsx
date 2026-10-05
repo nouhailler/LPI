@@ -13,7 +13,8 @@ import {
   ShieldAlert,
   Flame,
   ArrowRight,
-  Layers
+  Layers,
+  Network
 } from 'lucide-react';
 import { TrainingModeType } from '../../types';
 import {
@@ -32,6 +33,8 @@ import { GuidedMiniLabsModule } from './GuidedMiniLabsModule';
 import { IncidentResponseModule } from './IncidentResponseModule';
 import { VirtualTerminalModule } from './VirtualTerminalModule';
 import { LinuxLabVisualMap } from './LinuxLabVisualMap';
+import { LinuxMissionModule } from '../missions/LinuxMissionModule';
+import { VirtualNetworkLabModule } from '../network/VirtualNetworkLabModule';
 import { WeaknessTrainingModal } from '../weakness/WeaknessTrainingModal';
 import { getWeaknessReport } from '../../utils/weaknessEngine';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -43,7 +46,7 @@ interface Props {
   onNavigateTab?: (tab: any) => void;
 }
 
-export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_response', onNavigateTab }) => {
+export const TrainingHubView: React.FC<Props> = ({ initialMode = 'mission_linux', onNavigateTab }) => {
   const { isFrench } = useLanguage();
   const isFr = isFrench;
 
@@ -83,6 +86,24 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
     description: string;
     descriptionFr: string;
   }[] = [
+    {
+      id: 'mission_linux',
+      label: 'Mission Linux (Live Incidents)',
+      labelFr: '🎯 Mode Mission Linux',
+      badge: 'VirtualFS Démarche Sysadmin',
+      icon: ShieldAlert,
+      description: 'Production server failure missions. Investigate freely with VirtualFS shell, fix the incident, and get evaluated on your diagnostic methodology.',
+      descriptionFr: 'Missions de pannes en production (INCIDENT #042, etc.). Enquêtez librement sous shell root, réparez et soyez évalué sur votre démarche.',
+    },
+    {
+      id: 'network_lab',
+      label: 'Virtual Network Lab (5-Layer Diagnostics)',
+      labelFr: '🌐 Lab Réseau Virtuel (Diagnostic 5 Niveaux)',
+      badge: 'web01 ⇄ router ⇄ db01 ⇄ Internet',
+      icon: Network,
+      description: 'Interactive virtual network topology: "Why does ping db01 work while curl db01:5432 fails?" Experience the 5-layer diagnostic pipeline (IP -> Route -> DNS -> Port -> Service).',
+      descriptionFr: 'Topologie réseau interactive : « Pourquoi ping db01 fonctionne mais curl db01:5432 échoue ? » Expérimentez la démarche en 5 étapes (IP -> Route -> DNS -> Port fermé -> Service arrêté).',
+    },
     {
       id: 'lab_map',
       label: 'Labs Visual Map',
@@ -290,6 +311,17 @@ export const TrainingHubView: React.FC<Props> = ({ initialMode = 'incident_respo
 
       {/* Render Selected Module */}
       <div className="transition-all">
+        {currentMode === 'mission_linux' && (
+          <LinuxMissionModule onScoreUpdate={handleScoreUpdate} />
+        )}
+
+        {currentMode === 'network_lab' && (
+          <VirtualNetworkLabModule
+            onScoreUpdate={handleScoreUpdate}
+            onNavigateToTab={onNavigateTab}
+          />
+        )}
+
         {currentMode === 'lab_map' && (
           <LinuxLabVisualMap
             onSelectScenario={(scenarioId) => {

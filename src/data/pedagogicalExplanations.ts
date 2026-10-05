@@ -717,6 +717,174 @@ $ killall -u tux firefox`,
       howToAvoidFr: 'Retenez bien : kill = 15 par défaut. kill -9 = uniquement quand le chiffre 9 est explicitement écrit !',
     },
   },
+  {
+    id: 'network-ping-curl',
+    title: 'Network Troubleshooting: Ping vs Curl (ICMP vs TCP/Port)',
+    titleFr: 'Diagnostic Réseau : Ping vs Curl & Ports (ICMP vs TCP/Port)',
+    category: 'Networking & Services',
+    categoryFr: 'Réseau & Services',
+    tags: ['ping', 'curl', 'nc', 'network', 'lpic1-109', 'tcp', 'icmp', 'ports'],
+    summary: 'Why ping db01 succeeds while curl db01:5432 fails: the 5-step diagnostic pipeline.',
+    summaryFr: 'Pourquoi ping db01 fonctionne mais curl db01:5432 échoue : la méthode de diagnostic en 5 étapes (IP → Route → DNS → Port → Service).',
+    simple: {
+      en: 'A successful `ping` only proves Layer 3 (IP/ICMP) connectivity. It does NOT guarantee that any application (PostgreSQL, Nginx) is listening on a TCP port.\n\n• Step 1: IP OK (`ip addr`) - local network interface is UP with a valid subnet IP.\n• Step 2: Route OK (`ip route`) - default gateway is configured.\n• Step 3: DNS OK (`getent hosts db01`) - name resolves to correct IP (192.168.1.20).\n• Step 4: Port closed (`nc -zv db01 5432` or `curl`) - ICMP replies, but TCP handshake returns RST (Connection refused).\n• Step 5: Service stopped (`systemctl status postgresql`) - start daemon to open socket.',
+      fr: 'Un `ping` réussi prouve UNIQUEMENT que la couche 3 (IP et ICMP) fonctionne. Il ne garantit EN RIEN qu\'une application (PostgreSQL, Nginx, Apache) écoute sur un port TCP !\n\n• Étape 1 : IP OK (`ip addr`) - l\'interface eth0 est UP avec une adresse valide (192.168.1.10).\n• Étape 2 : Route OK (`ip route`) - la passerelle par défaut (router 192.168.1.1) est joignable.\n• Étape 3 : DNS OK (`getent hosts db01` / `/etc/hosts`) - le nom résout bien vers 192.168.1.20.\n• Étape 4 : Port fermé (`curl db01:5432` ou `nc -zv db01 5432`) - renvoie "Connection refused" car aucun socket n\'écoute sur le port 5432.\n• Étape 5 : Service arrêté (`systemctl status postgresql`) - le démon PostgreSQL est inactif. Il suffit de le lancer avec `systemctl start postgresql` !',
+      keyPointsEn: [
+        'Ping uses ICMP (Layer 3); Curl uses TCP/HTTP (Layer 4/7).',
+        'Ping can succeed while services are completely dead.',
+        '"Connection refused" means remote host is alive, but no daemon is listening on that port.',
+        'Use `nc -zv <host> <port>` or `ss -tulpn` to diagnose socket availability.',
+      ],
+      keyPointsFr: [
+        'Ping utilise ICMP (couche 3) ; Curl et Telnet utilisent TCP (couche 4/7).',
+        'Ping peut réussir à 100% alors que les serveurs web/base de données sont totalement éteints.',
+        'L\'erreur "Connection refused" signifie que la machine distante est BIEN VIVANTE, mais qu\'aucun programme n\'écoute sur ce port.',
+        'Utiliser `nc -zv <hôte> <port>` ou `ss -tulpn` pour sonder l\'ouverture réelle du socket.',
+      ],
+    },
+    beginner: {
+      en: 'Think of a server like a large office building with many numbered department windows:\n\n• `ping db01`: You drive to the building and honk your horn at the gate. The security guard waves back. (The building exists and the road is open!)\n• `curl db01:5432`: You walk up to window #5432 (the Database department). The window shutter is pulled down and locked, with a sign saying "Closed".\n\nHonking at the gate (ping) worked, but nobody was sitting at desk #5432 to handle your request! You need the manager to tell the clerk to open the shutter (`systemctl start postgresql`).',
+      fr: 'Imagine le serveur comme un grand centre administratif avec des guichets numérotés :\n\n• `ping db01` : Tu arrives en voiture devant le bâtiment et tu klaxonnes à la grille. Le vigile te répond par un signe de la main. Tu sais que le bâtiment existe et que la route est praticable !\n• `curl db01:5432` : Tu entres dans le hall et tu vas au guichet n°5432 (le guichet PostgreSQL). Le rideau métallique est baissé, et personne n\'est assis derrière.\n\nLe fait que le vigile à la grille réponde (ping OK) ne signifie pas que le guichetier n°5432 est à son poste ! Il faut réveiller le service avec `systemctl start postgresql` pour qu\'il lève le rideau de fer.',
+      analogyTitleEn: 'The Guard at the Gate vs The Closed Service Window',
+      analogyTitleFr: 'Le vigile à la grille vs Le rideau de fer baissé au guichet n°5432',
+      analogyStoryEn: 'Ping only talks to the kernel\'s network stack (the gatekeeper). Curl and application clients talk to the specific user-space process (the clerk).',
+      analogyStoryFr: 'Le ping communique directement avec la pile réseau du noyau Linux (qui répond par réflexe sans ouvrir d\'application). Curl tente d\'établir un dialogue avec un processus applicatif précis.',
+    },
+    example: {
+      en: 'Step-by-step diagnostic sequence from client web01 to database server db01:',
+      fr: 'Séquence complète de diagnostic réseau de web01 vers db01 :',
+      terminalSnippet: `# 1. Vérifier la configuration IP locale
+$ ip -br addr show eth0
+eth0             UP             192.168.1.10/24
+
+# 2. Vérifier la table de routage
+$ ip route show
+default via 192.168.1.1 dev eth0
+
+# 3. Tester la connectivité de couche 3 (ICMP) -> SUCCÈS
+$ ping -c 2 db01
+PING db01 (192.168.1.20) 56(84) bytes of data.
+64 bytes from db01 (192.168.1.20): icmp_seq=1 ttl=64 time=0.42 ms
+64 bytes from db01 (192.168.1.20): icmp_seq=2 ttl=64 time=0.38 ms
+
+# 4. Tester le port TCP applicatif 5432 -> ÉCHEC (Connection refused)
+$ nc -zv db01 5432
+nc: connect to db01 (192.168.1.20) port 5432 (tcp) failed: Connection refused
+
+# 5. Se connecter sur db01 et vérifier l'état du démon
+$ ssh admin@db01 "sudo systemctl status postgresql"
+● postgresql.service - PostgreSQL RDBMS
+   Active: inactive (dead)
+
+# 6. Démarrer le service et retester
+$ ssh admin@db01 "sudo systemctl start postgresql"
+$ nc -zv db01 5432
+Connection to db01 (192.168.1.20) 5432 port [tcp/postgresql] succeeded!`,
+      commandExplanationEn: 'Diagnose layer 3 with ping, layer 4 socket with nc -zv, and layer 7 service state with systemctl.',
+      commandExplanationFr: 'Isoler d\'abord la couche 3 avec ping, sonder le port TCP avec nc -zv, puis inspecter l\'état du démon avec systemctl.',
+    },
+    quiz: {
+      question: 'A Linux admin can successfully ping 192.168.1.20, but running "curl 192.168.1.20:5432" immediately returns "Connection refused". What is the most likely cause?',
+      questionFr: 'Un administrateur parvient à pinger avec succès 192.168.1.20, mais la commande "curl 192.168.1.20:5432" renvoie immédiatement "Connection refused". Quelle en est la cause la plus probable ?',
+      options: [
+        'The remote host is up and routing works, but the PostgreSQL service is stopped or not listening on port 5432',
+        'The network cable on the local machine is unplugged',
+        'The DNS server is down',
+        'The default gateway IP is invalid',
+      ],
+      optionsFr: [
+        'L\'hôte distant est joignable et le routage fonctionne, mais le service PostgreSQL est arrêté ou n\'écoute pas sur le port 5432',
+        'Le câble réseau de la machine cliente est débranché',
+        'Le serveur DNS est en panne',
+        'La passerelle par défaut est invalide',
+      ],
+      correctIndex: 0,
+      explanation: 'Since ping works, IP configuration and routing are fully operational. "Connection refused" specifically indicates that the target machine\'s OS received the TCP SYN packet and sent back a TCP RST because no process is listening on port 5432.',
+      explanationFr: 'Puisque le ping fonctionne, la connectivité IP et le routage sont valides. Le message "Connection refused" prouve que l\'hôte distant répond, mais qu\'aucun démon n\'écoute sur le port TCP demandé (service inactif).',
+    },
+    trap: {
+      en: 'Exam Trap 1: Assuming `ping` guarantees that a website or database is running. It does not! Ping only verifies ICMP ECHO.\nExam Trap 2: Believing a firewall always blocks ping if it blocks ports. Many enterprise firewalls allow HTTP/HTTPS (ports 80/443) while dropping ICMP ping altogether!',
+      fr: 'Piège LPIC 1 : Croire que ping valide le bon fonctionnement d\'une application web ou base de données. Non ! Ping ne teste que la couche IP/ICMP.\nPiège LPIC 2 : Penser qu\'un hôte est hors-ligne parce que le ping ne répond pas ("Request timeout"). Beaucoup de serveurs de production et pare-feux bloquent volontairement l\'ICMP tout en servant parfaitement le trafic web HTTP/HTTPS sur les ports 80 et 443 !',
+      trapTitleEn: 'ICMP Reachability vs Application Availability Fallacy',
+      trapTitleFr: 'Le piège classique : Confondre joignabilité réseau (ICMP) et disponibilité applicative (TCP)',
+      dangerLevel: 'high',
+      distractorExamEn: 'Choosing "Network interface is down" when curl returns "Connection refused".',
+      distractorExamFr: 'Choisir "L\'interface réseau est éteinte" quand curl renvoie "Connection refused".',
+      howToAvoidEn: '"Connection refused" = host is ALIVE, port is CLOSED. "No route to host" = network/routing issue.',
+      howToAvoidFr: 'Règle d\'or : "Connection refused" = la machine est VIVANTE mais le port est FERMÉ. "No route to host" = problème de route/réseau.',
+    },
+  },
+  {
+    id: 'fstab-mount',
+    title: '/etc/fstab, mount & Filesystem Maintenance',
+    titleFr: '/etc/fstab, mount & Maintenance des systèmes de fichiers',
+    category: 'Storage & Filesystems',
+    categoryFr: 'Stockage & Systèmes de fichiers',
+    tags: ['fstab', 'mount', 'umount', 'fsck', 'storage', 'lpic1-104'],
+    summary: 'Understanding automatic mounting, filesystem parameters, and the 6 fields of /etc/fstab.',
+    summaryFr: 'Comprendre le montage automatique au démarrage, les UUID et la syntaxe des 6 colonnes de /etc/fstab.',
+    simple: {
+      en: 'The `/etc/fstab` file dictates how disk partitions and filesystems are mounted at system boot.\n\nStructure (6 columns):\n1. Device / UUID (e.g. UUID=1234-abcd or /dev/sdb1)\n2. Mount Point (e.g. /data or /home)\n3. Filesystem Type (e.g. ext4, xfs, vfat)\n4. Mount Options (e.g. defaults, noexec, ro, rw)\n5. Dump flag (0 = do not backup, 1 = backup)\n6. Fsck pass number (1 = root filesystem /; 2 = other local partitions; 0 = no check / network shares)',
+      fr: 'Le fichier `/etc/fstab` configure le montage automatique des disques et partitions au démarrage du système Linux.\n\nStructure universelle en 6 colonnes :\n1. Périphérique ou UUID (ex: UUID=1234-abcd ou /dev/sdb1)\n2. Point de montage (ex: /mnt/data, /home)\n3. Type de système de fichiers (ex: ext4, xfs, btrfs)\n4. Options de montage (ex: defaults, noexec, nosuid, ro)\n5. Sauvegarde dump (0 = ignorer, 1 = sauvegarder)\n6. Ordre de vérification fsck (1 = partition racine / uniquement, 2 = autres disques locaux, 0 = aucun fsck / NFS)',
+      keyPointsEn: [
+        'Always run `mount -a` after editing /etc/fstab to verify syntax without rebooting.',
+        'Use UUID instead of /dev/sdX to prevent drive naming shifts after reboots.',
+        'The 6th field must be 1 for root (/), 2 for other filesystems, and 0 for swap/network drives.',
+      ],
+      keyPointsFr: [
+        'Toujours tester avec `mount -a` après modification de /etc/fstab AVANT de redémarrer !',
+        'Préférer les UUID (`blkid`) aux noms `/dev/sdX` pour éviter les inversions de disques au reboot.',
+        'La 6e colonne vaut 1 pour la racine `/`, 2 pour les autres partitions locales, et 0 pour swap/NFS.',
+      ],
+    },
+    beginner: {
+      en: 'Think of `/etc/fstab` like an address book for USB drives and hard drives.\n\nWithout it, Linux wouldn\'t know where to plug your hard drives when turning on. Column 1 is the badge ID of the drive, Column 2 is the room number where it belongs, Column 3 is the language it speaks (ext4), and Column 4 is its house rules (like "no running" / `noexec`).',
+      fr: 'Imagine `/etc/fstab` comme le carnet de route du concierge au démarrage de Linux.\n\nSans ce carnet, Linux allumerait la machine sans savoir où brancher chaque disque dur. La colonne 1 donne la plaque d\'immatriculation du disque (son UUID), la colonne 2 indique dans quelle pièce il doit s\'installer (le point de montage), la colonne 3 précise sa langue (ext4 ou xfs), et la colonne 4 donne les consignes de sécurité (interdit d\'exécuter des programmes = `noexec`).',
+      analogyTitleEn: 'The Bootloader\'s Disk Address Book',
+      analogyTitleFr: 'Le carnet de route du concierge au démarrage de Linux',
+      analogyStoryEn: 'If there is a typo in /etc/fstab, Linux may drop into Emergency Rescue mode during boot.',
+      analogyStoryFr: 'Si tu fais une faute de frappe dans /etc/fstab, la machine peut refuser de démarrer et tomber en mode Rescue (Emergency Shell). C\'est pourquoi `mount -a` est vital.',
+    },
+    example: {
+      en: 'Example of modifying and safely testing /etc/fstab:',
+      fr: 'Exemple de montage propre et vérification de /etc/fstab :',
+      terminalSnippet: `# 1. Trouver l'UUID de la partition
+$ sudo blkid /dev/sdb1
+/dev/sdb1: UUID="9f8e7d6c-5b4a-3210-fedc-ba9876543210" TYPE="ext4"
+
+# 2. Créer le point de montage
+$ sudo mkdir -p /mnt/backups
+
+# 3. Ligne /etc/fstab recommandée
+UUID=9f8e7d6c-5b4a-3210-fedc-ba9876543210  /mnt/backups  ext4  defaults,noatime  0  2
+
+# 4. CRUCIAL : Tester immédiatement sans redémarrer
+$ sudo mount -a
+$ df -h /mnt/backups`,
+      commandExplanationEn: 'Find UUID with blkid, specify mount point and options, then test with mount -a.',
+      commandExplanationFr: 'Récupérer l\'UUID avec blkid, renseigner le point de montage et tester immédiatement avec mount -a.',
+    },
+    quiz: {
+      question: 'Which command MUST an administrator run immediately after editing /etc/fstab to verify there are no syntax errors before rebooting?',
+      questionFr: 'Quelle commande un administrateur DOIT-IL exécuter immédiatement après avoir modifié /etc/fstab pour vérifier qu\'il n\'y a pas d\'erreur de syntaxe avant de redémarrer ?',
+      options: ['mount -a', 'fstab -v', 'systemctl reload fstab', 'fsck -A --all'],
+      optionsFr: ['mount -a', 'fstab -v', 'systemctl reload fstab', 'fsck -A --all'],
+      correctIndex: 0,
+      explanation: 'Running `mount -a` attempts to mount all filesystems mentioned in /etc/fstab. If there is a syntax error or a missing mount point, it immediately prints an error, preventing an unbootable system.',
+      explanationFr: 'La commande `mount -a` tente de monter tous les systèmes de fichiers déclarés dans /etc/fstab. En cas d\'erreur de syntaxe, elle alerte immédiatement, évitant un blocage au prochain redémarrage de la machine.',
+    },
+    trap: {
+      en: 'Exam Trap 1: What does fsck pass 1 mean? It is EXCLUSIVELY reserved for the root filesystem (`/`). All other local partitions must be 2.\nExam Trap 2: Using /dev/sda1 in /etc/fstab instead of UUID can cause boot failures if a new disk is added or storage controller reorders drives.',
+      fr: 'Piège LPIC 1 : La valeur \'1\' dans la 6e colonne de /etc/fstab est STRICTEMENT RÉSERVÉE au système de fichiers racine (`/`). Toutes les autres partitions locales doivent porter le chiffre \'2\'.\nPiège LPIC 2 : Si vous écrivez `/dev/sdb1`, l\'ajout d\'un nouveau disque au serveur ou un changement de port SATA peut renommer votre disque en `/dev/sdc1` au prochain boot. L\'utilisation de `UUID=...` est obligatoire pour la stabilité.',
+      trapTitleEn: 'The fsck Pass Priority Trap (Root=1, Others=2)',
+      trapTitleFr: 'Le piège de la priorité fsck (Racine=1, Autres=2, Ignorer=0)',
+      dangerLevel: 'high',
+      distractorExamEn: 'Setting 1 for all partitions in the 6th field of /etc/fstab.',
+      distractorExamFr: 'Mettre 1 pour toutes les partitions dans la 6e colonne de /etc/fstab.',
+      howToAvoidEn: 'Remember: 1 = Root only. 2 = other local drives. 0 = swap / network / no check.',
+      howToAvoidFr: 'Retenez : 1 = Racine / uniquement. 2 = autres partitions locales. 0 = swap ou disques réseau NFS.',
+    },
+  },
 ];
 
 /**

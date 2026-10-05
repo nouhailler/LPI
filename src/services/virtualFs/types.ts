@@ -32,6 +32,7 @@ export interface CommandExecutionResult {
   exitCode: number;
   error?: string;
   cleared?: boolean;
+  openEditor?: string;
 }
 
 export interface LabScenarioValidation {
@@ -52,6 +53,7 @@ export interface SimulatedLabScenario {
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   difficultyFr: 'Débutant' | 'Intermédiaire' | 'Avancé';
   estimatedMinutes: number;
+  linkedObjectiveId?: string;
   goal: string;
   goalFr: string;
   initialDirectory: string;

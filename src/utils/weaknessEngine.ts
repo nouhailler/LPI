@@ -4,6 +4,7 @@ import {
   WeaknessEngineReport,
   WeaknessSubtopicMetric,
   WeaknessQuestionDetail,
+  WeaknessCausalAnalysis,
   PracticeQuestion
 } from '../types';
 
@@ -415,6 +416,456 @@ export const INITIAL_WEAKNESS_REPORT: WeaknessEngineReport = {
 };
 
 /**
+ * Calcule l'analyse causale cognitive « Pourquoi suis-je faible ? »
+ * Décompose la performance selon les 4 dimensions cognitives :
+ * 1. Connaissance théorique (concepts, protocoles, architecture)
+ * 2. Commandes & Syntaxe (options exactes, flags, arguments)
+ * 3. Application pratique (labs, manipulation de terminal)
+ * 4. Diagnostic & Dépannage (méthodologie RCA, analyse de logs, forensic)
+ * et synthétise la cause racine ainsi que la prescription pédagogique personnalisée.
+ */
+export function computeCausalAnalysis(domain: WeaknessDomainStats): WeaknessCausalAnalysis {
+  switch (domain.id) {
+    case 'networking': {
+      const theory = 71;
+      const commands = 42;
+      const practice = 28;
+      const troubleshooting = 19;
+      return {
+        dimensions: {
+          theory: {
+            id: 'theory',
+            name: 'Theoretical Knowledge',
+            nameFr: 'Connaissance théorique',
+            scorePct: theory,
+            status: 'solid',
+            descriptionFr: 'Concepts DNS récursif, adresses link-local IPv6, tables de routage',
+            isRootCause: false
+          },
+          commands: {
+            id: 'commands',
+            name: 'Commands & Syntax',
+            nameFr: 'Commandes & Syntaxe',
+            scorePct: commands,
+            status: 'weak',
+            descriptionFr: 'Syntaxe ip route add default via, options de dig @serveur, ss vs netstat',
+            isRootCause: false
+          },
+          practice: {
+            id: 'practice',
+            name: 'Hands-on Lab Practice',
+            nameFr: 'Application pratique',
+            scorePct: practice,
+            status: 'critical',
+            descriptionFr: 'Configuration réelle sur machine Linux, tests ping, édition resolv.conf',
+            isRootCause: true
+          },
+          troubleshooting: {
+            id: 'troubleshooting',
+            name: 'Diagnostic & Troubleshooting',
+            nameFr: 'Diagnostic & Investigation',
+            scorePct: troubleshooting,
+            status: 'critical',
+            descriptionFr: 'Isolement méthodique d\'une coupure réseau, analyse du stub 127.0.0.53',
+            isRootCause: true
+          }
+        },
+        rootCauseDiagnosisFr: "→ Le problème n'est probablement pas la connaissance des concepts (71%).\n→ Le problème est l'application pratique (28%) et la méthode de diagnostic (19%).",
+        diagnosisSummaryFr: "Vous comprenez le rôle du DNS et du routage, mais dès qu'il faut agir dans un terminal pour configurer une passerelle ou investiguer une panne, le score s'effondre.",
+        prescription: {
+          summaryFr: "Prioriser l'expérimentation terminal avant toute évaluation théorique",
+          primaryRootCauseFr: "Application pratique insuffisante sous terminal virtuel",
+          secondaryRootCauseFr: "Manque d'automatismes d'investigation en situation d'incident",
+          actionPlanFr: "Fais 2 Labs réseau + 1 troubleshooting avant de refaire un QCM.",
+          steps: [
+            {
+              order: 1,
+              type: 'lab',
+              titleFr: 'Lab 1 : Diagnostic réseau et connectivité (ip & ping)',
+              targetId: 'lab-network-ping-diag',
+              actionLabelFr: 'Lancer le Lab Terminal',
+              navTarget: 'training'
+            },
+            {
+              order: 2,
+              type: 'lab',
+              titleFr: 'Lab 2 : Configuration d\'interface et stub DNS 127.0.0.53',
+              targetId: 'lab-lpic1-01',
+              actionLabelFr: 'Lancer le Mini-Lab',
+              navTarget: 'training'
+            },
+            {
+              order: 3,
+              type: 'troubleshooting',
+              titleFr: 'Incident : Résolution DNS en panne et passerelle inaccessible',
+              targetId: 'inc-lpic1-07',
+              actionLabelFr: 'Dépanner l\'incident',
+              navTarget: 'training'
+            },
+            {
+              order: 4,
+              type: 'qcm',
+              titleFr: 'Validation : QCM ciblé Réseau LPIC',
+              targetId: 'exam-102',
+              actionLabelFr: 'Tester avec le QCM',
+              navTarget: 'practice'
+            }
+          ]
+        }
+      };
+    }
+
+    case 'scripting': {
+      const theory = 68;
+      const commands = 48;
+      const practice = 32;
+      const troubleshooting = 24;
+      return {
+        dimensions: {
+          theory: {
+            id: 'theory',
+            name: 'Theoretical Knowledge',
+            nameFr: 'Connaissance théorique',
+            scorePct: theory,
+            status: 'solid',
+            descriptionFr: 'Principes des flux d\'entrée/sortie, variables globales vs locales',
+            isRootCause: false
+          },
+          commands: {
+            id: 'commands',
+            name: 'Commands & Syntax',
+            nameFr: 'Commandes & Syntaxe',
+            scorePct: commands,
+            status: 'weak',
+            descriptionFr: 'Syntaxe des tests [ vs [[, délimiteurs sed -i, séparateurs awk -F',
+            isRootCause: false
+          },
+          practice: {
+            id: 'practice',
+            name: 'Hands-on Lab Practice',
+            nameFr: 'Application pratique',
+            scorePct: practice,
+            status: 'critical',
+            descriptionFr: 'Enchaînement de filtres en pipelines réels, manipulation de flux de logs',
+            isRootCause: true
+          },
+          troubleshooting: {
+            id: 'troubleshooting',
+            name: 'Diagnostic & Troubleshooting',
+            nameFr: 'Diagnostic & Investigation',
+            scorePct: troubleshooting,
+            status: 'critical',
+            descriptionFr: 'Détection d\'erreurs de quoting, boucles infinies et codes de retour $?',
+            isRootCause: true
+          }
+        },
+        rootCauseDiagnosisFr: "→ Les concepts d'automatisation sont bien compris (68%).\n→ Le blocage provient de la manipulation de flux en direct (32%) et des erreurs de syntaxe sous terminal (24%).",
+        diagnosisSummaryFr: "Vous savez ce que doit faire le script, mais des fautes d'échappement de variables ou de format sed/awk empêchent son exécution correcte.",
+        prescription: {
+          summaryFr: "Manipuler interactivement des flux texte avant de rédiger des scripts complexes",
+          primaryRootCauseFr: "Hésitations de syntaxe sur sed et awk",
+          secondaryRootCauseFr: "Manque de pratique sur les expressions conditionnelles",
+          actionPlanFr: "Fais 2 Labs sur sed/awk et pipelines + 1 défi de correction de script Bash avant de retenter un examen.",
+          steps: [
+            {
+              order: 1,
+              type: 'lab',
+              titleFr: 'Lab 1 : Filtrage et parsing de flux (sed & awk)',
+              targetId: 'lab-text-filter-sed-awk',
+              actionLabelFr: 'Lancer le Lab Terminal',
+              navTarget: 'training'
+            },
+            {
+              order: 2,
+              type: 'lab',
+              titleFr: 'Lab 2 : Pipelines et redirections de flux de commandes',
+              targetId: 'lab-text-filter-pipeline',
+              actionLabelFr: 'Lancer le Mini-Lab',
+              navTarget: 'training'
+            },
+            {
+              order: 3,
+              type: 'troubleshooting',
+              titleFr: 'Troubleshooting : Dépannage d\'un script Bash avec variables non quotées',
+              targetId: 'tb-lpic1-103',
+              actionLabelFr: 'Corriger le script',
+              navTarget: 'training'
+            },
+            {
+              order: 4,
+              type: 'qcm',
+              titleFr: 'Validation : QCM Automatisation & Filtres',
+              targetId: 'exam-102',
+              actionLabelFr: 'Tester avec le QCM',
+              navTarget: 'practice'
+            }
+          ]
+        }
+      };
+    }
+
+    case 'security': {
+      const theory = 65;
+      const commands = 52;
+      const practice = 35;
+      const troubleshooting = 29;
+      return {
+        dimensions: {
+          theory: {
+            id: 'theory',
+            name: 'Theoretical Knowledge',
+            nameFr: 'Connaissance théorique',
+            scorePct: theory,
+            status: 'solid',
+            descriptionFr: 'Politiques de mots de passe, hachages SHA-512, séparation des privilèges',
+            isRootCause: false
+          },
+          commands: {
+            id: 'commands',
+            name: 'Commands & Syntax',
+            nameFr: 'Commandes & Syntaxe',
+            scorePct: commands,
+            status: 'weak',
+            descriptionFr: 'Options de sshd_config, visudo, chage -M, calcul octal des bits SUID',
+            isRootCause: false
+          },
+          practice: {
+            id: 'practice',
+            name: 'Hands-on Lab Practice',
+            nameFr: 'Application pratique',
+            scorePct: practice,
+            status: 'critical',
+            descriptionFr: 'Configuration réelle des fichiers /etc/shadow et clés SSH ~/.ssh/authorized_keys',
+            isRootCause: true
+          },
+          troubleshooting: {
+            id: 'troubleshooting',
+            name: 'Diagnostic & Troubleshooting',
+            nameFr: 'Diagnostic & Investigation',
+            scorePct: troubleshooting,
+            status: 'critical',
+            descriptionFr: 'Investigation sur connexion SSH refusée (permissions 600) ou audit journalctl',
+            isRootCause: true
+          }
+        },
+        rootCauseDiagnosisFr: "→ Les principes de sécurité sont acquis (65%).\n→ Le problème réside dans l'application stricte des droits fichiers (35%) et le diagnostic d'accès SSH rejetés (29%).",
+        diagnosisSummaryFr: "Les notions théoriques de cryptographie sont en place, mais l'application des permissions strictes sur les clés privées et fichiers shadow est hésitante.",
+        prescription: {
+          summaryFr: "Vérifier manuellement les permissions fichiers et résoudre un incident SSH",
+          primaryRootCauseFr: "Confusion sur les droits minimaux des fichiers sensibles (/etc/shadow, ~/.ssh)",
+          secondaryRootCauseFr: "Difficultés à interpréter les rejets de connexion dans auth.log",
+          actionPlanFr: "Fais 1 Lab shadow/chown + 1 scénario d'incident sécurité SSH avant de refaire un QCM.",
+          steps: [
+            {
+              order: 1,
+              type: 'lab',
+              titleFr: 'Lab 1 : Sécurisation de /etc/shadow et permissions de comptes',
+              targetId: 'lab-security-shadow',
+              actionLabelFr: 'Lancer le Lab Terminal',
+              navTarget: 'training'
+            },
+            {
+              order: 2,
+              type: 'lab',
+              titleFr: 'Lab 2 : Permissions d\'exécution strictes et droits de script',
+              targetId: 'lab-chmod-backup',
+              actionLabelFr: 'Lancer le Lab',
+              navTarget: 'training'
+            },
+            {
+              order: 3,
+              type: 'troubleshooting',
+              titleFr: 'Incident : Clé SSH rejetée pour permissions trop ouvertes (chmod 600)',
+              targetId: 'inc-lpic1-08',
+              actionLabelFr: 'Résoudre l\'incident',
+              navTarget: 'training'
+            },
+            {
+              order: 4,
+              type: 'qcm',
+              titleFr: 'Validation : QCM Sécurité & Durcissement',
+              targetId: 'exam-102',
+              actionLabelFr: 'Tester avec le QCM',
+              navTarget: 'practice'
+            }
+          ]
+        }
+      };
+    }
+
+    case 'filesystems': {
+      const theory = 76;
+      const commands = 62;
+      const practice = 46;
+      const troubleshooting = 38;
+      return {
+        dimensions: {
+          theory: {
+            id: 'theory',
+            name: 'Theoretical Knowledge',
+            nameFr: 'Connaissance théorique',
+            scorePct: theory,
+            status: 'solid',
+            descriptionFr: 'Architecture de l\'arborescence FHS, concepts de superbloc et d\'inodes',
+            isRootCause: false
+          },
+          commands: {
+            id: 'commands',
+            name: 'Commands & Syntax',
+            nameFr: 'Commandes & Syntaxe',
+            scorePct: commands,
+            status: 'moderate',
+            descriptionFr: 'Syntaxe de mkfs.ext4, fsck -y, tune2fs -l, blkid',
+            isRootCause: false
+          },
+          practice: {
+            id: 'practice',
+            name: 'Hands-on Lab Practice',
+            nameFr: 'Application pratique',
+            scorePct: practice,
+            status: 'weak',
+            descriptionFr: 'Édition sans erreur de /etc/fstab et montage effectif de partitions réelles',
+            isRootCause: true
+          },
+          troubleshooting: {
+            id: 'troubleshooting',
+            name: 'Diagnostic & Troubleshooting',
+            nameFr: 'Diagnostic & Investigation',
+            scorePct: troubleshooting,
+            status: 'critical',
+            descriptionFr: 'Identification d\'un échec de boot dû à une faute dans fstab ou un inode plein',
+            isRootCause: true
+          }
+        },
+        rootCauseDiagnosisFr: "→ La théorie du système de fichiers est très bien intégrée (76%).\n→ Le problème vient de la configuration persistance dans fstab (46%) et du diagnostic d'inodes saturés (38%).",
+        diagnosisSummaryFr: "La structure des répertoires est connue, mais la moindre faute de frappe dans le 6ème champ de fstab bloque le système sans que la cause soit immédiatement identifiée.",
+        prescription: {
+          summaryFr: "Manipuler la table fstab et simuler une réparation fsck",
+          primaryRootCauseFr: "Erreurs de syntaxe sur les 6 champs de /etc/fstab",
+          secondaryRootCauseFr: "Négligence de la vérification des inodes (df -i)",
+          actionPlanFr: "Fais le Lab fstab & montage disque + 1 troubleshooting de corruption avant le QCM.",
+          steps: [
+            {
+              order: 1,
+              type: 'lab',
+              titleFr: 'Lab 1 : Configuration et test de montage persistant dans /etc/fstab',
+              targetId: 'lab-fstab-mount-umount',
+              actionLabelFr: 'Lancer le Lab fstab',
+              navTarget: 'training'
+            },
+            {
+              order: 2,
+              type: 'lab',
+              titleFr: 'Lab 2 : Création de partitions et montage disque virtuel',
+              targetId: 'lab-storage-mount-disk',
+              actionLabelFr: 'Lancer le Lab Disque',
+              navTarget: 'training'
+            },
+            {
+              order: 3,
+              type: 'troubleshooting',
+              titleFr: 'Troubleshooting : Réparation d\'un boot bloqué en emergency mode par fstab',
+              targetId: 'tb-lpic1-104',
+              actionLabelFr: 'Dépanner le boot',
+              navTarget: 'training'
+            },
+            {
+              order: 4,
+              type: 'qcm',
+              titleFr: 'Validation : QCM Systèmes de fichiers & FHS',
+              targetId: 'exam-101',
+              actionLabelFr: 'Tester avec le QCM',
+              navTarget: 'practice'
+            }
+          ]
+        }
+      };
+    }
+
+    case 'commands':
+    default: {
+      const theory = 86;
+      const commands = 82;
+      const practice = 68;
+      const troubleshooting = 58;
+      return {
+        dimensions: {
+          theory: {
+            id: 'theory',
+            name: 'Theoretical Knowledge',
+            nameFr: 'Connaissance théorique',
+            scorePct: theory,
+            status: 'solid',
+            descriptionFr: 'Rôle des utilitaires Unix essentiels et des filtres de traitement',
+            isRootCause: false
+          },
+          commands: {
+            id: 'commands',
+            name: 'Commands & Syntax',
+            nameFr: 'Commandes & Syntaxe',
+            scorePct: commands,
+            status: 'solid',
+            descriptionFr: 'Options usuelles des commandes ls, grep, sort, uniq, cut, tr',
+            isRootCause: false
+          },
+          practice: {
+            id: 'practice',
+            name: 'Hands-on Lab Practice',
+            nameFr: 'Application pratique',
+            scorePct: practice,
+            status: 'moderate',
+            descriptionFr: 'Enchaînement de xargs avec -0 et find -exec {} +',
+            isRootCause: false
+          },
+          troubleshooting: {
+            id: 'troubleshooting',
+            name: 'Diagnostic & Troubleshooting',
+            nameFr: 'Diagnostic & Investigation',
+            scorePct: troubleshooting,
+            status: 'weak',
+            descriptionFr: 'Gestion des erreurs d\'arguments et ordre des redirections 2>&1',
+            isRootCause: true
+          }
+        },
+        rootCauseDiagnosisFr: "→ Solide maîtrise générale des commandes (86% théorie, 82% commandes).\n→ Seules des subtilités d'arguments complexes (find/xargs) et l'ordre des flux 2>&1 nécessitent un entraînement (58%).",
+        diagnosisSummaryFr: "Niveau très satisfaisant. Le seul écueil concerne l'ordre précis des redirections de flux de sortie standard et d'erreur.",
+        prescription: {
+          summaryFr: "Consolider les cas particuliers de redirection et de tubes",
+          primaryRootCauseFr: "Ordre d'évaluation des descripteurs de fichiers dans le shell",
+          actionPlanFr: "Fais 1 Lab de nettoyage ciblé avec find & xargs pour consolider l'excellence.",
+          steps: [
+            {
+              order: 1,
+              type: 'lab',
+              titleFr: 'Lab 1 : Recherche et suppression ciblée avec find et arguments',
+              targetId: 'lab-find-and-clean',
+              actionLabelFr: 'Lancer le Lab',
+              navTarget: 'training'
+            },
+            {
+              order: 2,
+              type: 'troubleshooting',
+              titleFr: 'Troubleshooting : Correction de redirection 2>&1 > log',
+              targetId: 'tb-lpic1-103',
+              actionLabelFr: 'Dépanner le flux',
+              navTarget: 'training'
+            },
+            {
+              order: 3,
+              type: 'qcm',
+              titleFr: 'Validation finale : QCM Commandes GNU/Linux',
+              targetId: 'exam-101',
+              actionLabelFr: 'Tester avec le QCM',
+              navTarget: 'practice'
+            }
+          ]
+        }
+      };
+    }
+  }
+}
+
+/**
  * Charge le rapport des faiblesses depuis localStorage ou initialise le modèle par défaut
  */
 export function getWeaknessReport(): WeaknessEngineReport {
@@ -423,6 +874,12 @@ export function getWeaknessReport(): WeaknessEngineReport {
     if (raw) {
       const parsed: WeaknessEngineReport = JSON.parse(raw);
       if (parsed && Array.isArray(parsed.domains) && parsed.domains.length > 0) {
+        // Garantir que chaque domaine possède son analyse causale
+        parsed.domains.forEach((d) => {
+          if (!d.causalAnalysis) {
+            d.causalAnalysis = computeCausalAnalysis(d);
+          }
+        });
         return parsed;
       }
     }
@@ -430,7 +887,12 @@ export function getWeaknessReport(): WeaknessEngineReport {
     console.warn('Error reading weakness report from localStorage:', e);
   }
 
-  // Initialisation par défaut
+  // Initialisation par défaut avec analyse causale
+  INITIAL_WEAKNESS_REPORT.domains.forEach((d) => {
+    if (!d.causalAnalysis) {
+      d.causalAnalysis = computeCausalAnalysis(d);
+    }
+  });
   saveWeaknessReport(INITIAL_WEAKNESS_REPORT);
   return INITIAL_WEAKNESS_REPORT;
 }

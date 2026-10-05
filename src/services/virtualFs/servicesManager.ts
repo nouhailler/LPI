@@ -140,6 +140,18 @@ export class ServicesManager {
           'mariadb.service: Deactivated successfully.',
         ],
       },
+      {
+        name: 'apache2.service',
+        description: 'The Apache HTTP Server',
+        loaded: true,
+        unitFileState: 'disabled',
+        activeState: 'inactive',
+        subState: 'dead',
+        since: 'Mon 2026-09-20 10:00:00 UTC',
+        memoryUsage: '0B',
+        cgroupProcesses: [],
+        logs: ['apache2.service: Deactivated successfully.'],
+      },
     ];
 
     for (const svc of defaultServices) {
@@ -168,6 +180,22 @@ export class ServicesManager {
   public getService(name: string): VfsService | undefined {
     const normalized = name.endsWith('.service') ? name : `${name}.service`;
     return this.services.get(normalized) || this.services.get(name);
+  }
+
+  public setServiceState(
+    name: string,
+    activeState: 'active' | 'inactive' | 'failed',
+    subState: 'running' | 'dead' | 'failed',
+    extraLogs?: string[]
+  ): void {
+    const svc = this.getService(name);
+    if (svc) {
+      svc.activeState = activeState;
+      svc.subState = subState;
+      if (extraLogs) {
+        svc.logs.push(...extraLogs);
+      }
+    }
   }
 
   public getAllServices(): VfsService[] {

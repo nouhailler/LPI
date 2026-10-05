@@ -64,6 +64,8 @@ import {
   SRS_INTERVALS,
 } from '../utils/srsEngine';
 import { useLanguage } from '../i18n/LanguageContext';
+import { ExplainDifferentlyPills } from './ExplainDifferentlyPills';
+import { mapFlashcardToPedagogicalTopic, openExplainDifferently } from '../utils/explainDifferentlyHelper';
 
 interface FlashcardsViewProps {
   cards: Flashcard[];
@@ -4955,6 +4957,23 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                         </p>
                       </div>
                     )}
+
+                    {/* Transversal Pedagogical Tutor Banner on Card Back */}
+                    {currentCard && (
+                      <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                        <ExplainDifferentlyPills
+                          topic={mapFlashcardToPedagogicalTopic(currentCard)}
+                          context={currentCard.definition || currentCard.answer}
+                          variant="banner"
+                          label={isFrench ? 'Explique-moi autrement' : 'Explain differently'}
+                          subLabel={
+                            isFrench
+                              ? 'Une hésitation ? Explorez ce concept sous un angle différent :'
+                              : 'Hesitating? Explore this concept from a different angle:'
+                          }
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Back Footer */}
@@ -5079,6 +5098,28 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                 </kbd>
               </button>
             </div>
+
+            {/* Contextual Tutor for Difficult Cards */}
+            {currentCard && (
+              <div className="w-full flex items-center justify-between gap-3 p-3 bg-[#fff8ea] border border-[#ffc20e]/60 rounded-xl mt-3 shadow-2xs flex-wrap">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Sparkles className="w-4 h-4 text-[#ffc20e] fill-[#ffc20e] shrink-0" />
+                  <span className="text-xs font-bold text-[#785a00] truncate">
+                    {isFrench
+                      ? 'Carte difficile ou doute ? Tuteur LPI :'
+                      : 'Difficult card or doubt? LPI Tutor:'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <ExplainDifferentlyPills
+                    topic={mapFlashcardToPedagogicalTopic(currentCard)}
+                    context={currentCard.definition || currentCard.answer}
+                    variant="compact"
+                    label={isFrench ? 'Explique-moi' : 'Explain'}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Stats Bar */}

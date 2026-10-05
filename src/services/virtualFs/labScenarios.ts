@@ -11,6 +11,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'permissions',
     difficulty: 'Beginner',
     difficultyFr: 'Débutant',
+    linkedObjectiveId: '104.5',
     estimatedMinutes: 5,
     goal: 'Accorder au script de sauvegarde les permissions rwxr-x--- (750) pour autoriser l\'exécution par l\'utilisateur student et le groupe, tout en interdisant tout accès aux autres.',
     goalFr: 'Accorder au script de sauvegarde les permissions rwxr-x--- (750) pour autoriser l\'exécution par l\'utilisateur student et le groupe, tout en interdisant tout accès aux autres.',
@@ -78,6 +79,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'files',
     difficulty: 'Beginner',
     difficultyFr: 'Débutant',
+    linkedObjectiveId: '103.2',
     estimatedMinutes: 6,
     goal: 'Extraire toutes les lignes contenant "Accepted" dans /var/log/auth.log et les rediriger dans un nouveau fichier /tmp/accepted_logins.txt.',
     goalFr: 'Extraire toutes les lignes contenant "Accepted" dans /var/log/auth.log et les rediriger dans un nouveau fichier /tmp/accepted_logins.txt.',
@@ -147,6 +149,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'files',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '103.3',
     estimatedMinutes: 7,
     goal: 'Créer une archive tar compressée avec gzip nommée web_backup.tar.gz dans /var/backups contenant le dossier /home/student/projects/web.',
     goalFr: 'Créer une archive tar compressée avec gzip nommée web_backup.tar.gz dans /var/backups contenant le dossier /home/student/projects/web.',
@@ -205,6 +208,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'permissions',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '104.5',
     estimatedMinutes: 6,
     goal: 'Changer le groupe propriétaire de l\'arborescence /home/student/projects pour le groupe developers de manière récursive.',
     goalFr: 'Changer le groupe propriétaire de l\'arborescence /home/student/projects pour le groupe developers de manière récursive.',
@@ -277,6 +281,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'files',
     difficulty: 'Beginner',
     difficultyFr: 'Débutant',
+    linkedObjectiveId: '104.6',
     estimatedMinutes: 5,
     goal: 'Créer un lien symbolique dans le répertoire personnel /home/student/run_backup.sh pointant vers le script réel /home/student/scripts/backup.sh.',
     goalFr: 'Créer un lien symbolique dans le répertoire personnel /home/student/run_backup.sh pointant vers le script réel /home/student/scripts/backup.sh.',
@@ -345,6 +350,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'processes',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '103.5',
     estimatedMinutes: 5,
     goal: 'Identifier le processus rogue (PID 1040 nginx worker bloqué) avec ps aux et l\'arrêter à l\'aide de la commande kill.',
     goalFr: 'Identifier le processus rogue (PID 1040 nginx worker bloqué) avec ps aux et l\'arrêter à l\'aide de la commande kill.',
@@ -419,6 +425,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'files',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '103.3',
     estimatedMinutes: 6,
     goal: 'Supprimer le fichier temporaire résiduel /tmp/session_dump.tmp pour libérer de l\'espace disque.',
     goalFr: 'Supprimer le fichier temporaire résiduel /tmp/session_dump.tmp pour libérer de l\'espace disque.',
@@ -472,6 +479,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'security',
     difficulty: 'Advanced',
     difficultyFr: 'Avancé',
+    linkedObjectiveId: '110.1',
     estimatedMinutes: 6,
     goal: 'Restreindre l\'accès au fichier de mots de passe hachés /etc/shadow au seul compte root avec les permissions 600 (-rw-------) en utilisant sudo.',
     goalFr: 'Restreindre l\'accès au fichier de mots de passe hachés /etc/shadow au seul compte root avec les permissions 600 (-rw-------) en utilisant sudo.',
@@ -538,6 +546,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'files',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '103.2',
     estimatedMinutes: 6,
     goal: 'Extraire le premier champ (nom d\'utilisateur) de /etc/passwd avec cut, trier la liste par ordre alphabétique avec sort, et enregistrer le résultat dans /tmp/sorted_users.txt.',
     goalFr: 'Extraire le premier champ (nom d\'utilisateur) de /etc/passwd avec cut, trier la liste par ordre alphabétique avec sort, et enregistrer le résultat dans /tmp/sorted_users.txt.',
@@ -616,6 +625,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'processes',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '101.3',
     estimatedMinutes: 5,
     goal: 'Interroger l\'état du service web nginx avec systemctl, consulter ses journaux d\'événements avec journalctl, et rediriger le rapport d\'état dans /tmp/nginx_status.txt.',
     goalFr: 'Interroger l\'état du service web nginx avec systemctl, consulter ses journaux d\'événements avec journalctl, et rediriger le rapport d\'état dans /tmp/nginx_status.txt.',
@@ -687,6 +697,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'network',
     difficulty: 'Beginner',
     difficultyFr: 'Débutant',
+    linkedObjectiveId: '109.3',
     estimatedMinutes: 5,
     goal: 'Inspecter les interfaces réseau avec ip addr, puis vérifier la connectivité vers la passerelle locale (192.168.1.1) avec ping -c 3 en sauvegardant le résultat dans /tmp/ping_gateway.txt.',
     goalFr: 'Inspecter les adresses réseau avec ip addr, puis vérifier la connectivité vers la passerelle locale (192.168.1.1) avec ping -c 3 en sauvegardant le résultat dans /tmp/ping_gateway.txt.',
@@ -759,6 +770,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'storage',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '104.3',
     estimatedMinutes: 6,
     goal: 'Inspecter les périphériques de stockage bloc avec lsblk -f, puis monter la partition /dev/sdc1 sur le répertoire /mnt en utilisant les privilèges root (sudo mount).',
     goalFr: 'Inspecter les périphériques de stockage bloc avec lsblk -f, puis monter la partition /dev/sdc1 sur le répertoire /mnt en utilisant les privilèges root (sudo mount).',
@@ -822,6 +834,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'storage',
     difficulty: 'Advanced',
     difficultyFr: 'Avancé',
+    linkedObjectiveId: '104.3',
     estimatedMinutes: 7,
     goal: 'Inspecter les partitions avec fdisk -l, créer le point de montage /mnt/backup, déclarer /dev/sdc1 de manière permanente dans /etc/fstab, appliquer le montage avec mount -a, puis tester la commande umount.',
     goalFr: 'Inspecter les partitions avec fdisk -l, créer le point de montage /mnt/backup, déclarer /dev/sdc1 de manière permanente dans /etc/fstab, appliquer le montage avec mount -a, puis tester la commande umount.',
@@ -908,6 +921,7 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
     category: 'files',
     difficulty: 'Intermediate',
     difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '103.2',
     estimatedMinutes: 6,
     goal: 'Transformer les données de serveurs avec sed pour standardiser les environnements "staging" en "preprod" dans /tmp/servers_mod.txt, puis utiliser awk pour filtrer les serveurs actifs vers /tmp/active_servers.txt et compter les lignes avec wc -l.',
     goalFr: 'Transformer les données de serveurs avec sed pour standardiser les environnements "staging" en "preprod" dans /tmp/servers_mod.txt, puis utiliser awk pour filtrer les serveurs actifs vers /tmp/active_servers.txt et compter les lignes avec wc -l.',
@@ -967,6 +981,85 @@ export const simulatedLabScenarios: SimulatedLabScenario[] = [
         feedbackFr: isComplete
           ? 'Magnifique ! Traitement de flux maîtrisé avec sed, awk et redirection.'
           : 'Filtrage incomplet.',
+        unmetCriteria: unmet,
+        unmetCriteriaFr: unmet,
+      };
+    },
+  },
+  {
+    id: 'lab-network-db-conn',
+    title: 'Diagnostic Réseau 5 Niveaux : Pourquoi ping db01 fonctionne mais curl db01:5432 échoue ?',
+    titleFr: 'Diagnostic Réseau 5 Niveaux : Pourquoi ping db01 fonctionne mais curl db01:5432 échoue ?',
+    certification: 'lpic-1',
+    category: 'network',
+    difficulty: 'Intermediate',
+    difficultyFr: 'Intermédiaire',
+    linkedObjectiveId: '109.3',
+    estimatedMinutes: 8,
+    goal: 'Diagnostiquer la panne réseau entre web01 et db01 : vérifier l\'IP (ip addr), la route (ip route), le DNS et l\'ICMP (ping db01), constater le port 5432 fermé (curl db01:5432), puis inspecter et démarrer PostgreSQL sur db01 via SSH.',
+    goalFr: 'Diagnostiquer la panne réseau entre web01 et db01 : vérifier l\'IP (ip addr), la route (ip route), le DNS et l\'ICMP (ping db01), constater le port 5432 fermé (curl db01:5432), puis inspecter et démarrer PostgreSQL sur db01 via SSH.',
+    initialDirectory: '/home/student',
+    instructions: [
+      '1. Vérifiez l\'adresse IP locale : ip addr show eth0',
+      '2. Vérifiez la table de routage : ip route show',
+      '3. Testez la connectivité ICMP vers db01 : ping -c 2 db01',
+      '4. Testez la connexion au port PostgreSQL : curl db01:5432 (ou nc -zv db01 5432)',
+      '5. Inspectez l\'état du service sur db01 : ssh db01 "systemctl status postgresql"',
+      '6. Démarrez le service PostgreSQL : ssh db01 "systemctl start postgresql"',
+      '7. Validez et sauvegardez le résultat : curl db01:5432 > /tmp/db_conn_test.txt',
+    ],
+    instructionsFr: [
+      '1. Vérifiez l\'adresse IP locale : ip addr show eth0',
+      '2. Vérifiez la table de routage : ip route show',
+      '3. Testez la connectivité ICMP vers db01 : ping -c 2 db01',
+      '4. Testez la connexion au port PostgreSQL : curl db01:5432 (ou nc -zv db01 5432)',
+      '5. Inspectez l\'état du service sur db01 : ssh db01 "systemctl status postgresql"',
+      '6. Démarrez le service PostgreSQL : ssh db01 "systemctl start postgresql"',
+      '7. Validez et sauvegardez le résultat : curl db01:5432 > /tmp/db_conn_test.txt',
+    ],
+    hints: [
+      'ping teste la couche 3 (réseau/ICMP). curl teste la couche 4/7 (transport TCP / application).',
+      'Sur db01, le service postgresql est arrêté. Utilisez : ssh db01 "systemctl start postgresql".',
+    ],
+    hintsFr: [
+      'ping teste la couche 3 (réseau/ICMP). curl teste la couche 4/7 (transport TCP / application).',
+      'Sur db01, le service postgresql est arrêté. Utilisez : ssh db01 "systemctl start postgresql".',
+    ],
+    solutionCommands: [
+      'ip addr show eth0',
+      'ip route show',
+      'ping -c 2 db01',
+      'curl db01:5432',
+      'ssh db01 "systemctl status postgresql"',
+      'ssh db01 "systemctl start postgresql"',
+      'curl db01:5432 > /tmp/db_conn_test.txt',
+    ],
+    solutionExplanation: 'Le ping fonctionne car l\'IP, la route et le protocole ICMP de la machine cible répondent. En revanche, curl ou psql échouent si le port TCP d\'écoute n\'est pas ouvert (service arrêté ou pare-feu). C\'est la démarche systématique en 5 étapes : IP OK -> Route OK -> DNS OK -> Port fermé -> Service arrêté.',
+    solutionExplanationFr: 'Le ping fonctionne car l\'IP, la route et le protocole ICMP de la machine cible répondent. En revanche, curl ou psql échouent si le port TCP d\'écoute n\'est pas ouvert (service arrêté ou pare-feu). C\'est la démarche systématique en 5 étapes : IP OK -> Route OK -> DNS OK -> Port fermé -> Service arrêté.',
+    validate: (fs: VirtualFs, interpreter: any): LabScenarioValidation => {
+      const unmet: string[] = [];
+      const testFile = fs.getNode('/tmp/db_conn_test.txt');
+      const isPortOpen = interpreter?.networkSimulator?.nodes?.db01?.ports?.find((p: any) => p.port === 5432)?.state === 'open';
+      const diag = interpreter?.networkSimulator?.diagnosticProgress;
+
+      if (!isPortOpen && !diag?.serviceStarted) {
+        unmet.push('Le service PostgreSQL sur db01 n\'a pas été démarré (ssh db01 "systemctl start postgresql").');
+      }
+
+      if (!testFile && !diag?.probeVerified) {
+        unmet.push('Le test final curl db01:5432 n\'a pas encore été sauvegardé dans /tmp/db_conn_test.txt.');
+      }
+
+      const isComplete = unmet.length === 0;
+      return {
+        isComplete,
+        score: isComplete ? 100 : Math.max(0, 100 - unmet.length * 50),
+        feedback: isComplete
+          ? 'Félicitations ! Démarche de diagnostic 5 niveaux parfaitement exécutée et validée.'
+          : 'Diagnostic ou remédiation en cours...',
+        feedbackFr: isComplete
+          ? 'Félicitations ! Démarche de diagnostic 5 niveaux parfaitement exécutée et validée.'
+          : 'Diagnostic ou remédiation en cours...',
         unmetCriteria: unmet,
         unmetCriteriaFr: unmet,
       };

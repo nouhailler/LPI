@@ -35,6 +35,8 @@ import {
 } from '../utils/examAnalytics';
 import { ExamPostAnalysis } from './practice/ExamPostAnalysis';
 import { markObjectiveMastered, markQuizTopicMastered } from '../services/adaptivePathEngine';
+import { ExplainDifferentlyPills } from './ExplainDifferentlyPills';
+import { mapQuestionToPedagogicalTopic } from '../utils/explainDifferentlyHelper';
 
 interface PracticeExamViewProps {
   initialExamId?: string;

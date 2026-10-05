@@ -20,7 +20,7 @@ import { ExplainDifferentlyModal } from './components/ExplainDifferentlyModal';
 import { DocumentationModal } from './components/DocumentationModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { certificationTiers, flashcardsData, initialUserStats, practiceQuestions } from './data/lpiData';
-import { PracticeQuestion, TabType, UserStats } from './types';
+import { PracticeQuestion, TabType, TrainingModeType, UserStats } from './types';
 import { PedagogicalMode } from './data/pedagogicalExplanations';
 import { useLanguage } from './i18n/LanguageContext';
 import { useAuth } from './firebase/AuthContext';
@@ -34,6 +34,10 @@ import {
   checkForUpdates,
   VersionInfo,
 } from './utils/updateService';
+import {
+  OPEN_EXPLAIN_DIFFERENTLY_EVENT,
+  OpenExplainDifferentlyDetail,
+} from './utils/explainDifferentlyHelper';
 
 export default function App() {
   const { isFrench } = useLanguage();
@@ -48,6 +52,7 @@ export default function App() {
   const [settingsInitialTab, setSettingsInitialTab] = useState<'updates' | 'profile' | 'preferences' | 'language'>('updates');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedLearningTopic, setSelectedLearningTopic] = useState<string | undefined>(undefined);
+  const [trainingInitialMode, setTrainingInitialMode] = useState<TrainingModeType>('mission_linux');
   const [selectedExamId, setSelectedExamId] = useState<string>('exam-101');
   const [dataResetKey, setDataResetKey] = useState(0);
 
@@ -74,6 +79,22 @@ export default function App() {
     setExplainContext(context);
     setIsExplainModalOpen(true);
   };
+
+  // Universal event listener for "Explique-moi autrement" transversal pedagogical tutor
+  useEffect(() => {
+    const handleTransversalExplain = (e: Event) => {
+      const customEvent = e as CustomEvent<OpenExplainDifferentlyDetail>;
+      if (customEvent.detail) {
+        const { topic, mode, context } = customEvent.detail;
+        handleOpenExplainDifferently(topic, mode || 'simple', context);
+      }
+    };
+
+    window.addEventListener(OPEN_EXPLAIN_DIFFERENTLY_EVENT, handleTransversalExplain);
+    return () => {
+      window.removeEventListener(OPEN_EXPLAIN_DIFFERENTLY_EVENT, handleTransversalExplain);
+    };
+  }, []);
 
   const handleOpenFlashcards = (topic: any = 'srs-daily') => {
     setSelectedFlashcardsTopic(topic);
@@ -198,7 +219,10 @@ export default function App() {
     setIsMenuOpen(false);
   };
 
-  const handleSelectTab = (tab: TabType) => {
+  const handleSelectTab = (tab: TabType, mode?: TrainingModeType) => {
+    if (tab === 'training' && mode) {
+      setTrainingInitialMode(mode);
+    }
     setCurrentTab(tab);
     setIsMenuOpen(false);
   };
@@ -470,6 +494,7 @@ export default function App() {
 
             {currentTab === 'training' && (
               <TrainingHubView
+                initialMode={trainingInitialMode}
                 onNavigateTab={handleSelectTab}
               />
             )}

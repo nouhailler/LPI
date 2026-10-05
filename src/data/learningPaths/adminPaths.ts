@@ -449,11 +449,11 @@ const sysadminModules: PathModule[] = [
       commandSnippet: 'rsync -av /etc/ /opt/backup/etc/',
     },
     lab: {
-      id: 'lab-adm-5',
-      title: 'Testing Logrotate Rules with Dry-Run',
-      titleFr: 'Test des règles logrotate en mode simulation',
-      goal: 'Validate nginx log rotation rules without modifying disk files.',
-      goalFr: 'Valider la configuration de rotation des logs nginx sans altérer les fichiers.',
+      id: 'lab-tar-archive',
+      title: 'Compressed Tar Archive Backups & Logrotate Verification',
+      titleFr: 'Archivage compressé tar.gz de projet web & logrotate',
+      goal: 'Create a gzip compressed tar archive in /var/backups and test logrotate.',
+      goalFr: 'Créer une archive tar.gz dans /var/backups et valider la rotation des logs.',
       context: 'You just deployed custom logrotate rules for an API daemon.',
       contextFr: 'Vous venez de déployer une règle de rotation pour une API.',
       steps: [

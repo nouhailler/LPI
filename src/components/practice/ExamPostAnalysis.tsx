@@ -21,6 +21,8 @@ import {
 import { PracticeQuestion } from '../../types';
 import { ExamSessionAnalytics } from '../../utils/examAnalytics';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { ExplainDifferentlyPills } from '../ExplainDifferentlyPills';
+import { mapQuestionToPedagogicalTopic } from '../../utils/explainDifferentlyHelper';
 
 interface ExamPostAnalysisProps {
   analytics: ExamSessionAnalytics;
@@ -757,6 +759,27 @@ export const ExamPostAnalysis: React.FC<ExamPostAnalysisProps> = ({
                           </div>
                         )}
                       </div>
+
+                      {/* Transversal Pedagogical Remediation */}
+                      <ExplainDifferentlyPills
+                        topic={mapQuestionToPedagogicalTopic(q)}
+                        context={q.explanation || q.question}
+                        variant="banner"
+                        label={
+                          !isCorrect
+                            ? isFrench
+                              ? 'Question ratée → Pourquoi ? Explique-moi autrement :'
+                              : 'Failed question → Why? Explain differently:'
+                            : isFrench
+                            ? 'Approfondir ce concept avec le tuteur LPI :'
+                            : 'Deepen this concept with the LPI tutor:'
+                        }
+                        subLabel={
+                          isFrench
+                            ? 'Découvrez ce concept sous 4 angles : Simple, Analogie, Exemple concret ou Pièges Expert.'
+                            : 'Explore this concept across 4 modes: Simple, Analogy, Practical example or Expert traps.'
+                        }
+                      />
                     </div>
                   )}
                 </div>

@@ -2,6 +2,8 @@ import React from 'react';
 import { X, Lightbulb, Terminal, BookOpen, CheckCircle, Sparkles } from 'lucide-react';
 import { PracticeQuestion } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
+import { ExplainDifferentlyPills } from './ExplainDifferentlyPills';
+import { mapQuestionToPedagogicalTopic } from '../utils/explainDifferentlyHelper';
 import { MarkdownView } from './MarkdownView';
 
 interface ExplanationModalProps {
@@ -89,23 +91,20 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
           </div>
         )}
 
-        {/* Explain Differently Button */}
-        {onExplainDifferently && (
-          <button
-            id="modal-explain-differently-btn"
-            onClick={() => {
-              onExplainDifferently(extractConcept(), question.question);
-            }}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#fff8f2] hover:bg-[#f2e7d6] text-[#785a00] border border-[#d3c5ab] font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-[#ffc20e] fill-[#ffc20e]" />
-            <span>
-              {isFrench
-                ? '💡 Explique-moi autrement (5 angles pédagogiques)'
-                : '💡 Explain it differently (5 angles)'}
-            </span>
-          </button>
-        )}
+        {/* Explain Differently Button / Transversal Tutor Pills */}
+        <div className="w-full">
+          <ExplainDifferentlyPills
+            topic={extractConcept() || mapQuestionToPedagogicalTopic(question)}
+            context={question.explanation || question.question}
+            variant="banner"
+            label={isFrench ? '💡 Explique-moi autrement :' : '💡 Explain differently:'}
+            subLabel={
+              isFrench
+                ? 'Choisissez votre angle : Simple, Analogie, Exemple ou Pièges Expert'
+                : 'Choose your angle: Simple, Analogy, Practical example or Expert traps'
+            }
+          />
+        </div>
 
         <button
           onClick={onClose}

@@ -19,6 +19,10 @@ import {
 } from 'lucide-react';
 import { TroubleshootingChallenge } from '../../types';
 import { useLanguage } from '../../i18n/LanguageContext';
+import {
+  getResolvedTroubleshootingIds,
+  recordTroubleshootingResolved
+} from '../../services/skillProfileEngine';
 
 interface Props {
   challenges: TroubleshootingChallenge[];
@@ -41,7 +45,9 @@ export const TroubleshootingModule: React.FC<Props> = ({ challenges, onScoreUpda
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [completedIds, setCompletedIds] = useState<Set<string>>(
+    () => new Set(getResolvedTroubleshootingIds())
+  );
 
   // Filter challenges strictly by chosen certification and exam/topic filters
   const filteredChallenges = useMemo(() => {
@@ -146,6 +152,7 @@ export const TroubleshootingModule: React.FC<Props> = ({ challenges, onScoreUpda
         const nextSet = new Set(completedIds);
         nextSet.add(current.id);
         setCompletedIds(nextSet);
+        recordTroubleshootingResolved(current.id);
         if (onScoreUpdate) onScoreUpdate(15);
       }
     }

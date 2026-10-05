@@ -244,6 +244,8 @@ export interface ExamSessionHistory {
 // ----------------------------------------------------
 
 export type TrainingModeType =
+  | 'mission_linux'
+  | 'network_lab'
   | 'virtual_terminal'
   | 'lab_map'
   | 'incident_response'
@@ -533,6 +535,45 @@ export interface WeaknessQuestionDetail {
   mistakeReasonFr?: string;
 }
 
+export interface WeaknessCognitiveDimension {
+  id: 'theory' | 'commands' | 'practice' | 'troubleshooting';
+  name: string;
+  nameFr: string;
+  scorePct: number; // e.g. 71, 42, 28, 19
+  status: 'solid' | 'moderate' | 'weak' | 'critical';
+  descriptionFr: string;
+  isRootCause: boolean; // Flagged as primary cause of failure
+}
+
+export interface WeaknessPrescriptionStep {
+  order: number;
+  type: 'lab' | 'troubleshooting' | 'command' | 'flashcard' | 'qcm';
+  titleFr: string;
+  targetId?: string;
+  actionLabelFr: string;
+  navTarget?: TabType;
+}
+
+export interface WeaknessPrescription {
+  summaryFr: string;
+  primaryRootCauseFr: string;
+  secondaryRootCauseFr?: string;
+  actionPlanFr: string; // e.g. "Fais 2 Labs réseau + 1 troubleshooting avant de refaire un QCM."
+  steps: WeaknessPrescriptionStep[];
+}
+
+export interface WeaknessCausalAnalysis {
+  dimensions: {
+    theory: WeaknessCognitiveDimension;
+    commands: WeaknessCognitiveDimension;
+    practice: WeaknessCognitiveDimension;
+    troubleshooting: WeaknessCognitiveDimension;
+  };
+  rootCauseDiagnosisFr: string;
+  diagnosisSummaryFr: string;
+  prescription: WeaknessPrescription;
+}
+
 export interface WeaknessDomainStats {
   id: WeaknessDomainId;
   name: string;
@@ -554,6 +595,7 @@ export interface WeaknessDomainStats {
   recommendedActionFr: string;
   targetObjectiveIds: string[];
   sampleMistakes: WeaknessQuestionDetail[];
+  causalAnalysis?: WeaknessCausalAnalysis;
 }
 
 export interface WeaknessEngineReport {

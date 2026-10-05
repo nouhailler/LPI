@@ -18,10 +18,19 @@ import {
   Terminal,
   Network,
   Cpu,
-  HardDrive
+  HardDrive,
+  Brain,
+  XCircle,
+  Wrench,
+  Layers,
+  Lightbulb
 } from 'lucide-react';
 import { WeaknessDomainId, WeaknessDomainStats, WeaknessEngineReport } from '../../types';
-import { getWeaknessReport, resetWeaknessData } from '../../utils/weaknessEngine';
+import {
+  getWeaknessReport,
+  resetWeaknessData,
+  computeCausalAnalysis
+} from '../../utils/weaknessEngine';
 import { WeaknessTrainingModal } from './WeaknessTrainingModal';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -302,6 +311,162 @@ export const WeaknessEngineWidget: React.FC<WeaknessEngineWidgetProps> = ({
               <span>{isFrench ? `Entraîner ce sujet (${selectedDomain.masteryPct}%)` : `Train this skill`}</span>
             </button>
           </div>
+
+          {/* 🧠 SECTION MAJEURE : « Pourquoi suis-je faible ? » — Analyse Causale Cognitive */}
+          {(() => {
+            const causal = selectedDomain.causalAnalysis || computeCausalAnalysis(selectedDomain);
+            if (!causal) return null;
+
+            return (
+              <div className="mt-4 p-5 rounded-2xl bg-gradient-to-br from-[#ffffff] via-[#fffdfa] to-[#fff8ee] border-2 border-amber-300 shadow-xs space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-amber-200">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-800 flex items-center justify-center font-bold shrink-0">
+                      <Brain className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-base sm:text-lg font-black text-[#201b11] flex items-center gap-2">
+                        <span>{isFrench ? 'Pourquoi suis-je faible ?' : 'Why am I weak?'}</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-200">
+                          {isFrench ? 'Analyse causale' : 'Causal Analysis'}
+                        </span>
+                      </h4>
+                      <p className="text-xs text-[#6e634e]">
+                        {isFrench
+                          ? 'Décomposition cognitive : Connaissances vs Commandes vs Pratique vs Diagnostic'
+                          : 'Cognitive breakdown: Knowledge vs Commands vs Practice vs Troubleshooting'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Cognitive Dimensions Gauges */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#6e634e] block">
+                    {isFrench ? 'Causes probables de contre-performance :' : 'Probable root causes:'}
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {Object.values(causal.dimensions).map((dim) => {
+                      const isLow = dim.scorePct < 50;
+                      const isMid = dim.scorePct >= 50 && dim.scorePct < 70;
+                      const statusColor = isLow
+                        ? 'text-red-700 bg-red-50 border-red-200'
+                        : isMid
+                        ? 'text-amber-700 bg-amber-50 border-amber-200'
+                        : 'text-emerald-700 bg-emerald-50 border-emerald-200';
+                      const barColor = isLow ? 'bg-red-500' : isMid ? 'bg-amber-500' : 'bg-emerald-500';
+
+                      return (
+                        <div
+                          key={dim.id}
+                          className={`p-3 rounded-xl border ${statusColor} space-y-1.5 transition-all`}
+                        >
+                          <div className="flex items-center justify-between text-xs font-bold">
+                            <span className="flex items-center gap-1.5 truncate">
+                              {dim.scorePct < 50 ? (
+                                <XCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                              ) : dim.scorePct < 70 ? (
+                                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                              ) : (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              )}
+                              <span className="truncate">{dim.nameFr}</span>
+                            </span>
+                            <span className="font-mono text-sm font-black shrink-0">
+                              {dim.scorePct} %
+                            </span>
+                          </div>
+
+                          <div className="w-full h-1.5 bg-black/10 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${barColor} rounded-full transition-all duration-500`}
+                              style={{ width: `${dim.scorePct}%` }}
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between text-[10px] text-[#6e634e] pt-0.5">
+                            <span className="truncate max-w-[190px]">{dim.descriptionFr}</span>
+                            {dim.isRootCause && (
+                              <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-extrabold uppercase text-[9px] shrink-0">
+                                {isFrench ? 'Cause racine' : 'Root cause'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Deductive Pedagogical Diagnosis */}
+                <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-300 text-xs sm:text-sm text-[#201b11] space-y-1.5 font-medium leading-relaxed">
+                  <div className="font-mono text-xs sm:text-sm font-bold text-amber-950 whitespace-pre-line">
+                    {causal.rootCauseDiagnosisFr}
+                  </div>
+                  <div className="text-xs text-[#5c4e36] pt-1.5 border-t border-amber-200">
+                    {causal.diagnosisSummaryFr}
+                  </div>
+                </div>
+
+                {/* Actionable Prescriptive Rule */}
+                <div className="p-4 rounded-xl bg-linear-to-r from-red-600/10 via-orange-500/10 to-amber-500/10 border border-red-300 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-red-600 shrink-0" />
+                    <span className="text-xs font-black uppercase tracking-wider text-red-950">
+                      {isFrench ? 'Prescription pédagogique du Weakness Engine :' : 'Weakness Engine Prescription:'}
+                    </span>
+                  </div>
+
+                  <div className="text-sm font-black text-red-900 bg-white/95 p-3 rounded-xl border border-red-200 shadow-2xs">
+                    « {causal.prescription.actionPlanFr} »
+                  </div>
+
+                  {/* Step Sequence */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#6e634e] block">
+                      {isFrench ? 'Séquence recommandée avant tout QCM :' : 'Recommended steps before quiz:'}
+                    </span>
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {causal.prescription.steps.map((step) => (
+                        <div
+                          key={step.order}
+                          className="p-2.5 rounded-xl bg-white border border-[#ebdcc4] flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs hover:border-[#ffc20e] transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="w-5 h-5 rounded-full bg-[#ffc20e] text-[#6d5100] text-xs font-bold flex items-center justify-center shrink-0">
+                              {step.order}
+                            </span>
+                            <span className="text-xs font-bold text-[#201b11] truncate">
+                              {step.titleFr}
+                            </span>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              if (step.type === 'lab' && onNavigateToTraining) {
+                                onNavigateToTraining('guided_labs');
+                              } else if (step.type === 'troubleshooting' && onNavigateToTraining) {
+                                onNavigateToTraining('troubleshooting');
+                              } else if (step.type === 'qcm' && onNavigateToExam) {
+                                onNavigateToExam(step.targetId || 'exam-101');
+                              } else if (onNavigateToTraining) {
+                                onNavigateToTraining('guided_labs');
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-[#201b11] hover:bg-[#38332a] text-[#fff8f2] text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+                          >
+                            <span>{step.actionLabelFr}</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Core breakdown summary badges */}
           <div className="mt-4 space-y-4">

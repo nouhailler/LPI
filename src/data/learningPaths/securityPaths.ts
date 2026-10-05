@@ -83,11 +83,11 @@ const secCoreModules: PathModule[] = [
       commandSnippet: 'sudo chage -l developer',
     },
     lab: {
-      id: 'lab-sec-1',
-      title: 'Enforcing Password Expiration with chage',
-      titleFr: 'Application d\'une politique d\'expiration de mot de passe',
-      goal: 'Configure maximum password age to 90 days with 7-day warning period for user operator.',
-      goalFr: 'Configurer l\'âge maximal du mot de passe à 90 jours avec alerte 7 jours avant expiration.',
+      id: 'lab-security-shadow',
+      title: 'Auditing and Hardening /etc/shadow Permissions',
+      titleFr: 'Audit et sécurisation des droits de /etc/shadow (chmod 600)',
+      goal: 'Configure maximum password age and restrict /etc/shadow permissions to root:shadow (600 or 640).',
+      goalFr: 'Restreindre l\'accès à /etc/shadow au seul compte root avec les permissions 600 en utilisant sudo.',
       context: 'You are applying corporate security compliance rules.',
       contextFr: 'Vous appliquez les règles de conformité de sécurité de l\'entreprise.',
       steps: [

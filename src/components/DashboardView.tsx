@@ -20,6 +20,7 @@ import {
   Brain,
   ShieldAlert,
   Terminal,
+  Network,
 } from 'lucide-react';
 import { ExamTier, TabType, UserStats, ExamSessionHistory, DiagnosticResult } from '../types';
 import { flashcardsData } from '../data/lpiData';
@@ -38,11 +39,13 @@ import {
   CERTIFICATION_GOALS,
 } from '../services/personalizedPathEngine';
 import { TopicKnowledgeMap } from './dashboard/TopicKnowledgeMap';
+import { LinuxSkillProfileWidget } from './profile/LinuxSkillProfileWidget';
+import { CompetencyMasteryWidget } from './mastery/CompetencyMasteryWidget';
 
 interface DashboardViewProps {
   userStats: UserStats;
   tiers: ExamTier[];
-  onNavigate: (tab: TabType) => void;
+  onNavigate: (tab: TabType, mode?: any) => void;
   onSelectTier: (tierId: string) => void;
   onStartExam: (examId: string) => void;
   onOpenLearning?: (topicId?: string) => void;
@@ -794,11 +797,85 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       )}
 
+      {/* 2.5 Mode Mission Linux : Incident en Production (INCIDENT #042) */}
+      <div className="bg-gradient-to-r from-[#1c1811] via-[#2a2217] to-[#1f1910] text-white rounded-2xl p-5 md:p-6 border border-[#483c27] shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden">
+        <div className="space-y-2 max-w-2xl relative z-10">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-600 text-white flex items-center gap-1 shadow-xs">
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>ALERTE DE PRODUCTION • P1</span>
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#ffc20e]/20 text-[#ffc20e]">
+              Mode Mission Linux
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/10 text-stone-300">
+              VirtualFS Real Engine
+            </span>
+          </div>
+
+          <h3 className="text-xl md:text-2xl font-black font-serif text-white tracking-tight">
+            Un serveur de production ne répond plus.
+          </h3>
+
+          <div className="bg-black/40 border border-white/10 rounded-xl p-3.5 space-y-1.5 font-mono text-xs">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-stone-300">
+              <span className="text-red-400 font-bold">INCIDENT #042</span>
+              <span>Serveur : <strong className="text-white">web-prod-01</strong></span>
+              <span>Service : <strong className="text-white">nginx</strong></span>
+              <span>Symptôme : <span className="text-amber-300">site inaccessible</span></span>
+            </div>
+            <div className="text-[11px] text-stone-400 pt-1 border-t border-white/10 flex flex-wrap gap-2">
+              <span className="text-emerald-400 font-semibold">✓ accès terminal</span>
+              <span className="text-emerald-400 font-semibold">✓ logs</span>
+              <span className="text-emerald-400 font-semibold">✓ réseau</span>
+              <span className="text-emerald-400 font-semibold">✓ services</span>
+              <span className="text-emerald-400 font-semibold">✓ filesystem</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-[#d3c5ab]">
+            {isFrench
+              ? 'Le moteur observe votre démarche d\'investigation (systemctl status, journalctl, ss -lntp, ip addr, ip route, nginx -t...), pas seulement la réponse finale.'
+              : 'The engine evaluates your investigation methodology, not just the final result.'}
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 relative z-10">
+          <button
+            onClick={() => onNavigate('training', 'mission_linux')}
+            className="px-5 py-3 rounded-xl bg-[#ffc20e] hover:bg-[#f9bd00] text-[#4f3c00] font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Terminal className="w-4 h-4" />
+            <span>{isFrench ? 'Prendre les commandes (Shell Root)' : 'Open Emergency Shell'}</span>
+          </button>
+          <button
+            onClick={() => onNavigate('training', 'network_lab')}
+            className="px-4 py-2 rounded-xl bg-blue-950/70 hover:bg-blue-900 text-blue-200 border border-blue-500/40 font-bold text-xs transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Network className="w-3.5 h-3.5 text-blue-400" />
+            <span>{isFrench ? 'Lab Réseau (web01 ⇄ db01)' : 'Network Lab (web01 ⇄ db01)'}</span>
+          </button>
+          <div className="text-center text-[10px] text-stone-400 font-mono">
+            Observation de démarche & Rapport Post-Mortem
+          </div>
+        </div>
+      </div>
+
       {/* 3. Weakness Engine: Mes Faiblesses & Entraînement Ciblé */}
       <WeaknessEngineWidget
         onNavigateToTraining={(mode) => onNavigate('training')}
         onNavigateToExam={(examId) => onStartExam(examId || 'exam-101')}
       />
+
+      {/* 4. Linux Skill Profile — Représentation Centrale de la Compétence (5 dimensions pondérées) */}
+      <LinuxSkillProfileWidget
+        onNavigateToTab={onNavigate}
+        onStartExam={onStartExam}
+        onOpenFlashcards={onOpenFlashcards}
+      />
+
+      {/* 5. Grille de Maîtrise des Compétences : Ne pas confondre Terminé et Maîtrisé (4 états) */}
+      <CompetencyMasteryWidget onNavigateToTab={onNavigate} />
 
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">

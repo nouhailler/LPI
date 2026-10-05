@@ -48,6 +48,10 @@ export class VirtualFs {
     return '/' + resolved.join('/');
   }
 
+  public resolvePath(path: string, cwd: string = '/home/student'): string {
+    return this.normalizePath(path, cwd);
+  }
+
   /**
    * Resolves a node at the given normalized path. Returns null if not found.
    */

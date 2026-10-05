@@ -182,11 +182,11 @@ const netCoreModules: PathModule[] = [
       commandSnippet: 'sudo ip route add 10.200.0.0/16 via 192.168.1.254 dev eth0',
     },
     lab: {
-      id: 'lab-net-2',
-      title: 'Default Gateway Verification',
-      titleFr: 'Vérification de la passerelle par défaut',
-      goal: 'Inspect the active default route and verify reachability of the gateway IP.',
-      goalFr: 'Inspecter la route par défaut et vérifier la joignabilité de la passerelle.',
+      id: 'lab-network-ping-diag',
+      title: 'Default Gateway Verification & ICMP Ping Diagnostics',
+      titleFr: 'Diagnostic réseau et connectivité (ip & ping)',
+      goal: 'Inspect the active default route and verify reachability of the gateway IP with ping.',
+      goalFr: 'Inspecter les adresses réseau avec ip addr, puis vérifier la connectivité vers la passerelle locale (192.168.1.1) avec ping.',
       context: 'External internet traffic is timing out from this server.',
       contextFr: 'Le trafic vers internet n\'aboutit pas depuis ce serveur.',
       steps: [
@@ -218,6 +218,104 @@ const netCoreModules: PathModule[] = [
       solutionCommand: 'sudo ip route add default via 192.168.1.1 dev eth0',
       solutionExplanation: 'Add the default gateway route, and ensure the DHCP client or static network configuration configures it at boot.',
       solutionExplanationFr: 'Ajoutez la route par défaut et assurez-vous qu\'elle est enregistrée de façon permanente.',
+    }
+  }),
+  createModule({
+    id: 'net-3-diagnostic',
+    number: 3,
+    title: '5-Layer Network Diagnostic: Ping OK vs Port Connection Refused',
+    titleFr: 'Diagnostic Réseau 5 Niveaux : Ping OK vs Port Refusé',
+    conceptTag: 'Network Troubleshooting',
+    conceptTagFr: 'Dépannage Réseau Systématique',
+    shortDesc: 'Why does ping work while curl or database connection fails? Discover IP -> Route -> DNS -> Closed Port -> Stopped Service.',
+    shortDescFr: 'Pourquoi ping db01 répond mais curl db01:5432 échoue ? Découvrez la chaîne IP -> Route -> DNS -> Port fermé -> Service arrêté.',
+    linkedLpiObjective: '109.3',
+    explainTopic: 'networking',
+    glossaryTerms: ['ip-addr', 'ip-route', 'ping', 'curl', 'ss', 'systemctl'],
+    theory: {
+      summary: 'ICMP echo (ping) verifies network reachability at Layer 3 (IP). However, client-server applications require an open TCP listening socket (Layer 4) and a running daemon (Layer 7). If the port is closed or service is dead, ping succeeds while application connections get Connection Refused.',
+      summaryFr: 'Le ping ICMP vérifie la connectivité au niveau IP (Couche 3). Cependant, les applications clientes exigent une socket TCP en écoute (Couche 4) et un service actif (Couche 7). Si le port est fermé ou le service arrêté, le ping répond parfaitement mais la connexion applicative est rejetée.',
+      whyItMatters: 'A common sysadmin pitfall is declaring "the network is fine because ping works". Systematic diagnostic isolates whether the failure is at IP, Route, DNS, Transport, or Service level.',
+      whyItMattersFr: 'Une erreur classique est de penser que "le réseau marche car le ping répond". La démarche méthodique en 5 étapes isole immédiatement le maillon défaillant.',
+      commands: [
+        'ip addr show eth0',
+        'ip route show',
+        'ping -c 2 db01',
+        'curl db01:5432',
+        'ssh db01 "systemctl start postgresql"'
+      ],
+      prodTrap: 'Declaring the service healthy based only on ping ICMP reply without checking the TCP port socket.',
+      prodTrapFr: 'Déduire qu\'un service tourne parce que ping répond avec 0% de perte, sans tester le socket TCP.'
+    },
+    flashcards: [
+      {
+        id: 'fc-net-3',
+        question: 'Why does pinging a remote host succeed when attempting to curl a web or database service on it returns "Connection refused"?',
+        questionFr: 'Pourquoi un ping vers une machine hôte réussit alors que curl vers un service web ou de base de données renvoie "Connection refused" ?',
+        answer: 'Ping operates at Layer 3 (ICMP). The target OS kernel is responding to echo requests, but no daemon is listening on the requested Layer 4 TCP port (service stopped or closed port).',
+        answerFr: 'Le ping opère en Couche 3 (ICMP). Le noyau de la machine cible répond, mais aucun démon n\'écoute sur le port TCP demandé en Couche 4 (service arrêté ou port fermé).',
+        examTip: 'Remember: ICMP reachability does not equal application service availability.',
+        examTipFr: 'Retenez : la connectivité ICMP n\'équivaut jamais à la disponibilité du service applicatif.'
+      }
+    ],
+    question: {
+      id: 'q-net-3',
+      question: 'A junior admin states: "The database server is running normally because `ping db01` replies 0% packet loss, so the outage must be in our application code." Is this deduction accurate?',
+      questionFr: 'Un administrateur affirme : "La base de données tourne normalement car `ping db01` répond avec 0% de perte de paquets, le problème vient donc du code client." Cette déduction est-elle exacte ?',
+      options: [
+        'No: Ping only validates Layer 3 ICMP; the PostgreSQL daemon could be stopped, leaving port 5432 closed.',
+        'Yes: If a machine responds to ICMP echo, all its network services are guaranteed to be listening.',
+        'No: Ping only tests DNS resolution, not IP connectivity.',
+        'Yes: ICMP packets and TCP database handshakes use the exact same transport ports.'
+      ],
+      optionsFr: [
+        'Non : Le ping valide uniquement la couche 3 (ICMP) ; le démon PostgreSQL peut être arrêté et le port 5432 fermé.',
+        'Oui : Si une machine répond au ping, tous ses services applicatifs sont nécessairement actifs.',
+        'Non : Le ping ne teste que la résolution DNS sans tester la connectivité IP.',
+        'Oui : Les paquets ICMP et les flux TCP de base de données empruntent le même port.'
+      ],
+      correctIndex: 0,
+      explanation: 'Ping operates at the ICMP layer within the OS kernel. It does not verify whether application listeners (like PostgreSQL on TCP port 5432) are active or accepting connections.',
+      explanationFr: 'Le ping opère au niveau ICMP dans le noyau. Il ne garantit absolument pas qu\'un socket TCP applicatif (comme PostgreSQL 5432) est ouvert et en écoute.',
+      commandSnippet: 'curl -v db01:5432  # Check Layer 4 TCP connection',
+    },
+    lab: {
+      id: 'lab-network-db-conn',
+      title: '5-Layer Systematic Network Diagnostic (IP, Route, DNS, Port, Service)',
+      titleFr: 'Diagnostic Réseau 5 Niveaux : Pourquoi ping db01 fonctionne mais curl db01:5432 échoue ?',
+      goal: 'Investigate the network path between web01 and db01, detect the closed TCP port 5432, and restart PostgreSQL via remote SSH.',
+      goalFr: 'Diagnostiquer la chaîne réseau complète entre web01 et db01 : vérifier l\'IP, la route, le DNS/ICMP (ping), identifier le port 5432 fermé (curl), puis démarrer PostgreSQL sur db01 via SSH.',
+      context: 'Web server cannot query the database. Ping responds, but curl db01:5432 says Connection refused.',
+      contextFr: 'Le serveur web ne peut plus joindre la base. Le ping fonctionne mais curl db01:5432 renvoie Connection refused.',
+      steps: [
+        {
+          stepNumber: 1,
+          title: 'IP OK',
+          titleFr: 'Vérifier l\'adresse IP locale',
+          instruction: 'Run ip addr show eth0',
+          instructionFr: 'Lancez ip addr show eth0',
+          hint: 'ip addr',
+          hintFr: 'ip addr',
+          expectedCommands: ['ip addr show eth0', 'ip addr', 'ip a'],
+          simulatedOutput: '2: eth0: <BROADCAST,UP> mtu 1500 inet 192.168.1.10/24',
+          explanation: 'Local interface is UP with IP 192.168.1.10.',
+          explanationFr: 'L\'interface locale est UP avec l\'IP 192.168.1.10.',
+        }
+      ]
+    },
+    troubleshooting: {
+      id: 'tb-net-3',
+      title: 'Ping works but curl / TCP connection refused',
+      titleFr: 'Ping répond mais curl / TCP renvoie Connection Refused',
+      symptom: '`ping db01` succeeds with 0% loss, but `curl db01:5432` returns `Failed to connect: Connection refused`.',
+      symptomFr: '`ping db01` réussit à 100%, mais `curl db01:5432` renvoie `Connection refused`.',
+      investigationCommands: ['ping -c 2 db01', 'nc -zv db01 5432', 'ssh db01 "systemctl status postgresql"'],
+      diagnosticOutput: 'PING db01 (192.168.1.20): 64 bytes received\nnc: connect to db01 (192.168.1.20) port 5432: Connection refused\nActive: inactive (dead)',
+      rootCause: 'Layer 3 IP routing and DNS are operational, but the target daemon (PostgreSQL) is stopped, so port 5432 is not in LISTEN state.',
+      rootCauseFr: 'La couche 3 (IP/DNS) fonctionne parfaitement, mais le service cible (PostgreSQL) est arrêté : le socket 5432 n\'écoute pas.',
+      solutionCommand: 'ssh db01 "systemctl start postgresql"',
+      solutionExplanation: 'Start the listening daemon on the remote server, and verify socket listening with ss -lntp.',
+      solutionExplanationFr: 'Démarrez le démon sur le serveur distant et vérifiez l\'écoute du port avec ss -lntp.',
     }
   })
 ];

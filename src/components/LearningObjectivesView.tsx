@@ -28,6 +28,15 @@ import {
 import { allLpicTopicsData } from '../data/lpicObjectivesData';
 import { LPICObjective, LPICTopic, TabType } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
+import {
+  evaluateObjectiveMastery,
+  ObjectiveCriteriaStatus,
+  CompetencyMasteryState,
+  MASTERY_EVENT,
+  setObjectiveMasteryState
+} from '../services/masteryEngine';
+import { ObjectiveMasteryBadge } from './mastery/ObjectiveMasteryBadge';
+import { ObjectiveMasteryChecklistModal } from './mastery/ObjectiveMasteryChecklistModal';
 
 interface LearningObjectivesViewProps {
   onNavigate: (tab: TabType) => void;
@@ -129,6 +138,23 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
   const [userQuizAnswers, setUserQuizAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
+  // 4-State Competency Mastery inspection & filtering
+  const [inspectionStatus, setInspectionStatus] = useState<ObjectiveCriteriaStatus | null>(null);
+  const [masteryFilter, setMasteryFilter] = useState<'all' | CompetencyMasteryState>('all');
+  const [masteryUpdateKey, setMasteryUpdateKey] = useState(0);
+
+  useEffect(() => {
+    const handleMasteryUpdate = () => {
+      setMasteryUpdateKey((k) => k + 1);
+    };
+    window.addEventListener(MASTERY_EVENT, handleMasteryUpdate);
+    window.addEventListener('storage', handleMasteryUpdate);
+    return () => {
+      window.removeEventListener(MASTERY_EVENT, handleMasteryUpdate);
+      window.removeEventListener('storage', handleMasteryUpdate);
+    };
+  }, []);
+
   // Mastered objectives stored in localStorage (clean prototype data if present)
   const [masteredObjectives, setMasteredObjectives] = useState<string[]>(() => {
     try {
@@ -219,7 +245,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
   const filteredTopics = useMemo(() => {
     const currentExamTopics = allLpicTopicsData.filter((t) => t.examId === selectedExam);
 
-    if (!searchQuery.trim() && selectedWeightFilter === 'all') {
+    if (!searchQuery.trim() && selectedWeightFilter === 'all' && masteryFilter === 'all') {
       return currentExamTopics;
     }
 
@@ -232,6 +258,12 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
             selectedWeightFilter === 'all' || obj.weight === selectedWeightFilter;
 
           if (!matchesWeight) return false;
+
+          if (masteryFilter !== 'all') {
+            const mastery = evaluateObjectiveMastery(obj.id, obj.title);
+            if (mastery.state !== masteryFilter) return false;
+          }
+
           if (!query) return true;
 
           const matchId = obj.id.toLowerCase().includes(query);
@@ -261,7 +293,7 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         };
       })
       .filter((topic) => topic.objectives.length > 0 || topic.title.toLowerCase().includes(query));
-  }, [selectedExam, searchQuery, selectedWeightFilter]);
+  }, [selectedExam, searchQuery, selectedWeightFilter, masteryFilter, masteryUpdateKey]);
 
   // Calculate stats for all exams
   const stats = useMemo(() => {
@@ -896,6 +928,110 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
         </div>
       </div>
 
+      {/* 4-State Competency Mastery Filter Ribbon (Terminé ≠ Maîtrisé) */}
+      <div className="bg-[#ffffff] border border-[#d3c5ab] rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs">
+        <div className="flex items-center gap-2">
+          <Award className="w-4 h-4 text-[#ffc20e]" />
+          <span className="font-extrabold text-[11px] uppercase tracking-wider text-[#201b11]">
+            {isFrench ? 'Filtrer par niveau de maîtrise :' : 'Filter by mastery state:'}
+          </span>
+          <span className="text-[10px] text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded font-mono font-bold">
+            {isFrench ? 'Terminé ≠ Maîtrisé' : 'Done ≠ Mastered'}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            onClick={() => setMasteryFilter('all')}
+            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              masteryFilter === 'all'
+                ? 'bg-[#201b11] text-[#ffc20e]'
+                : 'bg-[#f8ecdb] text-[#4f4632] hover:bg-[#ebdcc8]'
+            }`}
+          >
+            {isFrench ? 'Tous les statuts' : 'All States'}
+          </button>
+          <button
+            onClick={() => setMasteryFilter('MASTERED')}
+            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              masteryFilter === 'MASTERED'
+                ? 'bg-[#28A745] text-white shadow-2xs'
+                : 'bg-emerald-50 text-[#28A745] border border-emerald-200 hover:bg-emerald-100'
+            }`}
+          >
+            <span>✓ {isFrench ? 'Maîtrisé' : 'Mastered'}</span>
+          </button>
+          <button
+            onClick={() => setMasteryFilter('PRACTICING')}
+            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              masteryFilter === 'PRACTICING'
+                ? 'bg-[#FD7E14] text-white shadow-2xs'
+                : 'bg-orange-50 text-[#FD7E14] border border-orange-200 hover:bg-orange-100'
+            }`}
+          >
+            <span>⚙ {isFrench ? 'En pratique' : 'Practicing'}</span>
+          </button>
+          <button
+            onClick={() => setMasteryFilter('LEARNING')}
+            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              masteryFilter === 'LEARNING'
+                ? 'bg-[#007BFF] text-white shadow-2xs'
+                : 'bg-blue-50 text-[#007BFF] border border-blue-200 hover:bg-blue-100'
+            }`}
+          >
+            <span>📖 {isFrench ? 'En cours' : 'Learning'}</span>
+          </button>
+          <button
+            onClick={() => setMasteryFilter('NOT_STARTED')}
+            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              masteryFilter === 'NOT_STARTED'
+                ? 'bg-[#817660] text-white shadow-2xs'
+                : 'bg-stone-100 text-[#817660] border border-stone-200 hover:bg-stone-200'
+            }`}
+          >
+            <span>○ {isFrench ? 'Non démarré' : 'Not Started'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Distinction Terminé vs Maîtrisé & 4-State Lifecycle */}
+      <div className="bg-[#fffbf6] border border-[#d3c5ab] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs shadow-2xs">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 font-black text-[#201b11]">
+            <Sparkles className="w-4 h-4 text-amber-600" />
+            <span>{isFrench ? 'Modèle de Compétence en 4 États' : '4-State Competency Model'}</span>
+            <span className="font-mono text-[11px] text-[#785a00] bg-[#f8ecdb] px-2 py-0.5 rounded">
+              NOT_STARTED → LEARNING → PRACTICING → MASTERED
+            </span>
+          </div>
+          <p className="text-[#5c4e36]">
+            {isFrench
+              ? 'Ne confondez pas un module terminé (cours lu) avec un module maîtrisé (4 preuves : théorie, 8/10 QCM, 3 flashcards SRS, Lab réussi).'
+              : 'Do not confuse finished with mastered: genuine mastery requires theoretical proof, quiz pass (>=80%), SRS retention, and practical lab validation.'}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setInspectionStatus(evaluateObjectiveMastery('104.5', 'chmod (Permissions)'))}
+            className="px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 font-bold hover:bg-emerald-100 transition-colors cursor-pointer flex items-center gap-1.5"
+            title="Voir exemple maîtrisé (chmod)"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Exemple chmod (Maîtrisé)</span>
+          </button>
+
+          <button
+            onClick={() => setInspectionStatus(evaluateObjectiveMastery('109.2', 'network routing (Routage)'))}
+            className="px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 font-bold hover:bg-amber-100 transition-colors cursor-pointer flex items-center gap-1.5"
+            title="Voir exemple en cours (network routing)"
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Exemple Routing (En cours)</span>
+          </button>
+        </div>
+      </div>
+
       {/* Topics & Objectives Chapters List */}
       <div className="space-y-4">
         {filteredTopics.length === 0 ? (
@@ -991,13 +1127,13 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                 {isExpanded && (
                   <div className="divide-y divide-[#d3c5ab]/40">
                     {topic.objectives.map((obj) => {
-                      const isMastered = masteredObjectives.includes(obj.id);
+                      const mastery = evaluateObjectiveMastery(obj.id, obj.title);
 
                       return (
                         <div
                           key={obj.id}
                           className={`p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:bg-[#fffbf6] ${
-                            isMastered ? 'bg-[#f4faee]/40' : ''
+                            mastery.state === 'MASTERED' ? 'bg-[#f4faee]/40' : ''
                           }`}
                         >
                           <div className="space-y-2 flex-1">
@@ -1011,12 +1147,16 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                               <span className="px-2 py-0.5 bg-[#ebdcc8] text-[#4f4632] text-xs font-semibold rounded">
                                 {isFrench ? 'Poids :' : 'Weight:'} {obj.weight}
                               </span>
-                              {isMastered && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#28A745] bg-[#28A745]/10 px-2 py-0.5 rounded">
-                                  <CheckCircle2 className="w-3 h-3" />
-                                  {isFrench ? 'Maîtrisé' : 'Mastered'}
-                                </span>
-                              )}
+
+                              {/* 4-State Competency Mastery Badge */}
+                              <ObjectiveMasteryBadge
+                                state={mastery.state}
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setInspectionStatus(mastery);
+                                }}
+                              />
                             </div>
 
                             <p className="text-xs md:text-sm text-[#4f4632]">
@@ -1046,24 +1186,17 @@ export const LearningObjectivesView: React.FC<LearningObjectivesViewProps> = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleMasterObjective(obj.id);
+                                setInspectionStatus(mastery);
                               }}
                               title={
-                                isMastered
-                                  ? (isFrench ? 'Marquer comme en cours' : 'Mark as In Progress')
-                                  : (isFrench ? 'Marquer comme maîtrisé' : 'Mark as Mastered')
+                                isFrench
+                                  ? 'Inspecter les 4 preuves de maîtrise (Théorie, QCM, Flashcards, Lab)'
+                                  : 'Inspect the 4 mastery criteria'
                               }
-                              className={`p-2 rounded-lg border transition-colors ${
-                                isMastered
-                                  ? 'bg-[#28A745]/10 border-[#28A745]/40 text-[#28A745] hover:bg-[#28A745]/20'
-                                  : 'bg-[#f8ecdb] border-[#d3c5ab] text-[#817660] hover:text-[#201b11] hover:border-[#817660]'
-                              }`}
+                              className="px-3 py-2 rounded-xl border border-[#d3c5ab] bg-[#ffffff] hover:bg-[#fff8ee] text-[#785a00] transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-2xs"
                             >
-                              {isMastered ? (
-                                <CheckCircle2 className="w-4 h-4 fill-current" />
-                              ) : (
-                                <Circle className="w-4 h-4" />
-                              )}
+                              <Award className="w-4 h-4 text-[#ffc20e]" />
+                              <span>{isFrench ? 'Preuves' : 'Proof'}</span>
                             </button>
 
                             <button
